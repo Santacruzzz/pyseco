@@ -168,6 +168,7 @@ class BaseClient(object):
         pass
 
     def authenticate(self, *data) -> bool:
+        breakpoint()
         """Allow user authentication by specifying a login and a password, to gain access to the set of
         functionalities corresponding to this authorization level. """
         if len(data) > 0:

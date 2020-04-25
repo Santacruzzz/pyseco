@@ -89,7 +89,7 @@ class Client(BaseClient):
         for listener in self.__listeners:
             # if listener has implemented method event.event_name
             if event.event_name in dir(listener):
-                if len(event.data) > 0:
+                if len(event.data):
                     getattr(listener, event.event_name)(*event.data)
                 else:
                     getattr(listener, event.event_name)()
