@@ -29,9 +29,6 @@ class PlayerListener(Listener):
         del self.players[login]
         del self.ranks[login]
 
-    def PlayerManialinkPageAnswer(self, playeruid, login, answer):
-        pass
-
     def PlayerCheckpoint(self, playeruid, login, timeorscore, curlap, checkpointindex):
         cps = self.cps[login]
 
