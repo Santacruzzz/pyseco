@@ -1,0 +1,106 @@
+handshake
+Authenticate
+EnableCallbacks
+while GetStatus != 4	// wait ready
+# sync server data
+	GetVersion				// save server version
+	GetSystemInfo
+	GetDetailedPlayerInfo
+	GetLadderServerLimits
+	IsRelayServer
+		GetMainServerPlayerInfo
+	GetServerPackMask
+	SendHideManialinkPage	// clear widgets
+	GetCurrentGameInfo =
+	{
+		'GameMode': 1,
+		'NbChallenge': 32,
+		'ChatTime': 10000,
+		'FinishTimeout': 1,
+		'AllWarmUpDuration': 0,
+		'DisableRespawn': False,
+		'ForceShowAllOpponents': 0,
+		'RoundsPointsLimit': 30,
+		'RoundsForcedLaps': 0,
+		'RoundsUseNewRules': False,
+		'RoundsPointsLimitNewRules': 5,
+		'TeamPointsLimit': 15,
+		'TeamMaxPoints': 12,
+		'TeamUseNewRules': True,
+		'TeamPointsLimitNewRules': 9,
+		'TimeAttackLimit': 480000,
+		'TimeAttackSynchStartPeriod': 0,
+		'LapsNbLaps': 5,
+		'LapsTimeLimit': 0,
+		'CupPointsLimit': 100,
+		'CupRoundsPerChallenge': 5,
+		'CupNbWinners': 3,
+		'CupWarmUpDuration': 2
+	}
+
+	GetStatus
+	GameDataDirectory
+	GetTracksDirectory
+	GetServerOptions
+# end sync
+GetPlayerList(300, 0, 2)	// fill players data
+	{
+		'Login': 'edenik',
+		'NickName': '$o$f00xst$888.$dddMiniasy',
+		'PlayerId': 0,
+		'TeamId': -1,
+		'SpectatorStatus': 2550101,
+		'LadderRanking': 0,
+		'Flags': 1100000
+	}
+	GetDetailedPlayerInfo
+	GetPlayerInfo
+	ChatSendServerMessageToLogin	// welcome msg
+# main loop
+
+'''
+    def PlayerConnect(self, login, isspectator):
+    def PlayerDisconnect(self, login):
+    def PlayerChat(self, playeruid, login, text, isregistredcmd):
+    def PlayerManialinkPageAnswer(self, playeruid, login, answer):
+    def Echo(self, internal, public):
+    def ServerStart(self):
+    def ServerStop(self):
+    def BeginRace(self, challenge):
+    def EndRace(self, rankings, challenge):
+    def BeginChallenge(self, challenge, warmup, matchcontinuation):
+    def EndChallenge(self, rankings, challenge, waswarmup, matchcontinuesonnextchallenge, restartchallenge):
+    def BeginRound(self):
+    def EndRound(self):
+    def StatusChanged(self, statuscode, statusname):
+    def PlayerCheckpoint(self, playeruid, login, timeorscore, curlap, checkpointindex):
+    def PlayerFinish(self, playeruid, login, timeorscore):
+    def PlayerIncoherence(self, playeruid, login):
+    def BillUpdated(self, billid, state, statename, transactionid):
+    def TunnelDataReceived(self, playeruid, login, data):
+    def ChallengeListModified(self, curchallengeindex, nextchallengeindex, islistmodified):
+    def PlayerInfoChanged(self, playerinfo):
+    def ManualFlowControlTransition(self, transition):
+    def VoteUpdated(self, statename, login, cmdname, cmdparam):
+'''
+
+pyseco
+	config
+	client
+		socket
+		callback_queue[]
+	server
+		current_map
+		...
+		config
+	players[]
+		id
+		login
+		nick
+
+
+
+
+
+
+	
