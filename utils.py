@@ -8,6 +8,7 @@ import inspect
 
 # TODO add inheritance to types returned by functions which takes compatibility version in parameter (united/nations)
 # TODO DetailedPlayerInfo -> class
+# TODO rewrite some of those namedtuples to classes (maybe using dataclasses)
 
 Status = namedtuple('ServerStatus', ['code', 'name'])
 Version = namedtuple('Version', ['name', 'version', 'build'])
