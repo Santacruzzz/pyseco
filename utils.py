@@ -89,6 +89,7 @@ class EventData(object):
 
 
 def _get_parent_function_name():
+    # TODO sometimes throws an exception out of range blah blah
     return inspect.stack()[3][3]
 
 
