@@ -95,7 +95,7 @@ class Client(BaseClient):
                     getattr(listener, event.event_name)()
 
     def serverMessage(self, msg):
-        self.noresponse.ChatSendServerMessage('$f90~ $888{}'.format(msg))
+        self.noresponse.ChatSendServerMessage('$f09~ $888{}'.format(msg))
 
     def __no_response_request(self, methodname, params):
         request = dumps(params, methodname)

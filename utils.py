@@ -167,746 +167,525 @@ class BaseClient(object):
     def __getattr__(self, item):
         pass
 
-    def authenticate(self, *data) -> bool:
-        breakpoint()
+    def authenticate(self, login: str, password: str) -> bool:
         """Allow user authentication by specifying a login and a password, to gain access to the set of
         functionalities corresponding to this authorization level. """
-        if len(data) > 0:
-            return bool(getattr(self, 'Authenticate')(*data))
-        return bool(getattr(self, 'Authenticate')())
+        return bool(getattr(self, 'Authenticate')(login, password))
 
-    def changeAuthPassword(self, *data) -> bool:
+    def change_auth_password(self, login: str, password: str) -> bool:
         """Change the password for the specified login/user. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChangeAuthPassword')(*data))
-        return bool(getattr(self, 'ChangeAuthPassword')())
+        return bool(getattr(self, 'ChangeAuthPassword')(login, password))
 
-    def enableCallbacks(self, *data) -> bool:
+    def enable_callbacks(self, callback: bool) -> bool:
         """Allow the GameServer to call you back."""
-        if len(data) > 0:
-            return bool(getattr(self, 'EnableCallbacks')(*data))
-        return bool(getattr(self, 'EnableCallbacks')())
+        return bool(getattr(self, 'EnableCallbacks')(callback))
 
-    def getVersion(self, *data) -> Version:
+    def get_version(self) -> Version:
         """Returns a struct with the Name, Version and Build of the application remotely controled."""
-        if len(data) > 0:
-            return Version(*getattr(self, 'GetVersion')(*data).values())
         return Version(*getattr(self, 'GetVersion')().values())
 
-    def callVote(self, *data) -> bool:
+    def call_vote(self, vote: str) -> bool:
         """Call a vote for a cmd. The command is a XML string corresponding to an XmlRpc request.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'CallVote')(*data))
-        return bool(getattr(self, 'CallVote')())
+        return bool(getattr(self, 'CallVote')(vote))
 
-    def callVoteEx(self, *data) -> bool:
+    def call_vote_ex(self, vote: str, ratio: float, time_out: int, voter: int) -> bool:
         """Extended call vote. Same as CallVote, but you can additionally supply specific parameters for this vote:
         a ratio, a time out and who is voting. Special timeout values: a timeout of '0' means default,
         '1' means indefinite; a ratio of '-1' means default; Voters values: '0' means only active players,
         '1' means any player, '2' is for everybody, pure spectators included. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'CallVoteEx')(*data))
-        return bool(getattr(self, 'CallVoteEx')())
+        return bool(getattr(self, 'CallVoteEx')(vote, ratio, time_out, voter))
 
-    def internalCallVote(self, *data) -> bool:
+    def internal_call_vote(self) -> bool:
         """Used internally by game."""
-        if len(data) > 0:
-            return bool(getattr(self, 'InternalCallVote')(*data))
         return bool(getattr(self, 'InternalCallVote')())
 
-    def cancelVote(self, *data) -> bool:
+    def cancel_vote(self) -> bool:
         """Cancel the current vote. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'CancelVote')(*data))
         return bool(getattr(self, 'CancelVote')())
 
-    def getCurrentCallVote(self, *data) -> CurrentCallVote:
+    def get_current_call_vote(self) -> CurrentCallVote:
         """Returns the vote currently in progress. The returned structure is { CallerLogin, CmdName, CmdParam }."""
-        if len(data) > 0:
-            return CurrentCallVote(*getattr(self, 'GetCurrentCallVote')(*data).values())
         return CurrentCallVote(*getattr(self, 'GetCurrentCallVote')().values())
 
-    def setCallVoteTimeOut(self, *data) -> bool:
+    def set_call_vote_time_out(self, timeout: int) -> bool:
         """Set a new timeout for waiting for votes. A zero value disables callvote. Only available to Admin.
         Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetCallVoteTimeOut')(*data))
-        return bool(getattr(self, 'SetCallVoteTimeOut')())
+        return bool(getattr(self, 'SetCallVoteTimeOut')(timeout))
 
-    def getCallVoteTimeOut(self, *data) -> StateValue:
+    def get_call_vote_timeout(self) -> StateValue:
         """Get the current and next timeout for waiting for votes. The struct returned contains two
         fields 'CurrentValue' and 'NextValue'."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetCallVoteTimeOut')(*data).values())
         return StateValue(*getattr(self, 'GetCallVoteTimeOut')().values())
 
-    def setCallVoteRatio(self, *data) -> bool:
+    def set_call_vote_ratio(self, ratio: float) -> bool:
         """Set a new default ratio for passing a vote. Must lie between 0 and 1. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetCallVoteRatio')(*data))
-        return bool(getattr(self, 'SetCallVoteRatio')())
+        return bool(getattr(self, 'SetCallVoteRatio')(ratio))
 
-    def getCallVoteRatio(self, *data) -> float:
+    def get_call_vote_ratio(self) -> float:
         """Get the current default ratio for passing a vote. This value lies between 0 and 1."""
-        if len(data) > 0:
-            return float(*getattr(self, 'GetCallVoteRatio')(*data).values())
         return float(*getattr(self, 'GetCallVoteRatio')().values())
 
-    def setCallVoteRatios(self, *data) -> bool:
+    def set_call_vote_ratios(self, vote_ratios: CallVoteRatioList) -> bool:
         """Set new ratios for passing specific votes. The parameter is an array of structs {string Command,
         double Ratio}, ratio is in [0,1] or -1 for vote disabled. Only available to Admin. """
-        if len(data) > 0:
-            return bool(getattr(self, 'SetCallVoteRatios')(*data))
-        return bool(getattr(self, 'SetCallVoteRatios')())
+        return bool(getattr(self, 'SetCallVoteRatios')(vote_ratios))
 
-    def getCallVoteRatios(self, *data) -> CallVoteRatioList:
+    def get_call_vote_ratios(self, *data) -> CallVoteRatioList:
         """Get the current ratios for passing votes."""
-        if len(data) > 0:
-            return [CallVoteRatio(*result.values()) for result in getattr(self, 'GetCallVoteRatios')(*data)]
-        return [CallVoteRatio(*result.values()) for result in getattr(self, 'GetCallVoteRatios')()]
+        return [CallVoteRatio(*result.values()) for result in getattr(self, 'GetCallVoteRatios')(*data)]
 
-    def chatSendServerMessage(self, *data) -> bool:
+    def chat_send_server_message(self, *data) -> bool:
         """Send a text message to all clients without the server login. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatSendServerMessage')(*data))
-        return bool(getattr(self, 'ChatSendServerMessage')())
+        return bool(getattr(self, 'ChatSendServerMessage')(*data))
 
-    def chatSendServerMessageToLanguage(self, *data) -> bool:
+    def chat_send_server_message_to_language(self, *data) -> bool:
         """Send a localised text message to all clients without the server login, or optionally to a Login (which can
         be a single login or a list of comma-separated logins). The parameter is an array of structures {Lang='??',
         Text='...'}. If no matching language is found, the last text in the array is used. Only available to Admin. """
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatSendServerMessageToLanguage')(*data))
-        return bool(getattr(self, 'ChatSendServerMessageToLanguage')())
+        return bool(getattr(self, 'ChatSendServerMessageToLanguage')(*data))
 
-    def chatSendServerMessageToId(self, *data) -> bool:
+    def chat_send_server_message_to_id(self, *data) -> bool:
         """Send a text message without the server login to the client with the specified PlayerId.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatSendServerMessageToId')(*data))
-        return bool(getattr(self, 'ChatSendServerMessageToId')())
+        return bool(getattr(self, 'ChatSendServerMessageToId')(*data))
 
-    def chatSendServerMessageToLogin(self, *data) -> bool:
+    def chat_send_server_message_to_login(self, *data) -> bool:
         """Send a text message without the server login to the client with the specified login.
         Login can be a single login or a list of comma-separated logins. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatSendServerMessageToLogin')(*data))
-        return bool(getattr(self, 'ChatSendServerMessageToLogin')())
+        return bool(getattr(self, 'ChatSendServerMessageToLogin')(*data))
 
-    def chatSend(self, *data) -> bool:
+    def chat_send(self, *data) -> bool:
         """Send a text message to all clients. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatSend')(*data))
-        return bool(getattr(self, 'ChatSend')())
+        return bool(getattr(self, 'ChatSend')(*data))
 
-    def chatSendToLanguage(self, *data) -> bool:
+    def chat_send_to_language(self, *data) -> bool:
         """Send a localised text message to all clients, or optionally to a Login (which can be a single
         login or a list of comma-separated logins). The parameter is an array of structures {Lang='??', Text='...'}.
         If no matching language is found, the last text in the array is used. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatSendToLanguage')(*data))
-        return bool(getattr(self, 'ChatSendToLanguage')())
+        return bool(getattr(self, 'ChatSendToLanguage')(*data))
 
-    def chatSendToLogin(self, *data) -> bool:
+    def chat_send_to_login(self, *data) -> bool:
         """Send a text message to the client with the specified login. Login can be a single
         login or a list of comma-separated logins. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatSendToLogin')(*data))
-        return bool(getattr(self, 'ChatSendToLogin')())
+        return bool(getattr(self, 'ChatSendToLogin')(*data))
 
-    def chatSendToId(self, *data) -> bool:
+    def chat_send_to_id(self, *data) -> bool:
         """Send a text message to the client with the specified PlayerId. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatSendToId')(*data))
-        return bool(getattr(self, 'ChatSendToId')())
+        return bool(getattr(self, 'ChatSendToId')(*data))
 
-    def getChatLines(self, *data) -> ChatLinesList:
+    def get_chat_lines(self, *data) -> ChatLinesList:
         """Returns the last chat lines. Maximum of 40 lines. Only available to Admin."""
-        if len(data) > 0:
-            return [ChatLine(*result.values()) for result in getattr(self, 'GetChatLines')(*data)]
-        return [ChatLine(*result.values()) for result in getattr(self, 'GetChatLines')()]
+        return [ChatLine(*result.values()) for result in getattr(self, 'GetChatLines')(*data)]
 
-    def chatEnableManualRouting(self, *data) -> bool:
+    def chat_enable_manual_routing(self, *data) -> bool:
         """The chat messages are no longer dispatched to the players, they only go to the rpc callback
         and the controller has to manually forward them. The second (optional) parameter allows all messages from
         the server to be automatically forwarded. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatEnableManualRouting')(*data))
-        return bool(getattr(self, 'ChatEnableManualRouting')())
+        return bool(getattr(self, 'ChatEnableManualRouting')(*data))
 
-    def chatForwardToLogin(self, *data) -> bool:
+    def chat_forward_to_login(self, *data) -> bool:
         """(Text, SenderLogin, DestLogin) Send a text message to the specified DestLogin (or everybody if empty)
         on behalf of SenderLogin. DestLogin can be a single login or a list of comma-separated logins.
         Only available if manual routing is enabled. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChatForwardToLogin')(*data))
-        return bool(getattr(self, 'ChatForwardToLogin')())
+        return bool(getattr(self, 'ChatForwardToLogin')(*data))
 
-    def sendNotice(self, *data) -> bool:
+    def send_notice(self, *data) -> bool:
         """Display a notice on all clients. The parameters are the text message to display, and the login
         of the avatar to display next to it (or '' for no avatar), and an optional 'max duration'
         in seconds (default: 3). Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SendNotice')(*data))
-        return bool(getattr(self, 'SendNotice')())
+        return bool(getattr(self, 'SendNotice')(*data))
 
-    def sendNoticeToId(self, *data) -> bool:
+    def send_notice_to_id(self, *data) -> bool:
         """Display a notice on the client with the specified UId. The parameters are the Uid of the client
         to whom the notice is sent, the text message to display, and the UId of the avatar to display
         next to it (or '255' for no avatar), and an optional 'max duration' in seconds (default: 3).
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SendNoticeToId')(*data))
-        return bool(getattr(self, 'SendNoticeToId')())
+        return bool(getattr(self, 'SendNoticeToId')(*data))
 
-    def sendNoticeToLogin(self, *data) -> bool:
+    def send_notice_to_login(self, *data) -> bool:
         """Display a notice on the client with the specified login. The parameters are the login of the client
         to whom the notice is sent, the text message to display, and the login of the avatar to display
         next to it (or '' for no avatar), and an optional 'max duration' in seconds (default: 3).
         Login can be a single login or a list of comma-separated logins.  Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SendNoticeToLogin')(*data))
-        return bool(getattr(self, 'SendNoticeToLogin')())
+        return bool(getattr(self, 'SendNoticeToLogin')(*data))
 
-    def sendDisplayManialinkPage(self, *data) -> bool:
+    def send_display_manialink_page(self, *data) -> bool:
         """Display a manialink page on all clients. The parameters are the xml description of the page to display,
         a timeout to autohide it (0 = permanent), and a boolean to indicate whether the page must be hidden
         as soon as the user clicks on a page option. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SendDisplayManialinkPage')(*data))
-        return bool(getattr(self, 'SendDisplayManialinkPage')())
+        return bool(getattr(self, 'SendDisplayManialinkPage')(*data))
 
-    def sendDisplayManialinkPageToId(self, *data) -> bool:
+    def send_display_manialink_page_to_id(self, *data) -> bool:
         """Display a manialink page on the client with the specified UId. The first parameter is the UId of the player,
         the other are identical to 'SendDisplayManialinkPage'. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SendDisplayManialinkPageToId')(*data))
-        return bool(getattr(self, 'SendDisplayManialinkPageToId')())
+        return bool(getattr(self, 'SendDisplayManialinkPageToId')(*data))
 
-    def sendDisplayManialinkPageToLogin(self, *data) -> bool:
+    def send_display_manialink_page_to_login(self, *data) -> bool:
         """Display a manialink page on the client with the specified login. The first parameter is the
         login of the player, the other are identical to 'SendDisplayManialinkPage'.
         Login can be a single login or a list of comma-separated logins. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SendDisplayManialinkPageToLogin')(*data))
-        return bool(getattr(self, 'SendDisplayManialinkPageToLogin')())
+        return bool(getattr(self, 'SendDisplayManialinkPageToLogin')(*data))
 
-    def sendHideManialinkPage(self, *data) -> bool:
+    def send_hide_manialink_page(self, *data) -> bool:
         """Hide the displayed manialink page on all clients. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SendHideManialinkPage')(*data))
-        return bool(getattr(self, 'SendHideManialinkPage')())
+        return bool(getattr(self, 'SendHideManialinkPage')(*data))
 
-    def sendHideManialinkPageToId(self, *data) -> bool:
+    def send_hide_manialink_page_to_id(self, *data) -> bool:
         """Hide the displayed manialink page on the client with the specified UId. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SendHideManialinkPageToId')(*data))
-        return bool(getattr(self, 'SendHideManialinkPageToId')())
+        return bool(getattr(self, 'SendHideManialinkPageToId')(*data))
 
-    def sendHideManialinkPageToLogin(self, *data) -> bool:
+    def send_hide_manialink_page_to_login(self, *data) -> bool:
         """Hide the displayed manialink page on the client with the specified login. Login can be a single
         login or a list of comma-separated logins. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SendHideManialinkPageToLogin')(*data))
-        return bool(getattr(self, 'SendHideManialinkPageToLogin')())
+        return bool(getattr(self, 'SendHideManialinkPageToLogin')(*data))
 
-    def getManialinkPageAnswers(self, *data) -> ManialinkPageAnswersList:
+    def get_manialink_page_answers(self, *data) -> ManialinkPageAnswersList:
         """Returns the latest results from the current manialink page, as an array of structs {string Login,
         int PlayerId, int Result} Result==0 -> no answer, Result>0.... -> answer from the player."""
-        if len(data) > 0:
-            return [ManialinkPageAnswers(*result.values()) for result in getattr(self, 'GetManialinkPageAnswers')(*data)]
-        return [ManialinkPageAnswers(*result.values()) for result in getattr(self, 'GetManialinkPageAnswers')()]
+        return [ManialinkPageAnswers(*result.values()) for result in getattr(self, 'GetManialinkPageAnswers')(*data)]
 
     def kick(self, *data) -> bool:
         """Kick the player with the specified login, with an optional message. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'Kick')(*data))
-        return bool(getattr(self, 'Kick')())
+        return bool(getattr(self, 'Kick')(*data))
 
-    def kickId(self, *data) -> bool:
+    def kick_id(self, *data) -> bool:
         """Kick the player with the specified PlayerId, with an optional message. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'KickId')(*data))
-        return bool(getattr(self, 'KickId')())
+        return bool(getattr(self, 'KickId')(*data))
 
     def ban(self, *data) -> bool:
         """Ban the player with the specified login, with an optional message. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'Ban')(*data))
-        return bool(getattr(self, 'Ban')())
+        return bool(getattr(self, 'Ban')(*data))
 
-    def banAndBlackList(self, *data) -> bool:
+    def ban_and_black_list(self, *data) -> bool:
         """Ban the player with the specified login, with a message. Add it to the black list,
         and optionally save the new list. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'BanAndBlackList')(*data))
-        return bool(getattr(self, 'BanAndBlackList')())
+        return bool(getattr(self, 'BanAndBlackList')(*data))
 
-    def banId(self, *data) -> bool:
+    def ban_id(self, *data) -> bool:
         """Ban the player with the specified PlayerId, with an optional message. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'BanId')(*data))
-        return bool(getattr(self, 'BanId')())
+        return bool(getattr(self, 'BanId')(*data))
 
-    def unBan(self, *data) -> bool:
+    def un_ban(self, *data) -> bool:
         """Unban the player with the specified client name. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'UnBan')(*data))
-        return bool(getattr(self, 'UnBan')())
+        return bool(getattr(self, 'UnBan')(*data))
 
-    def cleanBanList(self, *data) -> bool:
+    def clean_ban_list(self, *data) -> bool:
         """Clean the ban list of the server. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'CleanBanList')(*data))
-        return bool(getattr(self, 'CleanBanList')())
+        return bool(getattr(self, 'CleanBanList')(*data))
 
-    def getBanList(self, *data) -> BanList:
+    def get_ban_list(self, max_number_of_infos: int, starting_index: int) -> BanList:
         """Returns the list of banned players. This method takes two parameters. The first parameter
         specifies the maximum number of infos to be returned, and the second one the starting index in the list.
         The list is an array of structures. Each structure contains the following fields :
         Login, ClientName and IPAddress."""
-        if len(data) > 0:
-            return [BanItem(*result.values()) for result in getattr(self, 'GetBanList')(*data)]
-        return [BanItem(*result.values()) for result in getattr(self, 'GetBanList')()]
+        return [BanItem(*result.values()) for result in getattr(self, 'GetBanList')(max_number_of_infos, starting_index)]
 
-    def blackList(self, *data) -> bool:
+    def black_list(self, *data) -> bool:
         """Blacklist the player with the specified login. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'BlackList')(*data))
-        return bool(getattr(self, 'BlackList')())
+        return bool(getattr(self, 'BlackList')(*data))
 
-    def blackListId(self, *data) -> bool:
+    def black_list_id(self, *data) -> bool:
         """Blacklist the player with the specified PlayerId. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'BlackListId')(*data))
-        return bool(getattr(self, 'BlackListId')())
+        return bool(getattr(self, 'BlackListId')(*data))
 
-    def unBlackList(self, *data) -> bool:
+    def un_black_list(self, *data) -> bool:
         """UnBlackList the player with the specified login. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'UnBlackList')(*data))
-        return bool(getattr(self, 'UnBlackList')())
+        return bool(getattr(self, 'UnBlackList')(*data))
 
-    def cleanBlackList(self, *data) -> bool:
+    def clean_black_list(self, *data) -> bool:
         """Clean the blacklist of the server. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'CleanBlackList')(*data))
-        return bool(getattr(self, 'CleanBlackList')())
+        return bool(getattr(self, 'CleanBlackList')(*data))
 
-    def getBlackList(self, *data) -> BlackList:
+    def get_black_list(self, max_number_of_infos: int, starting_index: int) -> BlackList:
         """Returns the list of blacklisted players. This method takes two parameters.
         The first parameter specifies the maximum number of infos to be returned,
         and the second one the starting index in the list. The list is an array of structures.
         Each structure contains the following fields : Login."""
-        if len(data) > 0:
-            return [BlackListItem(*result.values()) for result in getattr(self, 'GetBlackList')(*data)]
-        return [BlackListItem(*result.values()) for result in getattr(self, 'GetBlackList')()]
+        return [BlackListItem(*result.values()) for result in getattr(self, 'GetBlackList')(max_number_of_infos, starting_index)]
 
-    def loadBlackList(self, *data) -> bool:
+    def load_black_list(self, *data) -> bool:
         """Load the black list file with the specified file name. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'LoadBlackList')(*data))
-        return bool(getattr(self, 'LoadBlackList')())
+        return bool(getattr(self, 'LoadBlackList')(*data))
 
-    def saveBlackList(self, *data) -> bool:
+    def save_black_list(self, *data) -> bool:
         """Save the black list in the file with specified file name. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SaveBlackList')(*data))
-        return bool(getattr(self, 'SaveBlackList')())
+        return bool(getattr(self, 'SaveBlackList')(*data))
 
-    def addGuest(self, *data) -> bool:
+    def add_guest(self, *data) -> bool:
         """Add the player with the specified login on the guest list. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'AddGuest')(*data))
-        return bool(getattr(self, 'AddGuest')())
+        return bool(getattr(self, 'AddGuest')(*data))
 
-    def addGuestId(self, *data) -> bool:
+    def add_guest_id(self, *data) -> bool:
         """Add the player with the specified PlayerId on the guest list. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'AddGuestId')(*data))
-        return bool(getattr(self, 'AddGuestId')())
+        return bool(getattr(self, 'AddGuestId')(*data))
 
-    def removeGuest(self, *data) -> bool:
+    def remove_guest(self, *data) -> bool:
         """Remove the player with the specified login from the guest list. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'RemoveGuest')(*data))
-        return bool(getattr(self, 'RemoveGuest')())
+        return bool(getattr(self, 'RemoveGuest')(*data))
 
-    def removeGuestId(self, *data) -> bool:
+    def remove_guest_id(self, *data) -> bool:
         """Remove the player with the specified PlayerId from the guest list. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'RemoveGuestId')(*data))
-        return bool(getattr(self, 'RemoveGuestId')())
+        return bool(getattr(self, 'RemoveGuestId')(*data))
 
-    def cleanGuestList(self, *data) -> bool:
+    def clean_guest_list(self, *data) -> bool:
         """Clean the guest list of the server. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'CleanGuestList')(*data))
-        return bool(getattr(self, 'CleanGuestList')())
+        return bool(getattr(self, 'CleanGuestList')(*data))
 
-    def getGuestList(self, *data) -> GuestList:
+    def get_guest_list(self, max_number_of_infos: int, starting_index: int) -> GuestList:
         """Returns the list of players on the guest list. This method takes two parameters.
         The first parameter specifies the maximum number of infos to be returned, and the second one
         the starting index in the list. The list is an array of structures.
         Each structure contains the following fields : Login."""
-        if len(data) > 0:
-            return [GuestListItem(*result.values()) for result in getattr(self, 'GetGuestList')(*data)]
-        return [GuestListItem(*result.values()) for result in getattr(self, 'GetGuestList')()]
+        return [GuestListItem(*result.values()) for result in getattr(self, 'GetGuestList')(max_number_of_infos, starting_index)]
 
-    def loadGuestList(self, *data) -> bool:
+    def load_guest_list(self, *data) -> bool:
         """Load the guest list file with the specified file name. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'LoadGuestList')(*data))
-        return bool(getattr(self, 'LoadGuestList')())
+        return bool(getattr(self, 'LoadGuestList')(*data))
 
-    def saveGuestList(self, *data) -> bool:
+    def save_guest_list(self, *data) -> bool:
         """Save the guest list in the file with specified file name. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SaveGuestList')(*data))
-        return bool(getattr(self, 'SaveGuestList')())
+        return bool(getattr(self, 'SaveGuestList')(*data))
 
-    def setBuddyNotification(self, *data) -> bool:
+    def set_buddy_notification(self, *data) -> bool:
         """Sets whether buddy notifications should be sent in the chat. login is the login of the player,
         or '' for global setting, and enabled is the value. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetBuddyNotification')(*data))
-        return bool(getattr(self, 'SetBuddyNotification')())
+        return bool(getattr(self, 'SetBuddyNotification')(*data))
 
-    def getBuddyNotification(self, *data) -> bool:
+    def get_buddy_notification(self, *data) -> bool:
         """Gets whether buddy notifications are enabled for login, or '' to get the global setting."""
-        if len(data) > 0:
-            return bool(getattr(self, 'GetBuddyNotification')(*data))
-        return bool(getattr(self, 'GetBuddyNotification')())
+        return bool(getattr(self, 'GetBuddyNotification')(*data))
 
-    def writeFile(self, *data) -> bool:
+    def write_file(self, *data) -> bool:
         """Write the data to the specified file. The filename is relative to the Tracks path.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'WriteFile')(*data))
-        return bool(getattr(self, 'WriteFile')())
+        return bool(getattr(self, 'WriteFile')(*data))
 
-    def tunnelSendDataToId(self, *data) -> bool:
+    def tunnel_send_data_to_id(self, *data) -> bool:
         """Send the data to the specified player. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'TunnelSendDataToId')(*data))
-        return bool(getattr(self, 'TunnelSendDataToId')())
+        return bool(getattr(self, 'TunnelSendDataToId')(*data))
 
-    def tunnelSendDataToLogin(self, *data) -> bool:
+    def tunnel_send_data_to_login(self, *data) -> bool:
         """Send the data to the specified player. Login can be a single login or a list of comma-separated logins.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'TunnelSendDataToLogin')(*data))
-        return bool(getattr(self, 'TunnelSendDataToLogin')())
+        return bool(getattr(self, 'TunnelSendDataToLogin')(*data))
 
     def echo(self, *data) -> bool:
         """Just log the parameters and invoke a callback. Can be used to talk to other xmlrpc clients connected,
         or to make custom votes. If used in a callvote, the first parameter will be used as the vote
         message on the clients. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'Echo')(*data))
-        return bool(getattr(self, 'Echo')())
+        return bool(getattr(self, 'Echo')(*data))
 
     def ignore(self, *data) -> bool:
         """Ignore the player with the specified login. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'Ignore')(*data))
-        return bool(getattr(self, 'Ignore')())
+        return bool(getattr(self, 'Ignore')(*data))
 
-    def ignoreId(self, *data) -> bool:
+    def ignore_id(self, *data) -> bool:
         """Ignore the player with the specified PlayerId. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'IgnoreId')(*data))
-        return bool(getattr(self, 'IgnoreId')())
+        return bool(getattr(self, 'IgnoreId')(*data))
 
-    def unIgnore(self, *data) -> bool:
+    def un_ignore(self, *data) -> bool:
         """Unignore the player with the specified login. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'UnIgnore')(*data))
-        return bool(getattr(self, 'UnIgnore')())
+        return bool(getattr(self, 'UnIgnore')(*data))
 
-    def unIgnoreId(self, *data) -> bool:
+    def un_ignore_id(self, *data) -> bool:
         """Unignore the player with the specified PlayerId. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'UnIgnoreId')(*data))
-        return bool(getattr(self, 'UnIgnoreId')())
+        return bool(getattr(self, 'UnIgnoreId')(*data))
 
-    def cleanIgnoreList(self, *data) -> bool:
+    def clean_ignore_list(self, *data) -> bool:
         """Clean the ignore list of the server. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'CleanIgnoreList')(*data))
-        return bool(getattr(self, 'CleanIgnoreList')())
+        return bool(getattr(self, 'CleanIgnoreList')(*data))
 
-    def getIgnoreList(self, *data) -> IgnoreList:
+    def get_ignore_list(self, max_number_of_infos: int, starting_index: int) -> IgnoreList:
         """Returns the list of ignored players. This method takes two parameters.
         The first parameter specifies the maximum number of infos to be returned, and the second one
         the starting index in the list. The list is an array of structures. Each structure contains
         the following fields : Login."""
-        if len(data) > 0:
-            return [IgnoreListItem(*result.values()) for result in getattr(self, 'GetIgnoreList')(*data)]
-        return [IgnoreListItem(*result.values()) for result in getattr(self, 'GetIgnoreList')()]
+        return [IgnoreListItem(*result.values()) for result in getattr(self, 'GetIgnoreList')(max_number_of_infos, starting_index)]
 
     def pay(self, *data) -> int:
         """Pay coppers from the server account to a player, returns the BillId.
         This method takes three parameters: Login of the payee, Coppers to pay and a Label to send with the payment.
         The creation of the transaction itself may cost coppers, so you need to have coppers on the server account.
         Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'Pay')(*data))
-        return int(getattr(self, 'Pay')())
+        return int(getattr(self, 'Pay')(*data))
 
-    def sendBill(self, *data) -> int:
+    def send_bill(self, *data) -> int:
         """Create a bill, send it to a player, and return the BillId. This method takes four parameters:
         LoginFrom of the payer, Coppers the player has to pay, Label of the transaction and an optional
         LoginTo of the payee (if empty string, then the server account is used).
         The creation of the transaction itself may cost coppers, so you need to have coppers on the server account.
         Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'SendBill')(*data))
-        return int(getattr(self, 'SendBill')())
+        return int(getattr(self, 'SendBill')(*data))
 
-    def getBillState(self, *data) -> BillState:
+    def get_bill_state(self, state: int) -> BillState:
         """Returns the current state of a bill. This method takes one parameter, the BillId.
         Returns a struct containing State, StateName and TransactionId.
         Possible enum values are: CreatingTransaction, Issued, ValidatingPayement, Payed, Refused, Error."""
-        if len(data) > 0:
-            return BillState(*getattr(self, 'GetBillState')(*data).values())
-        return BillState(*getattr(self, 'GetBillState')().values())
+        return BillState(*getattr(self, 'GetBillState')(state).values())
 
-    def getServerCoppers(self, *data) -> int:
+    def get_server_coppers(self, *data) -> int:
         """Returns the current number of coppers on the server account."""
-        if len(data) > 0:
-            return int(getattr(self, 'GetServerCoppers')(*data))
-        return int(getattr(self, 'GetServerCoppers')())
+        return int(getattr(self, 'GetServerCoppers')(*data))
 
-    def getSystemInfo(self, *data) -> SystemInfo:
+    def get_system_info(self, *data) -> SystemInfo:
         """Get some system infos, including connection rates (in kbps)."""
-        if len(data) > 0:
-            return SystemInfo(*getattr(self, 'GetSystemInfo')(*data).values())
-        return SystemInfo(*getattr(self, 'GetSystemInfo')().values())
+        return SystemInfo(*getattr(self, 'GetSystemInfo')(*data).values())
 
-    def setConnectionRates(self, *data) -> bool:
+    def set_connection_rates(self, *data) -> bool:
         """Set the download and upload rates (in kbps)."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetConnectionRates')(*data))
-        return bool(getattr(self, 'SetConnectionRates')())
+        return bool(getattr(self, 'SetConnectionRates')(*data))
 
-    def setServerName(self, *data) -> bool:
+    def set_server_name(self, *data) -> bool:
         """Set a new server name in utf8 format. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetServerName')(*data))
-        return bool(getattr(self, 'SetServerName')())
+        return bool(getattr(self, 'SetServerName')(*data))
 
-    def getServerName(self, *data) -> str:
+    def get_server_name(self, *data) -> str:
         """Get the server name in utf8 format."""
-        if len(data) > 0:
-            return str(getattr(self, 'GetServerName')(*data))
-        return str(getattr(self, 'GetServerName')())
+        return str(getattr(self, 'GetServerName')(*data))
 
-    def setServerComment(self, *data) -> bool:
+    def set_server_comment(self, *data) -> bool:
         """Set a new server comment in utf8 format. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetServerComment')(*data))
-        return bool(getattr(self, 'SetServerComment')())
+        return bool(getattr(self, 'SetServerComment')(*data))
 
-    def getServerComment(self, *data) -> str:
+    def get_server_comment(self, *data) -> str:
         """Get the server comment in utf8 format."""
-        if len(data) > 0:
-            return str(getattr(self, 'GetServerComment')(*data))
-        return str(getattr(self, 'GetServerComment')())
+        return str(getattr(self, 'GetServerComment')(*data))
 
-    def setHideServer(self, *data) -> bool:
+    def set_hide_server(self, *data) -> bool:
         """Set whether the server should be hidden from the public server list
         (0 = visible, 1 = always hidden, 2 = hidden from nations). Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetHideServer')(*data))
-        return bool(getattr(self, 'SetHideServer')())
+        return bool(getattr(self, 'SetHideServer')(*data))
 
-    def getHideServer(self, *data) -> int:
+    def get_hide_server(self, *data) -> int:
         """Get whether the server wants to be hidden from the public server list."""
-        if len(data) > 0:
-            return int(getattr(self, 'GetHideServer')(*data))
-        return int(getattr(self, 'GetHideServer')())
+        return int(getattr(self, 'GetHideServer')(*data))
 
-    def isRelayServer(self, *data) -> bool:
+    def is_relay_server(self, *data) -> bool:
         """Returns true if this is a relay server."""
-        if len(data) > 0:
-            return bool(getattr(self, 'IsRelayServer')(*data))
-        return bool(getattr(self, 'IsRelayServer')())
+        return bool(getattr(self, 'IsRelayServer')(*data))
 
-    def setServerPassword(self, *data) -> bool:
+    def set_server_password(self, *data) -> bool:
         """Set a new password for the server. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetServerPassword')(*data))
-        return bool(getattr(self, 'SetServerPassword')())
+        return bool(getattr(self, 'SetServerPassword')(*data))
 
-    def getServerPassword(self, *data) -> str:
+    def get_server_password(self, *data) -> str:
         """Get the server password if called as Admin or Super Admin, else returns if a password is needed or not."""
-        if len(data) > 0:
-            return str(getattr(self, 'GetServerPassword')(*data))
-        return str(getattr(self, 'GetServerPassword')())
+        return str(getattr(self, 'GetServerPassword')(*data))
 
-    def setServerPasswordForSpectator(self, *data) -> bool:
+    def set_server_password_for_spectator(self, *data) -> bool:
         """Set a new password for the spectator mode. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetServerPasswordForSpectator')(*data))
-        return bool(getattr(self, 'SetServerPasswordForSpectator')())
+        return bool(getattr(self, 'SetServerPasswordForSpectator')(*data))
 
-    def getServerPasswordForSpectator(self, *data) -> str:
+    def get_server_password_for_spectator(self, *data) -> str:
         """Get the password for spectator mode if called as Admin or Super Admin, else returns if a password
         is needed or not."""
-        if len(data) > 0:
-            return str(getattr(self, 'GetServerPasswordForSpectator')(*data))
-        return str(getattr(self, 'GetServerPasswordForSpectator')())
+        return str(getattr(self, 'GetServerPasswordForSpectator')(*data))
 
-    def setMaxPlayers(self, *data) -> bool:
+    def set_max_players(self, *data) -> bool:
         """Set a new maximum number of players. Only available to Admin. Requires a challenge restart to be
         taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetMaxPlayers')(*data))
-        return bool(getattr(self, 'SetMaxPlayers')())
+        return bool(getattr(self, 'SetMaxPlayers')(*data))
 
-    def getMaxPlayers(self, *data) -> StateValue:
+    def get_max_players(self, *data) -> StateValue:
         """Get the current and next maximum number of players allowed on server. The struct returned contains
         two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetMaxPlayers')(*data).values())
-        return StateValue(*getattr(self, 'GetMaxPlayers')().values())
+        return StateValue(*getattr(self, 'GetMaxPlayers')(*data).values())
 
-    def setMaxSpectators(self, *data) -> bool:
+    def set_max_spectators(self, *data) -> bool:
         """Set a new maximum number of Spectators. Only available to Admin. Requires a challenge restart to be
         taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetMaxSpectators')(*data))
-        return bool(getattr(self, 'SetMaxSpectators')())
+        return bool(getattr(self, 'SetMaxSpectators')(*data))
 
-    def getMaxSpectators(self, *data) -> StateValue:
+    def get_max_spectators(self, *data) -> StateValue:
         """Get the current and next maximum number of Spectators allowed on server. The struct returned contains
         two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetMaxSpectators')(*data).values())
-        return StateValue(*getattr(self, 'GetMaxSpectators')().values())
+        return StateValue(*getattr(self, 'GetMaxSpectators')(*data).values())
 
-    def enableP2PUpload(self, *data) -> bool:
+    def enable_p2p_upload(self, *data) -> bool:
         """Enable or disable peer-to-peer upload from server. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'EnableP2PUpload')(*data))
-        return bool(getattr(self, 'EnableP2PUpload')())
+        return bool(getattr(self, 'EnableP2PUpload')(*data))
 
-    def isP2PUpload(self, *data) -> bool:
+    def is_p2p_upload(self, *data) -> bool:
         """Returns if the peer-to-peer upload from server is enabled."""
-        if len(data) > 0:
-            return bool(getattr(self, 'IsP2PUpload')(*data))
-        return bool(getattr(self, 'IsP2PUpload')())
+        return bool(getattr(self, 'IsP2PUpload')(*data))
 
-    def enableP2PDownload(self, *data) -> bool:
+    def enable_p2_download(self, *data) -> bool:
         """Enable or disable peer-to-peer download for server. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'EnableP2PDownload')(*data))
-        return bool(getattr(self, 'EnableP2PDownload')())
+        return bool(getattr(self, 'EnableP2PDownload')(*data))
 
-    def isP2PDownload(self, *data) -> bool:
+    def is_p2p_download(self, *data) -> bool:
         """Returns if the peer-to-peer download for server is enabled."""
-        if len(data) > 0:
-            return bool(getattr(self, 'IsP2PDownload')(*data))
-        return bool(getattr(self, 'IsP2PDownload')())
+        return bool(getattr(self, 'IsP2PDownload')(*data))
 
-    def allowChallengeDownload(self, *data) -> bool:
+    def allow_challenge_download(self, *data) -> bool:
         """Allow clients to download challenges from the server. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'AllowChallengeDownload')(*data))
-        return bool(getattr(self, 'AllowChallengeDownload')())
+        return bool(getattr(self, 'AllowChallengeDownload')(*data))
 
-    def isChallengeDownloadAllowed(self, *data) -> bool:
+    def is_challenge_download_allowed(self, *data) -> bool:
         """Returns if clients can download challenges from the server."""
-        if len(data) > 0:
-            return bool(getattr(self, 'IsChallengeDownloadAllowed')(*data))
-        return bool(getattr(self, 'IsChallengeDownloadAllowed')())
+        return bool(getattr(self, 'IsChallengeDownloadAllowed')(*data))
 
-    def autoSaveReplays(self, *data) -> bool:
+    def auto_save_replays(self, *data) -> bool:
         """Enable the autosaving of all replays (vizualisable replays with all players, but not validable)
         on the server. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'AutoSaveReplays')(*data))
-        return bool(getattr(self, 'AutoSaveReplays')())
+        return bool(getattr(self, 'AutoSaveReplays')(*data))
 
-    def autoSaveValidationReplays(self, *data) -> bool:
+    def auto_save_validation_replays(self, *data) -> bool:
         """Enable the autosaving on the server of validation replays, every time a player makes a new time.
         Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'AutoSaveValidationReplays')(*data))
-        return bool(getattr(self, 'AutoSaveValidationReplays')())
+        return bool(getattr(self, 'AutoSaveValidationReplays')(*data))
 
-    def isAutoSaveReplaysEnabled(self, *data) -> bool:
+    def is_auto_save_replays_enabled(self, *data) -> bool:
         """Returns if autosaving of all replays is enabled on the server."""
-        if len(data) > 0:
-            return bool(getattr(self, 'IsAutoSaveReplaysEnabled')(*data))
-        return bool(getattr(self, 'IsAutoSaveReplaysEnabled')())
+        return bool(getattr(self, 'IsAutoSaveReplaysEnabled')(*data))
 
-    def isAutoSaveValidationReplaysEnabled(self, *data) -> bool:
+    def is_auto_save_validation_replays_enabled(self, *data) -> bool:
         """Returns if autosaving of validation replays is enabled on the server."""
-        if len(data) > 0:
-            return bool(getattr(self, 'IsAutoSaveValidationReplaysEnabled')(*data))
-        return bool(getattr(self, 'IsAutoSaveValidationReplaysEnabled')())
+        return bool(getattr(self, 'IsAutoSaveValidationReplaysEnabled')(*data))
 
-    def saveCurrentReplay(self, *data) -> bool:
+    def save_current_replay(self, *data) -> bool:
         """Saves the current replay (vizualisable replays with all players, but not validable).
         Pass a filename, or '' for an automatic filename. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SaveCurrentReplay')(*data))
-        return bool(getattr(self, 'SaveCurrentReplay')())
+        return bool(getattr(self, 'SaveCurrentReplay')(*data))
 
-    def saveBestGhostsReplay(self, *data) -> bool:
+    def save_best_ghosts_replay(self, *data) -> bool:
         """Saves a replay with the ghost of all the players' best race. First parameter is the login of the player
         (or '' for all players), Second parameter is the filename, or '' for an automatic filename.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SaveBestGhostsReplay')(*data))
-        return bool(getattr(self, 'SaveBestGhostsReplay')())
+        return bool(getattr(self, 'SaveBestGhostsReplay')(*data))
 
     # def getValidationReplay(self, *data) -> base64 GetValidationReplay:
     #     '''Returns a replay containing the data needed to validate the current best time of the player.
     #     The parameter is the login of the player.'''
-    #     if len(data) > 0:
-    #         return ValidationReplay(*getattr(self, 'GetValidationReplay')(*data).values())
-    #     return ValidationReplay(*getattr(self, 'GetValidationReplay')().values())
+    #         retur ValidationReplay(*getattr(self, 'GetValidationReplay')(*data).values())
 
-    def setLadderMode(self, *data) -> bool:
+    def set_ladder_mode(self, *data) -> bool:
         """Set a new ladder mode between ladder disabled (0) and forced (1). Only available to Admin.
         Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetLadderMode')(*data))
-        return bool(getattr(self, 'SetLadderMode')())
+        return bool(getattr(self, 'SetLadderMode')(*data))
 
-    def getLadderMode(self, *data) -> StateValue:
+    def get_ladder_mode(self, *data) -> StateValue:
         """Get the current and next ladder mode on server. The struct returned contains two fields CurrentValue
         and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetLadderMode')(*data).values())
-        return StateValue(*getattr(self, 'GetLadderMode')().values())
+        return StateValue(*getattr(self, 'GetLadderMode')(*data).values())
 
-    def getLadderServerLimits(self, *data) -> LadderServerLimits:
+    def get_ladder_server_limits(self, *data) -> LadderServerLimits:
         """Get the ladder points limit for the players allowed on this server. The struct returned contains
         two fields LadderServerLimitMin and LadderServerLimitMax."""
-        if len(data) > 0:
-            return LadderServerLimits(*getattr(self, 'GetLadderServerLimits')(*data).values())
-        return LadderServerLimits(*getattr(self, 'GetLadderServerLimits')().values())
+        return LadderServerLimits(*getattr(self, 'GetLadderServerLimits')(*data).values())
 
-    def setVehicleNetQuality(self, *data) -> bool:
+    def set_vehicle_net_quality(self, *data) -> bool:
         """Set the network vehicle quality to Fast (0) or High (1). Only available to Admin.
         Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetVehicleNetQuality')(*data))
-        return bool(getattr(self, 'SetVehicleNetQuality')())
+        return bool(getattr(self, 'SetVehicleNetQuality')(*data))
 
-    def getVehicleNetQuality(self, *data) -> StateValue:
+    def get_vehicle_net_quality(self, *data) -> StateValue:
         """Get the current and next network vehicle quality on server. The struct returned contains two fields
         CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetVehicleNetQuality')(*data).values())
-        return StateValue(*getattr(self, 'GetVehicleNetQuality')().values())
+        return StateValue(*getattr(self, 'GetVehicleNetQuality')(*data).values())
 
-    def setServerOptions(self, *data) -> bool:
+    def set_server_options(self, *data) -> bool:
         """Set new server options using the struct passed as parameters. This struct must contain the following fields:
         Name, Comment, Password, PasswordForSpectator, NextMaxPlayers, NextMaxSpectators, IsP2PUpload, IsP2PDownload,
         NextLadderMode, NextVehicleNetQuality, NextCallVoteTimeOut, CallVoteRatio, AllowChallengeDownload,
@@ -914,11 +693,9 @@ class BaseClient(object):
         HideServer, UseChangingValidationSeed. Only available to Admin. A change of NextMaxPlayers, NextMaxSpectators,
         NextLadderMode, NextVehicleNetQuality, NextCallVoteTimeOut or UseChangingValidationSeed
         requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetServerOptions')(*data))
-        return bool(getattr(self, 'SetServerOptions')())
+        return bool(getattr(self, 'SetServerOptions')(*data))
 
-    def getServerOptions(self, *data) -> ServerOptions:
+    def get_server_options(self, tm_version: int) -> ServerOptions:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever).
         Returns a struct containing the server options: Name, Comment, Password, PasswordForSpectator,
         CurrentMaxPlayers, NextMaxPlayers, CurrentMaxSpectators, NextMaxSpectators, IsP2PUpload, IsP2PDownload,
@@ -926,182 +703,132 @@ class BaseClient(object):
         NextCallVoteTimeOut, CallVoteRatio, AllowChallengeDownload and AutoSaveReplays, and additionally for forever:
         RefereePassword, RefereeMode, AutoSaveValidationReplays, HideServer, CurrentUseChangingValidationSeed,
         NextUseChangingValidationSeed."""
-        if len(data) > 0:
-            return ServerOptions(*getattr(self, 'GetServerOptions')(*data).values())
-        return ServerOptions(*getattr(self, 'GetServerOptions')().values())
+        return ServerOptions(*getattr(self, 'GetServerOptions')(tm_version).values())
 
-    def setServerPackMask(self, *data) -> bool:
+    def set_server_pack_mask(self, *data) -> bool:
         """Defines the packmask of the server. Can be 'United', 'Nations', 'Sunrise', 'Original', or any of the
         environment names. (Only challenges matching the packmask will be allowed on the server, so that player
         connecting to it know what to expect.) Only available when the server is stopped. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetServerPackMask')(*data))
-        return bool(getattr(self, 'SetServerPackMask')())
+        return bool(getattr(self, 'SetServerPackMask')(*data))
 
-    def getServerPackMask(self, *data) -> str:
+    def get_server_pack_mask(self, *data) -> str:
         """Get the packmask of the server."""
-        if len(data) > 0:
-            return str(getattr(self, 'GetServerPackMask')(*data))
-        return str(getattr(self, 'GetServerPackMask')())
+        return str(getattr(self, 'GetServerPackMask')(*data))
 
-    def setForcedMods(self, *data) -> bool:
+    def set_forced_mods(self, *data) -> bool:
         """Set the mods to apply on the clients. Parameters: Override, if true even the challenges with a mod will
         be overridden by the server setting; and Mods, an array of structures [{EnvName, Url}, ...].
         Requires a challenge restart to be taken into account. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetForcedMods')(*data))
-        return bool(getattr(self, 'SetForcedMods')())
+        return bool(getattr(self, 'SetForcedMods')(*data))
 
-    def getForcedMods(self, *data) -> ForcedMods:
+    def get_forced_mods(self, *data) -> ForcedMods:
         """Get the mods settings."""
-        if len(data) > 0:
-            return ForcedMods(*getattr(self, 'GetForcedMods')(*data).values())
-        return ForcedMods(*getattr(self, 'GetForcedMods')().values())
+        return ForcedMods(*getattr(self, 'GetForcedMods')(*data).values())
 
-    def setForcedMusic(self, *data) -> bool:
+    def set_forced_music(self, *data) -> bool:
         """Set the music to play on the clients. Parameters: Override, if true even the challenges with a
         custom music will be overridden by the server setting, and a UrlOrFileName for the music. Requires a
         challenge restart to be taken into account. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetForcedMusic')(*data))
-        return bool(getattr(self, 'SetForcedMusic')())
+        return bool(getattr(self, 'SetForcedMusic')(*data))
 
-    def getForcedMusic(self, *data) -> ForcedMusic:
+    def get_forced_music(self, *data) -> ForcedMusic:
         """Get the music setting."""
-        if len(data) > 0:
-            return ForcedMusic(*getattr(self, 'GetForcedMusic')(*data).values())
-        return ForcedMusic(*getattr(self, 'GetForcedMusic')().values())
+        return ForcedMusic(*getattr(self, 'GetForcedMusic')(*data).values())
 
-    def setForcedSkins(self, *data) -> bool:
+    def set_forced_skins(self, *data) -> bool:
         """Defines a list of remappings for player skins. It expects a list of structs Orig, Name, Checksum, Url.
         Orig is the name of the skin to remap, or '*' for any other. Name, Checksum, Url define the skin to use.
         (They are optional, you may set value '' for any of those. All 3 null means same as Orig). Will only affect
         players connecting after the value is set. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetForcedSkins')(*data))
-        return bool(getattr(self, 'SetForcedSkins')())
+        return bool(getattr(self, 'SetForcedSkins')(*data))
 
-    def getForcedSkins(self, *data) -> ForcedSkinsList:
+    def get_forced_skins(self, *data) -> ForcedSkinsList:
         """Get the current forced skins."""
-        if len(data) > 0:
-            return [ForcedSkin(*result.values()) for result in getattr(self, 'GetForcedSkins')(*data)]
-        return [ForcedSkin(*result.values()) for result in getattr(self, 'GetForcedSkins')()]
+        return [ForcedSkin(*result.values()) for result in getattr(self, 'GetForcedSkins')(*data)]
 
-    def getLastConnectionErrorMessage(self, *data) -> str:
+    def get_last_connection_error_message(self, *data) -> str:
         """Returns the last error message for an internet connection. Only available to Admin."""
-        if len(data) > 0:
-            return str(getattr(self, 'GetLastConnectionErrorMessage')(*data))
-        return str(getattr(self, 'GetLastConnectionErrorMessage')())
+        return str(getattr(self, 'GetLastConnectionErrorMessage')(*data))
 
-    def setRefereePassword(self, *data) -> bool:
+    def set_referee_password(self, *data) -> bool:
         """Set a new password for the referee mode. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetRefereePassword')(*data))
-        return bool(getattr(self, 'SetRefereePassword')())
+        return bool(getattr(self, 'SetRefereePassword')(*data))
 
-    def getRefereePassword(self, *data) -> str:
+    def get_referee_password(self, *data) -> str:
         """Get the password for referee mode if called as Admin or Super Admin, else returns if a password is
         needed or not."""
-        if len(data) > 0:
-            return str(getattr(self, 'GetRefereePassword')(*data))
-        return str(getattr(self, 'GetRefereePassword')())
+        return str(getattr(self, 'GetRefereePassword')(*data))
 
-    def setRefereeMode(self, *data) -> bool:
+    def set_referee_mode(self, *data) -> bool:
         """Set the referee validation mode. 0 = validate the top3 players, 1 = validate all players.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetRefereeMode')(*data))
-        return bool(getattr(self, 'SetRefereeMode')())
+        return bool(getattr(self, 'SetRefereeMode')(*data))
 
-    def getRefereeMode(self, *data) -> int:
+    def get_referee_mode(self, *data) -> int:
         """Get the referee validation mode."""
-        if len(data) > 0:
-            return int(getattr(self, 'GetRefereeMode')(*data))
-        return int(getattr(self, 'GetRefereeMode')())
+        return int(getattr(self, 'GetRefereeMode')(*data))
 
-    def setUseChangingValidationSeed(self, *data) -> bool:
+    def set_use_changing_validation_seed(self, *data) -> bool:
         """Set whether the game should use a variable validation seed or not. Only available to Admin.
         Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetUseChangingValidationSeed')(*data))
-        return bool(getattr(self, 'SetUseChangingValidationSeed')())
+        return bool(getattr(self, 'SetUseChangingValidationSeed')(*data))
 
-    def getUseChangingValidationSeed(self, *data) -> StateValue:
+    def get_use_changing_validation_seed(self, *data) -> StateValue:
         """Get the current and next value of UseChangingValidationSeed. The struct returned contains two fields
         CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetUseChangingValidationSeed')(*data).values())
-        return StateValue(*getattr(self, 'GetUseChangingValidationSeed')().values())
+        return StateValue(*getattr(self, 'GetUseChangingValidationSeed')(*data).values())
 
-    def setWarmUp(self, *data) -> bool:
+    def set_warm_up(self, *data) -> bool:
         """Sets whether the server is in warm-up phase or not. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetWarmUp')(*data))
-        return bool(getattr(self, 'SetWarmUp')())
+        return bool(getattr(self, 'SetWarmUp')(*data))
 
-    def getWarmUp(self, *data) -> bool:
+    def get_warm_up(self, *data) -> bool:
         """Returns whether the server is in warm-up phase."""
-        if len(data) > 0:
-            return bool(getattr(self, 'GetWarmUp')(*data))
-        return bool(getattr(self, 'GetWarmUp')())
+        return bool(getattr(self, 'GetWarmUp')(*data))
 
-    def challengeRestart(self, *data) -> bool:
+    def challenge_restart(self, *data) -> bool:
         """Restarts the challenge, with an optional boolean parameter DontClearCupScores (only available in cup mode).
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChallengeRestart')(*data))
-        return bool(getattr(self, 'ChallengeRestart')())
+        return bool(getattr(self, 'ChallengeRestart')(*data))
 
-    def restartChallenge(self, *data) -> bool:
+    def restart_challenge(self, *data) -> bool:
         """Restarts the challenge, with an optional boolean parameter DontClearCupScores (only available in cup mode).
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'RestartChallenge')(*data))
-        return bool(getattr(self, 'RestartChallenge')())
+        return bool(getattr(self, 'RestartChallenge')(*data))
 
-    def nextChallenge(self, *data) -> bool:
+    def next_challenge(self, *data) -> bool:
         """Switch to next challenge, with an optional boolean parameter DontClearCupScores (only available in cup mode).
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'NextChallenge')(*data))
-        return bool(getattr(self, 'NextChallenge')())
+        return bool(getattr(self, 'NextChallenge')(*data))
 
-    def stopServer(self, *data) -> bool:
+    def stop_server(self, *data) -> bool:
         """Stop the server. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'StopServer')(*data))
-        return bool(getattr(self, 'StopServer')())
+        return bool(getattr(self, 'StopServer')(*data))
 
-    def forceEndRound(self, *data) -> bool:
+    def force_end_round(self, *data) -> bool:
         """In Rounds or Laps mode, force the end of round without waiting for all players to giveup/finish.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ForceEndRound')(*data))
-        return bool(getattr(self, 'ForceEndRound')())
+        return bool(getattr(self, 'ForceEndRound')(*data))
 
-    def setGameInfos(self, *data) -> bool:
+    def set_game_infos(self, *data) -> bool:
         """Set new game settings using the struct passed as parameters. This struct must contain the following fields :
         GameMode, ChatTime, RoundsPointsLimit, RoundsUseNewRules, RoundsForcedLaps, TimeAttackLimit,
         TimeAttackSynchStartPeriod, TeamPointsLimit, TeamMaxPoints, TeamUseNewRules, LapsNbLaps, LapsTimeLimit,
         FinishTimeout, and optionally: AllWarmUpDuration, DisableRespawn, ForceShowAllOpponents,
         RoundsPointsLimitNewRules, TeamPointsLimitNewRules, CupPointsLimit, CupRoundsPerChallenge, CupNbWinners,
         CupWarmUpDuration. Only available to Admin. Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetGameInfos')(*data))
-        return bool(getattr(self, 'SetGameInfos')())
+        return bool(getattr(self, 'SetGameInfos')(*data))
 
-    def getCurrentGameInfo(self, *data) -> GameInfo:
+    def get_current_game_info(self, tm_version: int) -> GameInfo:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever). Returns a struct containing
         the current game settings, ie: GameMode, ChatTime, NbChallenge, RoundsPointsLimit, RoundsUseNewRules,
         RoundsForcedLaps, TimeAttackLimit, TimeAttackSynchStartPeriod, TeamPointsLimit, TeamMaxPoints, TeamUseNewRules,
         LapsNbLaps, LapsTimeLimit, FinishTimeout, and additionally for version 1: AllWarmUpDuration, DisableRespawn,
         ForceShowAllOpponents, RoundsPointsLimitNewRules, TeamPointsLimitNewRules, CupPointsLimit,
         CupRoundsPerChallenge, CupNbWinners, CupWarmUpDuration."""
-        if len(data) > 0:
-            return GameInfo(*getattr(self, 'GetCurrentGameInfo')(*data).values())
-        return GameInfo(*getattr(self, 'GetCurrentGameInfo')().values())
+        return GameInfo(*getattr(self, 'GetCurrentGameInfo')(tm_version).values())
 
-    def getNextGameInfo(self, *data) -> GameInfo:
+    def get_next_game_info(self, tm_version: int) -> GameInfo:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever).
         Returns a struct containing the game settings for the next challenge, ie: GameMode, ChatTime, NbChallenge,
         RoundsPointsLimit, RoundsUseNewRules, RoundsForcedLaps, TimeAttackLimit, TimeAttackSynchStartPeriod,
@@ -1109,460 +836,332 @@ class BaseClient(object):
         and additionally for version 1: AllWarmUpDuration, DisableRespawn, ForceShowAllOpponents,
         RoundsPointsLimitNewRules, TeamPointsLimitNewRules, CupPointsLimit, CupRoundsPerChallenge, CupNbWinners,
         CupWarmUpDuration."""
-        if len(data) > 0:
-            return GameInfo(*getattr(self, 'GetNextGameInfo')(*data).values())
-        return GameInfo(*getattr(self, 'GetNextGameInfo')().values())
+        return GameInfo(*getattr(self, 'GetNextGameInfo')(tm_version).values())
 
-    def getGameInfos(self, *data) -> StateValue:
+    def get_game_infos(self, tm_version: int) -> StateValue:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever).
         Returns a struct containing two other structures, the first containing the current game settings and
         the second the game settings for next challenge. The first structure is named CurrentGameInfos and the
         second NextGameInfos."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetGameInfos')(*data).values())
-        return StateValue(*getattr(self, 'GetGameInfos')().values())
+        return StateValue(*getattr(self, 'GetGameInfos')(tm_version).values())
 
-    def setGameMode(self, *data) -> bool:
+    def set_game_mode(self, *data) -> bool:
         """Set a new game mode between Rounds (0), TimeAttack (1), Team (2), Laps (3), Stunts (4) and Cup (5).
         Only available to Admin. Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetGameMode')(*data))
-        return bool(getattr(self, 'SetGameMode')())
+        return bool(getattr(self, 'SetGameMode')(*data))
 
-    def getGameMode(self, *data) -> int:
+    def get_game_mode(self, *data) -> int:
         """Get the current game mode."""
-        if len(data) > 0:
-            return int(getattr(self, 'GetGameMode')(*data))
-        return int(getattr(self, 'GetGameMode')())
+        return int(getattr(self, 'GetGameMode')(*data))
 
-    def setChatTime(self, *data) -> bool:
+    def set_chat_time(self, *data) -> bool:
         """Set a new chat time value in milliseconds (actually 'chat time' is the duration of the end race podium,
         0 means no podium displayed.). Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetChatTime')(*data))
-        return bool(getattr(self, 'SetChatTime')())
+        return bool(getattr(self, 'SetChatTime')(*data))
 
-    def getChatTime(self, *data) -> StateValue:
+    def get_chat_time(self, *data) -> StateValue:
         """Get the current and next chat time. The struct returned contains two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetChatTime')(*data).values())
-        return StateValue(*getattr(self, 'GetChatTime')().values())
+        return StateValue(*getattr(self, 'GetChatTime')(*data).values())
 
-    def setFinishTimeout(self, *data) -> bool:
+    def set_finish_timeout(self, *data) -> bool:
         """Set a new finish timeout (for rounds/laps mode) value in milliseconds. 0 means default.
         1 means adaptative to the duration of the challenge. Only available to Admin.
         Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetFinishTimeout')(*data))
-        return bool(getattr(self, 'SetFinishTimeout')())
+        return bool(getattr(self, 'SetFinishTimeout')(*data))
 
-    def getFinishTimeout(self, *data) -> StateValue:
+    def get_finish_timeout(self, *data) -> StateValue:
         """Get the current and next FinishTimeout. The struct returned contains two fields CurrentValue and
         NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetFinishTimeout')(*data).values())
-        return StateValue(*getattr(self, 'GetFinishTimeout')().values())
+        return StateValue(*getattr(self, 'GetFinishTimeout')(*data).values())
 
-    def setAllWarmUpDuration(self, *data) -> bool:
+    def set_all_warm_up_duration(self, *data) -> bool:
         """Set whether to enable the automatic warm-up phase in all modes. 0 = no, otherwise it's the duration
         of the phase, expressed in number of rounds (in rounds/team mode), or in number of times the gold medal
         time (other modes). Only available to Admin. Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetAllWarmUpDuration')(*data))
-        return bool(getattr(self, 'SetAllWarmUpDuration')())
+        return bool(getattr(self, 'SetAllWarmUpDuration')(*data))
 
-    def getAllWarmUpDuration(self, *data) -> StateValue:
+    def get_all_warm_up_duration(self, *data) -> StateValue:
         """Get whether the automatic warm-up phase is enabled in all modes. The struct returned contains two
         fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetAllWarmUpDuration')(*data).values())
-        return StateValue(*getattr(self, 'GetAllWarmUpDuration')().values())
+        return StateValue(*getattr(self, 'GetAllWarmUpDuration')(*data).values())
 
-    def setDisableRespawn(self, *data) -> bool:
+    def set_disable_respawn(self, *data) -> bool:
         """Set whether to disallow players to respawn. Only available to Admin. Requires a challenge restart to
         be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetDisableRespawn')(*data))
-        return bool(getattr(self, 'SetDisableRespawn')())
+        return bool(getattr(self, 'SetDisableRespawn')(*data))
 
-    def getDisableRespawn(self, *data) -> StateValue:
+    def get_disable_respawn(self, *data) -> StateValue:
         """Get whether players are disallowed to respawn. The struct returned contains two fields CurrentValue
         and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetDisableRespawn')(*data).values())
-        return StateValue(*getattr(self, 'GetDisableRespawn')().values())
+        return StateValue(*getattr(self, 'GetDisableRespawn')(*data).values())
 
-    def setForceShowAllOpponents(self, *data) -> bool:
+    def set_force_show_all_opponents(self, *data) -> bool:
         """Set whether to override the players preferences and always display all opponents (0=no override,
         1=show all, other value=minimum number of opponents). Only available to Admin. Requires a challenge restart
         to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetForceShowAllOpponents')(*data))
-        return bool(getattr(self, 'SetForceShowAllOpponents')())
+        return bool(getattr(self, 'SetForceShowAllOpponents')(*data))
 
-    def getForceShowAllOpponents(self, *data) -> StateValue:
+    def get_force_show_all_opponents(self, *data) -> StateValue:
         """Get whether players are forced to show all opponents. The struct returned contains two fields CurrentValue
         and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetForceShowAllOpponents')(*data).values())
-        return StateValue(*getattr(self, 'GetForceShowAllOpponents')().values())
+        return StateValue(*getattr(self, 'GetForceShowAllOpponents')(*data).values())
 
-    def setTimeAttackLimit(self, *data) -> bool:
+    def set_time_attack_limit(self, *data) -> bool:
         """Set a new time limit for time attack mode. Only available to Admin. Requires a challenge restart to be
         taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetTimeAttackLimit')(*data))
-        return bool(getattr(self, 'SetTimeAttackLimit')())
+        return bool(getattr(self, 'SetTimeAttackLimit')(*data))
 
-    def getTimeAttackLimit(self, *data) -> StateValue:
+    def get_time_attack_limit(self, *data) -> StateValue:
         """Get the current and next time limit for time attack mode. The struct returned contains two fields
         CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetTimeAttackLimit')(*data).values())
-        return StateValue(*getattr(self, 'GetTimeAttackLimit')().values())
+        return StateValue(*getattr(self, 'GetTimeAttackLimit')(*data).values())
 
-    def setTimeAttackSynchStartPeriod(self, *data) -> bool:
+    def set_time_attack_synch_start_period(self, *data) -> bool:
         """Set a new synchronized start period for time attack mode. Only available to Admin. Requires a challenge
         restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetTimeAttackSynchStartPeriod')(*data))
-        return bool(getattr(self, 'SetTimeAttackSynchStartPeriod')())
+        return bool(getattr(self, 'SetTimeAttackSynchStartPeriod')(*data))
 
-    def getTimeAttackSynchStartPeriod(self, *data) -> StateValue:
+    def get_time_attack_synch_start_period(self, *data) -> StateValue:
         """Get the current and synchronized start period for time attack mode. The struct returned contains two
         fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetTimeAttackSynchStartPeriod')(*data).values())
-        return StateValue(*getattr(self, 'GetTimeAttackSynchStartPeriod')().values())
+        return StateValue(*getattr(self, 'GetTimeAttackSynchStartPeriod')(*data).values())
 
-    def setLapsTimeLimit(self, *data) -> bool:
+    def set_laps_time_limit(self, *data) -> bool:
         """Set a new time limit for laps mode. Only available to Admin. Requires a challenge restart to be taken
         into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetLapsTimeLimit')(*data))
-        return bool(getattr(self, 'SetLapsTimeLimit')())
+        return bool(getattr(self, 'SetLapsTimeLimit')(*data))
 
-    def getLapsTimeLimit(self, *data) -> StateValue:
+    def get_laps_time_limit(self, *data) -> StateValue:
         """Get the current and next time limit for laps mode. The struct returned contains two fields CurrentValue
         and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetLapsTimeLimit')(*data).values())
-        return StateValue(*getattr(self, 'GetLapsTimeLimit')().values())
+        return StateValue(*getattr(self, 'GetLapsTimeLimit')(*data).values())
 
-    def setNbLaps(self, *data) -> bool:
+    def set_nb_laps(self, *data) -> bool:
         """Set a new number of laps for laps mode. Only available to Admin. Requires a challenge restart to be
         taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetNbLaps')(*data))
-        return bool(getattr(self, 'SetNbLaps')())
+        return bool(getattr(self, 'SetNbLaps')(*data))
 
-    def getNbLaps(self, *data) -> StateValue:
+    def get_nb_laps(self, *data) -> StateValue:
         """Get the current and next number of laps for laps mode. The struct returned contains two fields
         CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetNbLaps')(*data).values())
-        return StateValue(*getattr(self, 'GetNbLaps')().values())
+        return StateValue(*getattr(self, 'GetNbLaps')(*data).values())
 
-    def setRoundForcedLaps(self, *data) -> bool:
+    def set_round_forced_laps(self, *data) -> bool:
         """Set a new number of laps for rounds mode (0 = default, use the number of laps from the challenges,
         otherwise forces the number of rounds for multilaps challenges). Only available to Admin. Requires a
         challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetRoundForcedLaps')(*data))
-        return bool(getattr(self, 'SetRoundForcedLaps')())
+        return bool(getattr(self, 'SetRoundForcedLaps')(*data))
 
-    def getRoundForcedLaps(self, *data) -> StateValue:
+    def get_round_forced_laps(self, *data) -> StateValue:
         """Get the current and next number of laps for rounds mode. The struct returned contains two fields
         CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetRoundForcedLaps')(*data).values())
-        return StateValue(*getattr(self, 'GetRoundForcedLaps')().values())
+        return StateValue(*getattr(self, 'GetRoundForcedLaps')(*data).values())
 
-    def setRoundPointsLimit(self, *data) -> bool:
+    def set_round_points_limit(self, *data) -> bool:
         """Set a new points limit for rounds mode (value set depends on UseNewRulesRound). Only available to Admin.
         Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetRoundPointsLimit')(*data))
-        return bool(getattr(self, 'SetRoundPointsLimit')())
+        return bool(getattr(self, 'SetRoundPointsLimit')(*data))
 
-    def getRoundPointsLimit(self, *data) -> StateValue:
+    def get_round_points_limit(self, *data) -> StateValue:
         """Get the current and next points limit for rounds mode (values returned depend on UseNewRulesRound).
         The struct returned contains two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetRoundPointsLimit')(*data).values())
-        return StateValue(*getattr(self, 'GetRoundPointsLimit')().values())
+        return StateValue(*getattr(self, 'GetRoundPointsLimit')(*data).values())
 
-    def setRoundCustomPoints(self, *data) -> bool:
+    def set_round_custom_points(self, *data) -> bool:
         """Set the points used for the scores in rounds mode. Points is an array of decreasing integers for the
         players from the first to last. And you can add an optional boolean to relax the constraint checking
         on the scores. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetRoundCustomPoints')(*data))
-        return bool(getattr(self, 'SetRoundCustomPoints')())
+        return bool(getattr(self, 'SetRoundCustomPoints')(*data))
 
-    def getRoundCustomPoints(self, *data) -> RoundCustomPointsList:
+    def get_round_custom_points(self, *data) -> RoundCustomPointsList:
         """Gets the points used for the scores in rounds mode."""
-        if len(data) > 0:
-            return [RoundCustomPoints(*result.values()) for result in getattr(self, 'GetRoundCustomPoints')(*data)]
-        return [RoundCustomPoints(*result.values()) for result in getattr(self, 'GetRoundCustomPoints')()]
+        return [RoundCustomPoints(*result.values()) for result in getattr(self, 'GetRoundCustomPoints')(*data)]
 
-    def setUseNewRulesRound(self, *data) -> bool:
+    def set_use_new_rules_round(self, *data) -> bool:
         """Set if new rules are used for rounds mode. Only available to Admin. Requires a challenge restart to be
         taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetUseNewRulesRound')(*data))
-        return bool(getattr(self, 'SetUseNewRulesRound')())
+        return bool(getattr(self, 'SetUseNewRulesRound')(*data))
 
-    def getUseNewRulesRound(self, *data) -> StateValue:
+    def get_use_new_rules_round(self, *data) -> StateValue:
         """Get if the new rules are used for rounds mode (Current and next values). The struct returned contains
         two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetUseNewRulesRound')(*data).values())
-        return StateValue(*getattr(self, 'GetUseNewRulesRound')().values())
+        return StateValue(*getattr(self, 'GetUseNewRulesRound')(*data).values())
 
-    def setTeamPointsLimit(self, *data) -> bool:
+    def set_team_points_limit(self, *data) -> bool:
         """Set a new points limit for team mode (value set depends on UseNewRulesTeam). Only available to Admin.
         Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetTeamPointsLimit')(*data))
-        return bool(getattr(self, 'SetTeamPointsLimit')())
+        return bool(getattr(self, 'SetTeamPointsLimit')(*data))
 
-    def getTeamPointsLimit(self, *data) -> StateValue:
+    def get_team_points_limit(self, *data) -> StateValue:
         """Get the current and next points limit for team mode (values returned depend on UseNewRulesTeam).
         The struct returned contains two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetTeamPointsLimit')(*data).values())
-        return StateValue(*getattr(self, 'GetTeamPointsLimit')().values())
+        return StateValue(*getattr(self, 'GetTeamPointsLimit')(*data).values())
 
-    def setMaxPointsTeam(self, *data) -> bool:
+    def set_max_points_team(self, *data) -> bool:
         """Set a new number of maximum points per round for team mode. Only available to Admin. Requires a
         challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetMaxPointsTeam')(*data))
-        return bool(getattr(self, 'SetMaxPointsTeam')())
+        return bool(getattr(self, 'SetMaxPointsTeam')(*data))
 
-    def getMaxPointsTeam(self, *data) -> StateValue:
+    def get_max_points_team(self, *data) -> StateValue:
         """Get the current and next number of maximum points per round for team mode. The struct returned contains
         two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetMaxPointsTeam')(*data).values())
-        return StateValue(*getattr(self, 'GetMaxPointsTeam')().values())
+        return StateValue(*getattr(self, 'GetMaxPointsTeam')(*data).values())
 
-    def setUseNewRulesTeam(self, *data) -> bool:
+    def set_use_new_rules_team(self, *data) -> bool:
         """Set if new rules are used for team mode. Only available to Admin. Requires a challenge restart to be
         taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetUseNewRulesTeam')(*data))
-        return bool(getattr(self, 'SetUseNewRulesTeam')())
+        return bool(getattr(self, 'SetUseNewRulesTeam')(*data))
 
-    def getUseNewRulesTeam(self, *data) -> StateValue:
+    def get_use_new_rules_team(self, *data) -> StateValue:
         """Get if the new rules are used for team mode (Current and next values). The struct returned contains
         two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetUseNewRulesTeam')(*data).values())
-        return StateValue(*getattr(self, 'GetUseNewRulesTeam')().values())
+        return StateValue(*getattr(self, 'GetUseNewRulesTeam')(*data).values())
 
-    def setCupPointsLimit(self, *data) -> bool:
+    def set_cup_points_limit(self, *data) -> bool:
         """Set the points needed for victory in Cup mode. Only available to Admin. Requires a challenge restart
         to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetCupPointsLimit')(*data))
-        return bool(getattr(self, 'SetCupPointsLimit')())
+        return bool(getattr(self, 'SetCupPointsLimit')(*data))
 
-    def getCupPointsLimit(self, *data) -> StateValue:
+    def get_cup_points_limit(self, *data) -> StateValue:
         """Get the points needed for victory in Cup mode. The struct returned contains two fields CurrentValue
         and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetCupPointsLimit')(*data).values())
-        return StateValue(*getattr(self, 'GetCupPointsLimit')().values())
+        return StateValue(*getattr(self, 'GetCupPointsLimit')(*data).values())
 
-    def setCupRoundsPerChallenge(self, *data) -> bool:
+    def set_cup_rounds_per_challenge(self, *data) -> bool:
         """Sets the number of rounds before going to next challenge in Cup mode. Only available to Admin.
         Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetCupRoundsPerChallenge')(*data))
-        return bool(getattr(self, 'SetCupRoundsPerChallenge')())
+        return bool(getattr(self, 'SetCupRoundsPerChallenge')(*data))
 
-    def getCupRoundsPerChallenge(self, *data) -> StateValue:
+    def get_cup_rounds_per_challenge(self, *data) -> StateValue:
         """Get the number of rounds before going to next challenge in Cup mode. The struct returned contains
         two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetCupRoundsPerChallenge')(*data).values())
-        return StateValue(*getattr(self, 'GetCupRoundsPerChallenge')().values())
+        return StateValue(*getattr(self, 'GetCupRoundsPerChallenge')(*data).values())
 
-    def setCupWarmUpDuration(self, *data) -> bool:
+    def set_cup_warm_up_duration(self, *data) -> bool:
         """Set whether to enable the automatic warm-up phase in Cup mode. 0 = no, otherwise it's the duration of
         the phase, expressed in number of rounds. Only available to Admin. Requires a challenge restart to be
         taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetCupWarmUpDuration')(*data))
-        return bool(getattr(self, 'SetCupWarmUpDuration')())
+        return bool(getattr(self, 'SetCupWarmUpDuration')(*data))
 
-    def getCupWarmUpDuration(self, *data) -> StateValue:
+    def get_cup_warm_up_duration(self, *data) -> StateValue:
         """Get whether the automatic warm-up phase is enabled in Cup mode. The struct returned contains two fields
         CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetCupWarmUpDuration')(*data).values())
-        return StateValue(*getattr(self, 'GetCupWarmUpDuration')().values())
+        return StateValue(*getattr(self, 'GetCupWarmUpDuration')(*data).values())
 
-    def setCupNbWinners(self, *data) -> bool:
+    def set_cup_nb_winners(self, *data) -> bool:
         """Set the number of winners to determine before the match is considered over. Only available to Admin.
         Requires a challenge restart to be taken into account."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetCupNbWinners')(*data))
-        return bool(getattr(self, 'SetCupNbWinners')())
+        return bool(getattr(self, 'SetCupNbWinners')(*data))
 
-    def getCupNbWinners(self, *data) -> StateValue:
+    def get_cup_nb_winners(self, *data) -> StateValue:
         """Get the number of winners to determine before the match is considered over. The struct returned contains
         two fields CurrentValue and NextValue."""
-        if len(data) > 0:
-            return StateValue(*getattr(self, 'GetCupNbWinners')(*data).values())
-        return StateValue(*getattr(self, 'GetCupNbWinners')().values())
+        return StateValue(*getattr(self, 'GetCupNbWinners')(*data).values())
 
-    def getCurrentChallengeIndex(self, *data) -> int:
+    def get_current_challenge_index(self, *data) -> int:
         """Returns the current challenge index in the selection, or -1 if the challenge is no longer in the
         selection."""
-        if len(data) > 0:
-            return int(getattr(self, 'GetCurrentChallengeIndex')(*data))
-        return int(getattr(self, 'GetCurrentChallengeIndex')())
+        return int(getattr(self, 'GetCurrentChallengeIndex')(*data))
 
-    def getNextChallengeIndex(self, *data) -> int:
+    def get_next_challenge_index(self, *data) -> int:
         """Returns the challenge index in the selection that will be played next (unless the current one is
         restarted...)"""
-        if len(data) > 0:
-            return int(getattr(self, 'GetNextChallengeIndex')(*data))
-        return int(getattr(self, 'GetNextChallengeIndex')())
+        return int(getattr(self, 'GetNextChallengeIndex')(*data))
 
-    def setNextChallengeIndex(self, *data) -> bool:
+    def set_next_challenge_index(self, *data) -> bool:
         """Sets the challenge index in the selection that will be played next (unless the current one is
         restarted...)"""
-        if len(data) > 0:
-            return bool(getattr(self, 'SetNextChallengeIndex')(*data))
-        return bool(getattr(self, 'SetNextChallengeIndex')())
+        return bool(getattr(self, 'SetNextChallengeIndex')(*data))
 
-    def getCurrentChallengeInfo(self, *data) -> ChallengeInfo:
+    def get_current_challenge_info(self, *data) -> ChallengeInfo:
         """Returns a struct containing the infos for the current challenge. The struct contains the following
         fields : Name, UId, FileName, Author, Environnement, Mood, BronzeTime, SilverTime, GoldTime, AuthorTime,
         CopperPrice, LapRace, NbLaps and NbCheckpoints."""
-        if len(data) > 0:
-            return ChallengeInfo(*getattr(self, 'GetCurrentChallengeInfo')(*data).values())
-        return ChallengeInfo(*getattr(self, 'GetCurrentChallengeInfo')().values())
+        return ChallengeInfo(*getattr(self, 'GetCurrentChallengeInfo')(*data).values())
 
-    def getNextChallengeInfo(self, *data) -> ChallengeInfo:
+    def get_next_challenge_info(self, *data) -> ChallengeInfo:
         """Returns a struct containing the infos for the next challenge. The struct contains the following fields:
         Name, UId, FileName, Author, Environnement, Mood, BronzeTime, SilverTime, GoldTime, AuthorTime, CopperPrice
         and LapRace. (NbLaps and NbCheckpoints are also present but always set to -1)"""
-        if len(data) > 0:
-            return ChallengeInfo(*getattr(self, 'GetNextChallengeInfo')(*data).values())
-        return ChallengeInfo(*getattr(self, 'GetNextChallengeInfo')().values())
+        return ChallengeInfo(*getattr(self, 'GetNextChallengeInfo')(*data).values())
 
-    def getChallengeInfo(self, *data) -> ChallengeInfo:
+    def get_challenge_info(self, filename: str) -> ChallengeInfo:
         """Returns a struct containing the infos for the challenge with the specified filename. The struct contains
         the following fields : Name, UId, FileName, Author, Environnement, Mood, BronzeTime, SilverTime, GoldTime,
         AuthorTime, CopperPrice and LapRace. (NbLaps and NbCheckpoints are also present but always set to -1)"""
-        if len(data) > 0:
-            return ChallengeInfo(*getattr(self, 'GetChallengeInfo')(*data).values())
-        return ChallengeInfo(*getattr(self, 'GetChallengeInfo')().values())
+        return ChallengeInfo(*getattr(self, 'GetChallengeInfo')(filename).values())
 
-    def checkChallengeForCurrentServerParams(self, *data) -> bool:
+    def check_challenge_for_current_server_params(self, *data) -> bool:
         """Returns a boolean if the challenge with the specified filename matches the current server settings."""
-        if len(data) > 0:
-            return bool(getattr(self, 'CheckChallengeForCurrentServerParams')(*data))
-        return bool(getattr(self, 'CheckChallengeForCurrentServerParams')())
+        return bool(getattr(self, 'CheckChallengeForCurrentServerParams')(*data))
 
-    def getChallengeList(self, *data) -> ChallengeList:
+    def get_challenge_list(self, max_number_of_infos: int, starting_index: int) -> ChallengeList:
         """Returns a list of challenges among the current selection of the server. This method take two parameters.
         The first parameter specifies the maximum number of infos to be returned, and the second one the starting
         index in the selection. The list is an array of structures. Each structure contains the following fields :
         Name, UId, FileName, Environnement, Author, GoldTime and CopperPrice."""
-        if len(data) > 0:
-            return [Challenge(*result.values()) for result in getattr(self, 'GetChallengeList')(*data)]
-        return [Challenge(*result.values()) for result in getattr(self, 'GetChallengeList')()]
+        return [Challenge(*result.values()) for result in getattr(self, 'GetChallengeList')(max_number_of_infos, starting_index)]
 
-    def addChallenge(self, *data) -> bool:
+    def add_challenge(self, *data) -> bool:
         """Add the challenge with the specified filename at the end of the current selection.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'AddChallenge')(*data))
-        return bool(getattr(self, 'AddChallenge')())
+        return bool(getattr(self, 'AddChallenge')(*data))
 
-    def addChallengeList(self, *data) -> int:
+    def add_challenge_list(self, *data) -> int:
         """Add the list of challenges with the specified filenames at the end of the current selection.
         The list of challenges to add is an array of strings. Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'AddChallengeList')(*data))
-        return int(getattr(self, 'AddChallengeList')())
+        return int(getattr(self, 'AddChallengeList')(*data))
 
-    def removeChallenge(self, *data) -> bool:
+    def remove_challenge(self, *data) -> bool:
         """Remove the challenge with the specified filename from the current selection. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'RemoveChallenge')(*data))
-        return bool(getattr(self, 'RemoveChallenge')())
+        return bool(getattr(self, 'RemoveChallenge')(*data))
 
-    def removeChallengeList(self, *data) -> int:
+    def remove_challenge_list(self, *data) -> int:
         """Remove the list of challenges with the specified filenames from the current selection.
         The list of challenges to remove is an array of strings. Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'RemoveChallengeList')(*data))
-        return int(getattr(self, 'RemoveChallengeList')())
+        return int(getattr(self, 'RemoveChallengeList')(*data))
 
-    def insertChallenge(self, *data) -> bool:
+    def insert_challenge(self, *data) -> bool:
         """Insert the challenge with the specified filename after the current challenge. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'InsertChallenge')(*data))
-        return bool(getattr(self, 'InsertChallenge')())
+        return bool(getattr(self, 'InsertChallenge')(*data))
 
-    def insertChallengeList(self, *data) -> int:
+    def insert_challenge_list(self, *data) -> int:
         """Insert the list of challenges with the specified filenames after the current challenge.
         The list of challenges to insert is an array of strings. Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'InsertChallengeList')(*data))
-        return int(getattr(self, 'InsertChallengeList')())
+        return int(getattr(self, 'InsertChallengeList')(*data))
 
-    def chooseNextChallenge(self, *data) -> bool:
+    def choose_next_challenge(self, *data) -> bool:
         """Set as next challenge the one with the specified filename, if it is present in the selection.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ChooseNextChallenge')(*data))
-        return bool(getattr(self, 'ChooseNextChallenge')())
+        return bool(getattr(self, 'ChooseNextChallenge')(*data))
 
-    def chooseNextChallengeList(self, *data) -> int:
+    def choose_next_challenge_list(self, *data) -> int:
         """Set as next challenges the list of challenges with the specified filenames,
         if they are present in the selection. The list of challenges to choose is an array of strings.
         Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'ChooseNextChallengeList')(*data))
-        return int(getattr(self, 'ChooseNextChallengeList')())
+        return int(getattr(self, 'ChooseNextChallengeList')(*data))
 
-    def loadMatchSettings(self, *data) -> int:
+    def load_match_settings(self, *data) -> int:
         """Set a list of challenges defined in the playlist with the specified filename as the current selection
         of the server, and load the gameinfos from the same file. Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'LoadMatchSettings')(*data))
-        return int(getattr(self, 'LoadMatchSettings')())
+        return int(getattr(self, 'LoadMatchSettings')(*data))
 
-    def appendPlaylistFromMatchSettings(self, *data) -> int:
+    def append_playlist_from_match_settings(self, *data) -> int:
         """Add a list of challenges defined in the playlist with the specified filename at the end of the current
         selection. Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'AppendPlaylistFromMatchSettings')(*data))
-        return int(getattr(self, 'AppendPlaylistFromMatchSettings')())
+        return int(getattr(self, 'AppendPlaylistFromMatchSettings')(*data))
 
-    def saveMatchSettings(self, *data) -> int:
+    def save_match_settings(self, *data) -> int:
         """Save the current selection of challenge in the playlist with the specified filename,
         as well as the current gameinfos. Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'SaveMatchSettings')(*data))
-        return int(getattr(self, 'SaveMatchSettings')())
+        return int(getattr(self, 'SaveMatchSettings')(*data))
 
-    def insertPlaylistFromMatchSettings(self, *data) -> int:
+    def insert_playlist_from_match_settings(self, *data) -> int:
         """Insert a list of challenges defined in the playlist with the specified filename after the current challenge.
         Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'InsertPlaylistFromMatchSettings')(*data))
-        return int(getattr(self, 'InsertPlaylistFromMatchSettings')())
+        return int(getattr(self, 'InsertPlaylistFromMatchSettings')(*data))
 
-    def getPlayerInfo(self, *data) -> PlayerInfo:
+    def get_player_info(self, *data) -> PlayerInfo:
         """
         Returns a struct containing the infos on the player with the specified login, with an optional parameter for
         compatibility: struct version (0 = united, 1 = forever). The structure is identical to the ones from
@@ -1573,11 +1172,9 @@ class BaseClient(object):
         SpectatorStatus = Spectator + TemporarySpectator * 10 + PureSpectator * 100 + AutoTarget * 1000 +
         CurrentTargetId * 10000
         """
-        if len(data) > 0:
-            return PlayerInfo(*getattr(self, 'GetPlayerInfo')(*data).values())
-        return PlayerInfo(*getattr(self, 'GetPlayerInfo')().values())
+        return PlayerInfo(*getattr(self, 'GetPlayerInfo')(*data).values())
 
-    def getDetailedPlayerInfo(self, *data) -> DetailedPlayerInfo:
+    def get_detailed_player_info(self, *data) -> DetailedPlayerInfo:
         """Returns a struct containing the infos on the player with the specified login.
         The structure contains the following fields : Login, NickName, PlayerId, TeamId, IPAddress,
         DownloadRate, UploadRate, Language, IsSpectator, IsInOfficialMode, a structure named Avatar,
@@ -1585,11 +1182,9 @@ class BaseClient(object):
         and OnlineRights (0: nations account, 3: united account). Each structure of the array Skins contains
         two fields Environnement and a struct PackDesc. Each structure PackDesc, as well as the struct Avatar,
         contains two fields FileName and Checksum."""
-        if len(data) > 0:
-            return DetailedPlayerInfo(*getattr(self, 'GetDetailedPlayerInfo')(*data).values())
-        return DetailedPlayerInfo(*getattr(self, 'GetDetailedPlayerInfo')().values())
+        return DetailedPlayerInfo(*getattr(self, 'GetDetailedPlayerInfo')(*data).values())
 
-    def getPlayerList(self, *data) -> PlayerInfoList:
+    def get_player_list(self, *data) -> PlayerInfoList:
         """
         Returns the list of players on the server. This method take two parameters.
         The first parameter specifies the maximum number of infos to be returned, and the second one the starting
@@ -1603,11 +1198,9 @@ class BaseClient(object):
         SpectatorStatus = Spectator + TemporarySpectator * 10 + PureSpectator * 100 + AutoTarget * 1000 +
         CurrentTargetId * 10000
         """
-        if len(data) > 0:
-            return [PlayerInfo(*result.values()) for result in getattr(self, 'GetPlayerList')(*data)]
-        return [PlayerInfo(*result.values()) for result in getattr(self, 'GetPlayerList')()]
+        return [PlayerInfo(*result.values()) for result in getattr(self, 'GetPlayerList')(*data)]
 
-    def getMainServerPlayerInfo(self, *data) -> PlayerInfo:
+    def get_main_server_player_info(self, *data) -> PlayerInfo:
         """
         Returns a struct containing the player infos of the game server (ie: in case of a basic server, itself;
         in case of a relay server, the main server),
@@ -1620,181 +1213,131 @@ class BaseClient(object):
         SpectatorStatus = Spectator + TemporarySpectator * 10 + PureSpectator * 100 + AutoTarget * 1000 +
         CurrentTargetId * 10000
         """
-        if len(data) > 0:
-            return PlayerInfo(*getattr(self, 'GetMainServerPlayerInfo')(*data).values())
-        return PlayerInfo(*getattr(self, 'GetMainServerPlayerInfo')().values())
+        return PlayerInfo(*getattr(self, 'GetMainServerPlayerInfo')(*data).values())
 
-    def getCurrentRanking(self, *data) -> RankingList:
+    def get_current_ranking(self, *data) -> RankingList:
         """Returns the current rankings for the race in progress. (in team mode, the scores for the two
         teams are returned. In other modes, it's the individual players' scores) This method take two parameters.
         The first parameter specifies the maximum number of infos to be returned, and the second one the starting
         index in the ranking. The ranking returned is a list of structures. Each structure contains the following
         fields : Login, NickName, PlayerId, Rank, BestTime, Score, NbrLapsFinished and LadderScore.
         It also contains an array BestCheckpoints that contains the checkpoint times for the best race."""
-        if len(data) > 0:
-            return [RankingItem(*result.values()) for result in getattr(self, 'GetCurrentRanking')(*data)]
-        return [RankingItem(*result.values()) for result in getattr(self, 'GetCurrentRanking')()]
+        return [RankingItem(*result.values()) for result in getattr(self, 'GetCurrentRanking')(*data)]
 
-    def getCurrentRankingForLogin(self, *data) -> RankingList:
+    def get_current_ranking_for_login(self, *data) -> RankingList:
         """Returns the current ranking for the race in progressof the player with the specified login
         (or list of comma-separated logins). The ranking returned is a list of structures, that contains the
         following fields : Login, NickName, PlayerId, Rank, BestTime, Score, NbrLapsFinished and LadderScore.
         It also contains an array BestCheckpoints that contains the checkpoint times for the best race."""
-        if len(data) > 0:
-            return [RankingItem(*result.values()) for result in getattr(self, 'GetCurrentRankingForLogin')(*data)]
-        return [RankingItem(*result.values()) for result in getattr(self, 'GetCurrentRankingForLogin')()]
+        return [RankingItem(*result.values()) for result in getattr(self, 'GetCurrentRankingForLogin')(*data)]
 
-    def forceScores(self, *data) -> bool:
+    def force_scores(self, *data) -> bool:
         """Force the scores of the current game. Only available in rounds and team mode. You have to pass an
         array of structs {int PlayerId, int Score}. And a boolean SilentMode - if true, the scores are silently
         updated (only available for SuperAdmin), allowing an external controller to do its custom counting...
         Only available to Admin/SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ForceScores')(*data))
-        return bool(getattr(self, 'ForceScores')())
+        return bool(getattr(self, 'ForceScores')(*data))
 
-    def forcePlayerTeam(self, *data) -> bool:
+    def force_player_team(self, *data) -> bool:
         """Force the team of the player. Only available in team mode. You have to pass the login and the
         team number (0 or 1). Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ForcePlayerTeam')(*data))
-        return bool(getattr(self, 'ForcePlayerTeam')())
+        return bool(getattr(self, 'ForcePlayerTeam')(*data))
 
-    def forcePlayerTeamId(self, *data) -> bool:
+    def force_player_team_id(self, *data) -> bool:
         """Force the team of the player. Only available in team mode. You have to pass the playerid and the
         team number (0 or 1). Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ForcePlayerTeamId')(*data))
-        return bool(getattr(self, 'ForcePlayerTeamId')())
+        return bool(getattr(self, 'ForcePlayerTeamId')(*data))
 
-    def forceSpectator(self, *data) -> bool:
+    def force_spectator(self, *data) -> bool:
         """Force the spectating status of the player. You have to pass the login and the spectator mode
         (0: user selectable, 1: spectator, 2: player). Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ForceSpectator')(*data))
-        return bool(getattr(self, 'ForceSpectator')())
+        return bool(getattr(self, 'ForceSpectator')(*data))
 
-    def forceSpectatorId(self, *data) -> bool:
+    def force_spectator_id(self, *data) -> bool:
         """Force the spectating status of the player. You have to pass the playerid and the spectator mode
         (0: user selectable, 1: spectator, 2: player). Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ForceSpectatorId')(*data))
-        return bool(getattr(self, 'ForceSpectatorId')())
+        return bool(getattr(self, 'ForceSpectatorId')(*data))
 
-    def forceSpectatorTarget(self, *data) -> bool:
+    def force_spectator_target(self, *data) -> bool:
         """Force spectators to look at a specific player. You have to pass the login of the spectator
         (or '' for all) and the login of the target (or '' for automatic), and an integer for the camera type to use
         (-1 = leave unchanged, 0 = replay, 1 = follow, 2 = free). Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ForceSpectatorTarget')(*data))
-        return bool(getattr(self, 'ForceSpectatorTarget')())
+        return bool(getattr(self, 'ForceSpectatorTarget')(*data))
 
-    def forceSpectatorTargetId(self, *data) -> bool:
+    def force_spectator_target_id(self, *data) -> bool:
         """Force spectators to look at a specific player. You have to pass the id of the spectator (or -1 for all)
         and the id of the target (or -1 for automatic), and an integer for the camera type to use
         (-1 = leave unchanged, 0 = replay, 1 = follow, 2 = free). Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ForceSpectatorTargetId')(*data))
-        return bool(getattr(self, 'ForceSpectatorTargetId')())
+        return bool(getattr(self, 'ForceSpectatorTargetId')(*data))
 
-    def spectatorReleasePlayerSlot(self, *data) -> bool:
+    def spectator_release_player_slot(self, *data) -> bool:
         """Pass the login of the spectator. A spectator that once was a player keeps his player slot,
         so that he can go back to race mode. Calling this function frees this slot for another player to connect.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SpectatorReleasePlayerSlot')(*data))
-        return bool(getattr(self, 'SpectatorReleasePlayerSlot')())
+        return bool(getattr(self, 'SpectatorReleasePlayerSlot')(*data))
 
-    def spectatorReleasePlayerSlotId(self, *data) -> bool:
+    def spectator_release_player_slot_id(self, *data) -> bool:
         """Pass the playerid of the spectator. A spectator that once was a player keeps his player slot,
         so that he can go back to race mode. Calling this function frees this slot for another player to connect.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'SpectatorReleasePlayerSlotId')(*data))
-        return bool(getattr(self, 'SpectatorReleasePlayerSlotId')())
+        return bool(getattr(self, 'SpectatorReleasePlayerSlotId')(*data))
 
-    def manualFlowControlEnable(self, *data) -> bool:
+    def manual_flow_control_enable(self, *data) -> bool:
         """Enable control of the game flow: the game will wait for the caller to validate state transitions.
         Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ManualFlowControlEnable')(*data))
-        return bool(getattr(self, 'ManualFlowControlEnable')())
+        return bool(getattr(self, 'ManualFlowControlEnable')(*data))
 
-    def manualFlowControlProceed(self, *data) -> bool:
+    def manual_flow_control_proceed(self, *data) -> bool:
         """Allows the game to proceed. Only available to Admin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'ManualFlowControlProceed')(*data))
-        return bool(getattr(self, 'ManualFlowControlProceed')())
+        return bool(getattr(self, 'ManualFlowControlProceed')(*data))
 
-    def manualFlowControlIsEnabled(self, *data) -> int:
+    def manual_flow_control_is_enabled(self, *data) -> int:
         """Returns whether the manual control of the game flow is enabled. 0 = no, 1 = yes by the xml-rpc
         client making the call, 2 = yes, by some other xml-rpc client. Only available to Admin."""
-        if len(data) > 0:
-            return int(getattr(self, 'ManualFlowControlIsEnabled')(*data))
-        return int(getattr(self, 'ManualFlowControlIsEnabled')())
+        return int(getattr(self, 'ManualFlowControlIsEnabled')(*data))
 
-    def manualFlowControlGetCurTransition(self, *data) -> str:
+    def manual_flow_control_get_cur_transition(self, *data) -> str:
         """Returns the transition that is currently blocked, or '' if none.
         (That's exactly the value last received by the callback.) Only available to Admin."""
-        if len(data) > 0:
-            return str(getattr(self, 'ManualFlowControlGetCurTransition')(*data))
-        return str(getattr(self, 'ManualFlowControlGetCurTransition')())
+        return str(getattr(self, 'ManualFlowControlGetCurTransition')(*data))
 
-    def checkEndMatchCondition(self, *data) -> str:
+    def check_end_match_condition(self, *data) -> str:
         """Returns the current match ending condition. Return values are: 'Playing', 'ChangeMap' or 'Finished'."""
-        if len(data) > 0:
-            return str(getattr(self, 'CheckEndMatchCondition')(*data))
-        return str(getattr(self, 'CheckEndMatchCondition')())
+        return str(getattr(self, 'CheckEndMatchCondition')(*data))
 
-    def getNetworkStats(self, *data) -> NetworkStats:
+    def get_network_stats(self, *data) -> NetworkStats:
         """Returns a struct containing the networks stats of the server. The structure contains the following fields :
         Uptime, NbrConnection, MeanConnectionTime, MeanNbrPlayer, RecvNetRate, SendNetRate, TotalReceivingSize,
         TotalSendingSize and an array of structures named PlayerNetInfos. Each structure of the array PlayerNetInfos
         contains the following fields : Login, IPAddress, LastTransferTime, DeltaBetweenTwoLastNetState,
         PacketLossRate. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return NetworkStats(*getattr(self, 'GetNetworkStats')(*data).values())
-        return NetworkStats(*getattr(self, 'GetNetworkStats')().values())
+        return NetworkStats(*getattr(self, 'GetNetworkStats')(*data).values())
 
-    def startServerLan(self, *data) -> bool:
+    def start_server_lan(self, *data) -> bool:
         """Start a server on lan, using the current configuration. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'StartServerLan')(*data))
-        return bool(getattr(self, 'StartServerLan')())
+        return bool(getattr(self, 'StartServerLan')(*data))
 
-    def startServerInternet(self, *data) -> bool:
+    def start_server_internet(self, *data) -> bool:
         """Start a server on internet using the 'Login' and 'Password' specified in the struct passed as parameters.
         Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'StartServerInternet')(*data))
-        return bool(getattr(self, 'StartServerInternet')())
+        return bool(getattr(self, 'StartServerInternet')(*data))
 
-    def getStatus(self, *data) -> Status:
+    def get_status(self, *data) -> Status:
         """Returns the current status of the server."""
-        if len(data) > 0:
-            return Status(*getattr(self, 'GetStatus')(*data).values())
-        return Status(*getattr(self, 'GetStatus')().values())
+        return Status(*getattr(self, 'GetStatus')(*data).values())
 
-    def quitGame(self, *data) -> bool:
+    def quit_game(self, *data) -> bool:
         """Quit the application. Only available to SuperAdmin."""
-        if len(data) > 0:
-            return bool(getattr(self, 'QuitGame')(*data))
-        return bool(getattr(self, 'QuitGame')())
+        return bool(getattr(self, 'QuitGame')(*data))
 
-    def gameDataDirectory(self, *data) -> str:
+    def game_data_directory(self, *data) -> str:
         """Returns the path of the game datas directory. Only available to Admin."""
-        if len(data) > 0:
-            return str(getattr(self, 'GameDataDirectory')(*data))
-        return str(getattr(self, 'GameDataDirectory')())
+        return str(getattr(self, 'GameDataDirectory')(*data))
 
-    def getTracksDirectory(self, *data) -> str:
+    def get_tracks_directory(self, *data) -> str:
         """Returns the path of the tracks directory. Only available to Admin."""
-        if len(data) > 0:
-            return str(getattr(self, 'GetTracksDirectory')(*data))
-        return str(getattr(self, 'GetTracksDirectory')())
+        return str(getattr(self, 'GetTracksDirectory')(*data))
 
-    def getSkinsDirectory(self, *data) -> str:
+    def get_skins_directory(self, *data) -> str:
         """Returns the path of the skins directory. Only available to Admin."""
-        if len(data) > 0:
-            return str(getattr(self, 'GetSkinsDirectory')(*data))
-        return str(getattr(self, 'GetSkinsDirectory')())
+        return str(getattr(self, 'GetSkinsDirectory')(*data))
