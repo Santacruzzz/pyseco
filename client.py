@@ -16,6 +16,7 @@ class Client(BaseClient):
         self.logger = Logger('Pyseco', logging_mode)
         self.__listeners = listeners
         self._events = []
+        self.debug_data = None
 
     def _read_init_resp_size(self):
         return unpack('<L', self.sock.recv(4))[0]
@@ -95,7 +96,7 @@ class Client(BaseClient):
                     getattr(listener, event.event_name)()
 
     def serverMessage(self, msg):
-        self.noresponse.ChatSendServerMessage('$f90~ $888{}'.format(msg))
+        self.noresponse.ChatSendServerMessage(f'${self.debug_data["color"]}~ $888{msg}')
 
     def __no_response_request(self, methodname, params):
         request = dumps(params, methodname)
@@ -143,6 +144,9 @@ class Client(BaseClient):
             self.logger.error('Connection lost')
             self.request_num -= 1
             raise
+
+    def set_debug_data(self, data):
+        self.debug_data = data
 
     def __enter__(self):
         self.connect()

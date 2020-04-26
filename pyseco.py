@@ -18,6 +18,11 @@ class Pyseco(object):
         self.listeners = []
         self.server = ServerCtx()
         self.client = Client(ip, port, logging_mode, self.listeners)
+        self.debug_data = None
+
+    def set_debug_data(self, data):
+        self.debug_data = data
+        self.client.set_debug_data(data)
 
     def run(self):
         try:
