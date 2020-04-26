@@ -1042,7 +1042,10 @@ class TrackmaniaAPI(object):
         contains two fields FileName and Checksum."""
         return DetailedPlayerInfo(*getattr(self, 'GetDetailedPlayerInfo')(login).values())
 
-    def get_player_list(self, max_number_of_infos: int, starting_index: int, compatibility: int) -> List[PlayerInfo]:
+    def get_player_list(self,
+                        max_number_of_infos: int,
+                        starting_index: int = 0,
+                        compatibility: int = 0) -> List[PlayerInfo]:
         """
         Returns the list of players on the server. This method take two parameters.
         The first parameter specifies the maximum number of infos to be returned, and the second one the starting
