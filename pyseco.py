@@ -30,11 +30,6 @@ class Pyseco(object):
             self.client.authenticate(self.login, self.password)
             self.client.serverMessage('pyseco connected')
             self.client.enableCallbacks(True)
-            for player in self.client.getPlayerList(20, 0):
-                if player.player_id > 0:
-                    for listener in self.listeners:
-                        listener.PlayerConnect(player.login, False)
-
             self.client.loop()
         except KeyboardInterrupt:
             self.client.disconnect()
