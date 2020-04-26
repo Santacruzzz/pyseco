@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 
+# TODO change it to dataclass
 class ServerCtx:
     def __init__(self):
         self.version = None
         self.system_info = None
+        self.max_players = None
         self.detailed_player_info = None
         self.ladder_server_limits = None
         self.playersInfos = {}

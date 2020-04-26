@@ -34,7 +34,8 @@ class Client(TrackmaniaAPI):
         while len(bytes_received) < size:
             bytes_received.extend(self.sock.recv(size - len(bytes_received)))
             if len(bytes_received) < size:
-                self.logger.debug('#### wait for {} bytes'.format(size - len(bytes_received)))
+                bytes_left = size - len(bytes_received)
+                self.logger.debug(f'waiting for next {bytes_left} byte(s)')
         return bytes_received.decode('utf-8')
 
     def _read_any_message(self):
@@ -43,7 +44,7 @@ class Client(TrackmaniaAPI):
     def _read_message(self, wait_for_number):
         while True:
             size, request_number = self._read_message_info()
-            self.logger.debug('<- READ LEN={}, NUM={}'.format(size, request_number))
+            self.logger.debug(f'<- READ LEN={size}, NUM={request_number}')
             msg = self._recv_decoded(size)
 
             if not wait_for_number:
@@ -65,7 +66,7 @@ class Client(TrackmaniaAPI):
         self.sock.connect((self.ip, self.port))
         data_length = self._read_init_resp_size()
         protocol_version = self._recv_decoded(data_length)
-        self.logger.info('Connected, protocol: {}'.format(protocol_version))
+        self.logger.info(f'Connected, protocol used: {protocol_version}')
         if self.get_status().code != 4:
             self.logger.error("Server is not ready yet.")
 
@@ -82,11 +83,10 @@ class Client(TrackmaniaAPI):
             self.logger.debug(f'{event.event_name}: {event.data}')
             if event.event_name and '.' in event.event_name:
                 event.event_name = event.event_name.split('.')[1]
-                self.logger.debug('Event: {}'.format(event))
         except UnicodeDecodeError as ex:
-            self.logger.debug('Parsing xml failed. ({})'.format(str(ex)))
+            self.logger.debug(f'Parsing xml failed. ({str(ex)})')
         except Exception as ex:
-            self.logger.error('Error during handling event. ({})'.format(str(ex)))
+            self.logger.error(f'Error during handling event. ({str(ex)})')
             return
 
         for listener in self.__listeners:
@@ -116,7 +116,7 @@ class Client(TrackmaniaAPI):
         if name == 'noresponse':
             msg.set_send(self.__no_response_request)
         events = len(self._events)
-        self.logger.debug('events queue size = {}'.format(events))
+        self.logger.debug(f'current events queue size = {events}')
         self._handle_buffered_events()
         return msg
 
@@ -131,7 +131,7 @@ class Client(TrackmaniaAPI):
         request = dumps(params, methodname)
         try:
             self.request_num += 1
-            self.logger.debug('-> sending request: {}, num: {}'.format(methodname, self.request_num))
+            self.logger.debug(f'-> sending request: {methodname}, num: {self.request_num}')
             self._send_request(request)
             resp = self._read_message(self.request_num)
             try:
@@ -139,7 +139,7 @@ class Client(TrackmaniaAPI):
             except Fault as ex:
                 self.logger.error(str(ex))
                 response = False
-            self.logger.debug('<- received response: {}'.format(response))
+            self.logger.debug(f'<- received response: {response}')
             return response
 
         except BrokenPipeError:

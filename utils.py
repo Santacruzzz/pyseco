@@ -45,6 +45,9 @@ class Colors(object):
 
 
 class Logger(object):
+    CALLER_FUNCTION_DEPTH = 3
+
+
     def __init__(self, name: str = None, logging_mode: int = 0):
         self._name = name
         self._mode = logging_mode
@@ -62,7 +65,7 @@ class Logger(object):
         self._name = name
 
     def _show(self, tag, msg):
-        trace = get_trace()
+        trace = self._get_trace()
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         try:
             if self._name:
@@ -87,13 +90,13 @@ class Logger(object):
         if self._mode != NONE:
             self._show(Colors.red('ERR'), msg)
 
-
-def get_trace():
-    # TODO sometimes throws an exception out of range blah blah
-    file_name = os.path.basename(inspect.stack()[3][1])
-    line_number = inspect.stack()[3][2]
-    function_name = inspect.stack()[3][3]
-    return f'{file_name}:{line_number}/{function_name}'
+    def _get_trace(self):
+        try:
+            caller_function = inspect.stack()[self.CALLER_FUNCTION_DEPTH]
+            file_name = os.path.basename(caller_function.filename)
+            return f'{file_name}:{caller_function.lineno}/{caller_function.function}'
+        except IndexError:
+            return 'unknown_function'
 
 
 def strip_size(text):
