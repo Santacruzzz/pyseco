@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-from utils import *
+from errors import PlayerNotFound
+from player import Player
+from server_context import ServerCtx
 from client import *
 from listener import Listener
 
@@ -62,7 +63,6 @@ class Pyseco(object):
     def _synchronize_game_infos(self):
         self.server.current_game_info = self.client.getCurrentGameInfo()
         self.server.next_game_info = self.client.getNextGameInfo()
-        self.server.challenge = self.client.getCurrentChallengeInfo()
 
     def __enter__(self):
         return self
@@ -72,9 +72,30 @@ class Pyseco(object):
 
     def _synchronize_players(self):
         for player in self.client.getPlayerList(50, 0):
-            self.server.playersInfos[player.login] = self.client.getDetailedPlayerInfo(player.login)
-            self.server.playersRankings[player.login] = self.client.getCurrentRankingForLogin(player.login)[0]
+            self.add_player(login=player.login)
 
     def _synchronize_challenges(self):
-        self.server.challenge = self.client.getCurrentChallengeInfo()
+        self.server.current_challenge = self.client.getCurrentChallengeInfo()
+        self.logger.info(self.server.current_challenge)
+        self.client.serverMessage(f'Current map is {strip_size(self.server.current_challenge.name)}$z$s$888,'
+                                  f' author: {self.server.current_challenge.author}')
         self.server.next_challenge = self.client.getNextChallengeInfo()
+
+    def add_player(self, login: str, is_spectator: bool = False):
+        if login not in self.server.playersInfos.keys():
+            self.server.playersInfos[login] = self.client.getDetailedPlayerInfo(login)
+        if login not in self.server.playersRankings.keys():
+            self.server.playersRankings[login] = self.client.getCurrentRankingForLogin(login)[0]
+
+    def remove_player(self, login: str):
+        if login in self.server.playersInfos.keys():
+            del self.server.playersInfos[login]
+        if login in self.server.playersRankings.keys():
+            del self.server.playersRankings[login]
+
+    def get_player(self, login):
+        try:
+            return Player(self.server.playersInfos[login], self.server.playersRankings[login])
+        except KeyError:
+            self.logger.error(f'Login "{login}" not found')
+            raise PlayerNotFound(f'Login "{login}" not found')

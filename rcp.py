@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pyseco import Pyseco
-from player_listener import PlayerListener
+from listeners.player_listener import PlayerListener
 import argparse
 
 parser = argparse.ArgumentParser(description='Pyseco. Trackmania Server Control')
@@ -12,7 +12,7 @@ parser.add_argument('-c', '--color', default='f90', type=str, help='Debug color'
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    with Pyseco('SuperAdmin', 'optimus1', '86.106.91.148', 5002, args.varbose) as pyseco:
+    with Pyseco('SuperAdmin', 'optimus1', '86.106.91.148', 5002, args.verbose) as pyseco:
         pyseco.set_debug_data({'color': args.color})
         pyseco.register_listener(PlayerListener('PlrLstnr'))
         pyseco.run()
