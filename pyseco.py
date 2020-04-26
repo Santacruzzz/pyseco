@@ -29,7 +29,7 @@ class Pyseco(object):
             self.client.connect()
             self.client.authenticate(self.login, self.password)
             self.client.serverMessage('pyseco connected')
-            self.client.enableCallbacks(True)
+            self.client.enable_callbacks(True)
             self.client.loop()
         except KeyboardInterrupt:
             self.client.disconnect()
