@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import inspect
@@ -61,13 +62,13 @@ class Logger(object):
         self._name = name
 
     def _show(self, tag, msg):
-        function_name = _get_parent_function_name()
+        trace = get_trace()
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         try:
             if self._name:
-                print(f'{current_time} {tag}/{self._name}/{function_name}: {msg}')
+                print(f'{current_time} {tag}/{self._name}/{trace}: {msg}')
             else:
-                print(f'{current_time} {tag}/{function_name}: {msg}')
+                print(f'{current_time} {tag}/{trace}: {msg}')
         except Exception as ex:
             self.error(str(ex))
 
@@ -87,6 +88,13 @@ class Logger(object):
             self._show(Colors.red('ERR'), msg)
 
 
-def _get_parent_function_name():
+def get_trace():
     # TODO sometimes throws an exception out of range blah blah
-    return inspect.stack()[3][3]
+    file_name = os.path.basename(inspect.stack()[3][1])
+    line_number = inspect.stack()[3][2]
+    function_name = inspect.stack()[3][3]
+    return f'{file_name}:{line_number}/{function_name}'
+
+
+def strip_size(text):
+    return text.replace('$o', '').replace('$w', '')
