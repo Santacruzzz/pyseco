@@ -5,8 +5,10 @@ from struct import unpack, pack
 from utils import *
 from xmlrpc.client import *
 
+from APIs.trackmania_api import TrackmaniaAPI
 
-class Client(BaseClient):
+
+class Client(TrackmaniaAPI):
     def __init__(self, ip, port, logging_mode, listeners):
         super().__init__()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,7 +66,7 @@ class Client(BaseClient):
         data_length = self._read_init_resp_size()
         protocol_version = self._recv_decoded(data_length)
         self.logger.info('Connected, protocol: {}'.format(protocol_version))
-        if self.getStatus().code != 4:
+        if self.get_status().code != 4:
             self.logger.error("Server is not ready yet.")
 
     def loop(self):
