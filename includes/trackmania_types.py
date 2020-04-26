@@ -3,6 +3,8 @@ from dataclasses import dataclass
 
 # TODO add inheritance to types returned by functions which takes compatibility version in parameter (united/nations)
 # TODO DetailedPlayerInfo -> class
+from typing import List
+
 
 @dataclass
 class PlayerScore:
@@ -215,20 +217,42 @@ class ChallengeInfo:
 
 
 @dataclass
+class LadderRanking:
+    path: str
+    score: float
+    ranking: int
+    total_count: int
+
+
+@dataclass
+class LadderStats:
+    last_match_score: float
+    nbr_match_wins: int
+    nbr_match_draws: int
+    nbr_match_losses: int
+    team_name: str
+    player_rankings: List[LadderRanking]
+    TeamRankings: list
+
+
+@dataclass
 class DetailedPlayerInfo:
     login: str
     nickname: str
     player_id: int
     team_id: int
+    path: str
+    language: str
+    client_version: str
     ip_address: str
     download_rate: float
     upload_rate: float
-    language: str
     is_spectator: bool
     is_in_official_mode: bool
+    is_referee: bool
     avatar: Avatar
     skins: Skins
-    ladder_stats: int
+    ladder_stats: LadderStats
     hours_since_zone_inscription: int
     online_rights: int
 

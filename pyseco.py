@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 from errors import PlayerNotFound
 from player import Player
 from server_context import ServerCtx
@@ -32,6 +30,7 @@ class Pyseco(object):
             for player in self.server.playersRankings.values():
                 for listener in self.listeners:
                     if "PlayerConnect" in dir(listener):
+                        # only for test purpose
                         listener.PlayerConnect(player.login, False)
 
             self.client.loop()
@@ -55,14 +54,14 @@ class Pyseco(object):
         self._synchronize_challenges()
 
     def _synchronize_basic_data(self):
-        self.server.version = self.client.getVersion()
-        self.server.system_info = self.client.getSystemInfo()
-        self.server.detailed_player_info = self.client.getDetailedPlayerInfo('edenik')
-        self.server.ladder_server_limits = self.client.getLadderServerLimits()
+        self.server.version = self.client.get_version()
+        self.server.system_info = self.client.get_system_info()
+        self.server.detailed_player_info = self.client.get_detailed_player_info('edenik')
+        self.server.ladder_server_limits = self.client.get_ladder_server_limits()
 
     def _synchronize_game_infos(self):
-        self.server.current_game_info = self.client.getCurrentGameInfo()
-        self.server.next_game_info = self.client.getNextGameInfo()
+        self.server.current_game_info = self.client.get_current_game_info(0)
+        self.server.next_game_info = self.client.get_next_game_info(0)
 
     def __enter__(self):
         return self
@@ -71,21 +70,21 @@ class Pyseco(object):
         self.client.disconnect()
 
     def _synchronize_players(self):
-        for player in self.client.getPlayerList(50, 0):
+        for player in self.client.get_player_list(50, 0, 0):
             self.add_player(login=player.login)
 
     def _synchronize_challenges(self):
-        self.server.current_challenge = self.client.getCurrentChallengeInfo()
+        self.server.current_challenge = self.client.get_current_challenge_info()
         self.logger.info(self.server.current_challenge)
         self.client.serverMessage(f'Current map is {strip_size(self.server.current_challenge.name)}$z$s$888,'
                                   f' author: {self.server.current_challenge.author}')
-        self.server.next_challenge = self.client.getNextChallengeInfo()
+        self.server.next_challenge = self.client.get_next_challenge_info()
 
     def add_player(self, login: str, is_spectator: bool = False):
         if login not in self.server.playersInfos.keys():
-            self.server.playersInfos[login] = self.client.getDetailedPlayerInfo(login)
+            self.server.playersInfos[login] = self.client.get_detailed_player_info(login)
         if login not in self.server.playersRankings.keys():
-            self.server.playersRankings[login] = self.client.getCurrentRankingForLogin(login)[0]
+            self.server.playersRankings[login] = self.client.get_current_ranking_for_login(login)[0]
 
     def remove_player(self, login: str):
         if login in self.server.playersInfos.keys():

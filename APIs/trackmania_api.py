@@ -547,6 +547,7 @@ class TrackmaniaAPI(object):
         requires a challenge restart to be taken into account."""
         return bool(getattr(self, 'SetServerOptions')(server_options))
 
+    # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
     def get_server_options(self, tm_version: int) -> ServerOptions:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever).
         Returns a struct containing the server options: Name, Comment, Password, PasswordForSpectator,
@@ -671,6 +672,7 @@ class TrackmaniaAPI(object):
         CupWarmUpDuration. Only available to Admin. Requires a challenge restart to be taken into account."""
         return bool(getattr(self, 'SetGameInfos')(game_infos))
 
+    # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
     def get_current_game_info(self, tm_version: int) -> GameInfo:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever). Returns a struct containing
         the current game settings, ie: GameMode, ChatTime, NbChallenge, RoundsPointsLimit, RoundsUseNewRules,
@@ -680,6 +682,7 @@ class TrackmaniaAPI(object):
         CupRoundsPerChallenge, CupNbWinners, CupWarmUpDuration."""
         return GameInfo(*getattr(self, 'GetCurrentGameInfo')(tm_version).values())
 
+    # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
     def get_next_game_info(self, tm_version: int) -> GameInfo:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever).
         Returns a struct containing the game settings for the next challenge, ie: GameMode, ChatTime, NbChallenge,
@@ -690,6 +693,7 @@ class TrackmaniaAPI(object):
         CupWarmUpDuration."""
         return GameInfo(*getattr(self, 'GetNextGameInfo')(tm_version).values())
 
+    # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
     def get_game_infos(self, tm_version: int) -> StateValue:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever).
         Returns a struct containing two other structures, the first containing the current game settings and
@@ -1014,6 +1018,7 @@ class TrackmaniaAPI(object):
         Only available to Admin."""
         return int(getattr(self, 'InsertPlaylistFromMatchSettings')(filename))
 
+    # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
     def get_player_info(self, login: str, tm_version: int) -> PlayerInfo:
         """
         Returns a struct containing the infos on the player with the specified login, with an optional parameter for
