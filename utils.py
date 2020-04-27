@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import inspect
@@ -44,6 +45,9 @@ class Colors(object):
 
 
 class Logger(object):
+    CALLER_FUNCTION_DEPTH = 3
+
+
     def __init__(self, name: str = None, logging_mode: int = 0):
         self._name = name
         self._mode = logging_mode
@@ -61,13 +65,13 @@ class Logger(object):
         self._name = name
 
     def _show(self, tag, msg):
-        function_name = _get_parent_function_name()
+        trace = self._get_trace()
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         try:
             if self._name:
-                print(f'{current_time} {tag}/{self._name}/{function_name}: {msg}')
+                print(f'{current_time} {tag}/{self._name}/{trace}: {msg}')
             else:
-                print(f'{current_time} {tag}/{function_name}: {msg}')
+                print(f'{current_time} {tag}/{trace}: {msg}')
         except Exception as ex:
             self.error(str(ex))
 
@@ -86,7 +90,14 @@ class Logger(object):
         if self._mode != NONE:
             self._show(Colors.red('ERR'), msg)
 
+    def _get_trace(self):
+        try:
+            caller_function = inspect.stack()[self.CALLER_FUNCTION_DEPTH]
+            file_name = os.path.basename(caller_function.filename)
+            return f'{file_name}:{caller_function.lineno}/{caller_function.function}'
+        except IndexError:
+            return 'unknown_function'
 
-def _get_parent_function_name():
-    # TODO sometimes throws an exception out of range blah blah
-    return inspect.stack()[3][3]
+
+def strip_size(text):
+    return text.replace('$o', '').replace('$w', '')
