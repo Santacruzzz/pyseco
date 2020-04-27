@@ -31,7 +31,7 @@ class Pyseco(object):
         if not is_bound(listener_method):
             self.logger.error(f'This is not a bound method "{listener_method.__name__}"')
             return
-        self.events_map[event].add(listener_method)
+        self.events_map[event.name].add((listener_method, event.type))
 
     def run(self):
         try:
@@ -44,7 +44,7 @@ class Pyseco(object):
         except KeyboardInterrupt:
             self.logger.info('Exiting')
         except Exception as ex:
-            self.logger.error(str(ex))
+            self.logger.error(ex)
 
     def register_listener(self, listener: Listener):
         listener.set_pyseco(self)
