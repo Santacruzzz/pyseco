@@ -70,7 +70,7 @@ class Pyseco(object):
         self.client.disconnect()
 
     def _synchronize_players(self):
-        for player in self.client.getPlayerList(50, 0):
+        for player in self.client.get_player_list(self.server.max_players.current_value):
             self.add_player(login=player.login)
 
     def _synchronize_challenges(self):
