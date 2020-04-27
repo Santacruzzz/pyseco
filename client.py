@@ -103,9 +103,9 @@ class Client(TrackmaniaAPI):
             return
 
         if event.name in self._events_map:
-            for listener_method in self._events_map[event.name]:
+            for listener_method, event_type in self._events_map[event.name]:
                 if event.data:
-                    listener_method(event.data)
+                    listener_method(event_type(*event.data))
                 else:
                     listener_method()
 
