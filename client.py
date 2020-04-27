@@ -117,7 +117,6 @@ class Client(TrackmaniaAPI):
             msg.set_send(self.__no_response_request)
         events = len(self._events)
         self.logger.debug(f'current events queue size = {events}')
-        self._handle_buffered_events()
         return msg
 
     def _handle_buffered_events(self):
