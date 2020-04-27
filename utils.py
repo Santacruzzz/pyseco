@@ -13,15 +13,10 @@ NONE = 9
 class EventData(object):
     def __init__(self, data, event_name: str):
         self.data = data
-        self.event_name = event_name
+        self.name = event_name
 
     def __str__(self):
-        return self.event_name
-
-
-def _get_parent_function_name():
-    # TODO sometimes throws an exception out of range blah blah
-    return inspect.stack()[3][3]
+        return self.name
 
 
 class Colors(object):
@@ -46,7 +41,6 @@ class Colors(object):
 
 class Logger(object):
     CALLER_FUNCTION_DEPTH = 3
-
 
     def __init__(self, name: str = None, logging_mode: int = 0):
         self._name = name
@@ -101,3 +95,7 @@ class Logger(object):
 
 def strip_size(text):
     return text.replace('$o', '').replace('$w', '')
+
+
+def is_bound(m):
+    return hasattr(m, '__self__')

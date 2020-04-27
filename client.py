@@ -9,16 +9,30 @@ from APIs.trackmania_api import TrackmaniaAPI
 
 
 class Client(TrackmaniaAPI):
-    def __init__(self, ip, port, logging_mode, listeners):
+    def __init__(self, ip, port, logging_mode, events_map):
         super().__init__()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.ip = ip
         self.port = port
         self.request_num = 2147483648
         self.logger = Logger('Pyseco', logging_mode)
-        self.__listeners = listeners
+        self._events_map = events_map
         self._events = []
         self.debug_data = None
+
+    def __getattr__(self, name):
+        msg = Method(self._request, name, self.logger)
+        if name == 'noresponse':
+            msg.set_send(self._no_response_request)
+        self.logger.debug(f'current events queue size = {len(self._events)}')
+        return msg
+
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, *args):
+        self.disconnect()
 
     def _read_init_resp_size(self):
         return unpack('<L', self.sock.recv(4))[0]
@@ -80,44 +94,34 @@ class Client(TrackmaniaAPI):
     def _handle_event(self, msg):
         try:
             event = EventData(*loads(msg))
-            self.logger.debug(f'{event.event_name}: {event.data}')
-            if event.event_name and '.' in event.event_name:
-                event.event_name = event.event_name.split('.')[1]
+            self.logger.debug(f'{event.name}: {event.data}')
         except UnicodeDecodeError as ex:
-            self.logger.debug(f'Parsing xml failed. ({str(ex)})')
+            self.logger.debug(f'Parsing xml failed. ({ex})')
+            return
         except Exception as ex:
-            self.logger.error(f'Error during handling event. ({str(ex)})')
+            self.logger.error(f'Error during handling event. ({ex})')
             return
 
-        for listener in self.__listeners:
-            # if listener has implemented method event.event_name
-            if event.event_name in dir(listener):
-                if len(event.data) > 0:
-                    getattr(listener, event.event_name)(*event.data)
+        if event.name in self._events_map:
+            for listener_method in self._events_map[event.name]:
+                if event.data:
+                    listener_method(event.data)
                 else:
-                    getattr(listener, event.event_name)()
+                    listener_method()
 
-    def serverMessage(self, msg):
+    def server_message(self, msg):
         self.noresponse.ChatSendServerMessage(f'${self.debug_data["color"]}~ $888{msg}')
 
-    def __no_response_request(self, methodname, params):
+    def _no_response_request(self, methodname, params):
         request = dumps(params, methodname)
         self.request_num += 1
         self.logger.debug(f'-> sending {methodname}')
         self._send_request(request)
 
     def disconnect(self):
-        self.serverMessage('pyseco disconnected')
+        self.server_message('pyseco disconnected')
         self.sock.close()
         self.logger.info('Disconnected')
-
-    def __getattr__(self, name):
-        msg = Method(self.__request, name, self.logger)
-        if name == 'noresponse':
-            msg.set_send(self.__no_response_request)
-        events = len(self._events)
-        self.logger.debug(f'current events queue size = {events}')
-        return msg
 
     def _handle_buffered_events(self):
         self.logger.debug(f'Handling buffered {len(self._events)} event(s)')
@@ -126,7 +130,7 @@ class Client(TrackmaniaAPI):
             self.logger.debug('Pop event from queue')
             self._handle_event(event)
 
-    def __request(self, methodname, params):
+    def _request(self, methodname, params):
         request = dumps(params, methodname)
         try:
             self.request_num += 1
@@ -140,7 +144,6 @@ class Client(TrackmaniaAPI):
                 response = False
             self.logger.debug(f'<- received response: {response}')
             return response
-
         except BrokenPipeError:
             self.logger.error('Connection lost')
             self.request_num -= 1
@@ -149,28 +152,21 @@ class Client(TrackmaniaAPI):
     def set_debug_data(self, data):
         self.debug_data = data
 
-    def __enter__(self):
-        self.connect()
-        return self
-
-    def __exit__(self, *args):
-        self.disconnect()
-
 
 class Method:
     def __init__(self, send, name, logger):
-        self.__send = send
-        self.__name = name
+        self._send = send
+        self._name = name
         self.logger = Logger(f'Method.{name}', logger.get_logging_mode())
 
-    def set_send(self, send):
-        self.__send = send
-
     def __getattr__(self, name):
-        return Method(self.__send, f'{self.__name}.{name}', self.logger)
+        return Method(self._send, f'{self._name}.{name}', self.logger)
 
     def __call__(self, *args):
         self.logger.debug('calling')
-        if 'noresponse.' in self.__name:
-            self.__name = self.__name.replace('noresponse.', '')
-        return self.__send(self.__name, args)
+        if 'noresponse.' in self._name:
+            self._name = self._name.replace('noresponse.', '')
+        return self._send(self._name, args)
+
+    def set_send(self, send):
+        self._send = send
