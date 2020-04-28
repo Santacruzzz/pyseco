@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from pyseco import Pyseco
-from listeners.player_listener import PlayerListener
 import argparse
 import logging
 
@@ -19,10 +18,9 @@ There will be logs from any logs you defined.
 """
 
 if __name__ == '__main__':
+    logging.basicConfig(format='%(asctime)s.%(msecs)03d:%(levelname)-8s%(name)s:%(funcName)s:%(lineno)d:%(message)s',
+                        level=args.verbose,
+                        datefmt='%Y-%m-%d %H:%M:%S')
     with Pyseco('SuperAdmin', 'optimus1', '86.106.91.148', 5002) as pyseco:
-        logging.basicConfig(format='%(asctime)s:%(levelname)-8s%(name)s:%(funcName)s:%(lineno)d:%(message)s',
-                            level=args.verbose,
-                            datefmt='%Y-%m-%d %H:%M:%S')
         pyseco.set_debug_data({'color': args.color})
-        pyseco.register_listener(PlayerListener('PlrLstnr'))
         pyseco.run()

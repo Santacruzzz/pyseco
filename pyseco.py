@@ -1,23 +1,22 @@
 from collections import defaultdict
 import logging
-
 from errors import PlayerNotFound
 from player import Player
 from server_context import ServerCtx
 from client import *
-from listener import Listener
+from listeners.player_listener import PlayerListener
 
 logger = logging.getLogger(__name__)
 
 
 class Pyseco(object):
-    def __init__(self, login, password, ip, port, logging_mode='DEBUG'):
+    def __init__(self, login, password, ip, port):
         self.login = login
         self.password = password
         self.events_map = defaultdict(set)
         self.server = ServerCtx()
-        self.client = Client(ip, port, logging_mode, self.events_map)
-        self.debug_data = None
+        self.client = Client(ip, port, self.events_map)
+        self._register_listeners()
 
     def __enter__(self):
         return self
@@ -25,38 +24,9 @@ class Pyseco(object):
     def __exit__(self, *args):
         self.client.disconnect()
 
-    def set_debug_data(self, data):
-        self.debug_data = data
-        self.client.set_debug_data(data)
-
-    def register(self, event, listener_method):
-        if not is_bound(listener_method):
-            logger.error(f'This is not a bound method "{listener_method.__name__}"')
-            return
-        self.events_map[event].add(listener_method)
-
-    def run(self):
-        try:
-            self.client.connect()
-            self.client.authenticate(self.login, self.password)
-            self.client.server_message('pyseco connected')
-            self.client.enable_callbacks(True)
-            self.synchronize()
-            self.client.loop()
-        except KeyboardInterrupt:
-            logger.info('Exiting')
-        except Exception as ex:
-            logger.error(ex)
-
-    def register_listener(self, listener: Listener):
-        listener.set_pyseco(self)
-
-    def synchronize(self):
-        logger.info('Synchronizing data')
-        self._synchronize_basic_data()
-        self._synchronize_game_infos()
-        self._synchronize_players()
-        self._synchronize_challenges()
+    def _register_listeners(self):
+        PlayerListener('PlayerListener', self)
+        # and so on
 
     def _synchronize_basic_data(self):
         self.server.version = self.client.get_version()
@@ -80,6 +50,32 @@ class Pyseco(object):
                                    f' author: {self.server.current_challenge.author}')
         self.server.next_challenge = self.client.get_next_challenge_info()
 
+    def _synchronize(self):
+        logger.info('Synchronizing data')
+        self._synchronize_basic_data()
+        self._synchronize_game_infos()
+        self._synchronize_players()
+        self._synchronize_challenges()
+
+    def register(self, event, listener_method):
+        if not is_bound(listener_method):
+            logger.error(f'This is not a bound method "{listener_method.__name__}"')
+            return
+        self.events_map[event].add(listener_method)
+
+    def run(self):
+        try:
+            self.client.connect()
+            self.client.authenticate(self.login, self.password)
+            self.client.server_message('pyseco connected')
+            self.client.enable_callbacks(True)
+            self._synchronize()
+            self.client.loop()
+        except KeyboardInterrupt:
+            logger.info('Exiting')
+        except Exception as ex:
+            logger.error(ex)
+
     def add_player(self, login: str, is_spectator: bool = False):
         if login not in self.server.playersInfos:
             self.server.playersInfos[login] = self.client.get_detailed_player_info(login)
@@ -98,3 +94,6 @@ class Pyseco(object):
         except KeyError:
             logger.error(f'Login "{login}" not found')
             raise PlayerNotFound(f'Login "{login}" not found')
+
+    def set_debug_data(self, data):
+        self.client.set_debug_data(data)
