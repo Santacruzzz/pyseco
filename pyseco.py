@@ -44,7 +44,7 @@ class Pyseco(object):
         except KeyboardInterrupt:
             self.logger.info('Exiting')
         except Exception as ex:
-            self.logger.error(str(ex))
+            self.logger.error(ex)
 
     def register_listener(self, listener: Listener):
         listener.set_pyseco(self)

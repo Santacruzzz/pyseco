@@ -9,16 +9,6 @@ INFO = 1
 NONE = 9
 
 
-# classes
-class EventData(object):
-    def __init__(self, data, event_name: str):
-        self.data = data
-        self.name = event_name
-
-    def __str__(self):
-        return self.name
-
-
 class Colors(object):
     BLUE = '\033[94m'
     GREEN = '\033[92m'

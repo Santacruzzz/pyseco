@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import socket
 from struct import unpack, pack
+
+from includes.events import EVENTS_MAP
 from utils import *
 from xmlrpc.client import *
 
@@ -93,8 +95,23 @@ class Client(TrackmaniaAPI):
 
     def _handle_event(self, msg):
         try:
-            event = EventData(*loads(msg))
-            self.logger.debug(f'{event.name}: {event.data}')
+            payload, event = loads(msg)
+            if not event:
+                # TODO this is an side effect of noresponse method which should be deleted
+                # if parsed xml has no "methodName" (second field in tuple) then this is a response
+                # which belongs to noresponse.Request and should be discarded
+                return
+            if event in self._events_map:
+                payload = EVENTS_MAP[event](*payload)
+            else:
+                return
+            self.logger.debug(f'{event}: {payload}')
+            if event in self._events_map:
+                for listener_method in self._events_map[event]:
+                    if payload:
+                        listener_method(payload)
+                    else:
+                        listener_method()
         except UnicodeDecodeError as ex:
             self.logger.debug(f'Parsing xml failed. ({ex})')
             return
@@ -102,15 +119,8 @@ class Client(TrackmaniaAPI):
             self.logger.error(f'Error during handling event. ({ex})')
             return
 
-        if event.name in self._events_map:
-            for listener_method in self._events_map[event.name]:
-                if event.data:
-                    listener_method(event.data)
-                else:
-                    listener_method()
-
     def server_message(self, msg):
-        self.noresponse.ChatSendServerMessage(f'${self.debug_data["color"]}~ $888{msg}')
+        self.ChatSendServerMessage(f'${self.debug_data["color"]}~ $888{msg}')
 
     def _no_response_request(self, methodname, params):
         request = dumps(params, methodname)
