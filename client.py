@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import socket
+import logging
 from struct import unpack, pack
 
 from includes.events import EVENTS_MAP
@@ -8,6 +9,8 @@ from utils import *
 from xmlrpc.client import *
 
 from APIs.trackmania_api import TrackmaniaAPI
+
+logger = logging.getLogger(__name__)
 
 
 class Client(TrackmaniaAPI):
@@ -17,16 +20,15 @@ class Client(TrackmaniaAPI):
         self.ip = ip
         self.port = port
         self.request_num = 2147483648
-        self.logger = Logger('Pyseco', logging_mode)
         self._events_map = events_map
         self._events = []
         self.debug_data = None
 
     def __getattr__(self, name):
-        msg = Method(self._request, name, self.logger)
+        msg = Method(self._request, name)
         if name == 'noresponse':
             msg.set_send(self._no_response_request)
-        self.logger.debug(f'current events queue size = {len(self._events)}')
+        logger.debug(f'current events queue size = {len(self._events)}')
         return msg
 
     def __enter__(self):
@@ -51,7 +53,7 @@ class Client(TrackmaniaAPI):
             bytes_received.extend(self.sock.recv(size - len(bytes_received)))
             if len(bytes_received) < size:
                 bytes_left = size - len(bytes_received)
-                self.logger.debug(f'waiting for next {bytes_left} byte(s)')
+                logger.debug(f'waiting for next {bytes_left} byte(s)')
         return bytes_received.decode('utf-8')
 
     def _read_any_message(self):
@@ -60,7 +62,7 @@ class Client(TrackmaniaAPI):
     def _read_message(self, wait_for_number):
         while True:
             size, request_number = self._read_message_info()
-            self.logger.debug(f'<- READ LEN={size}, NUM={request_number}')
+            logger.debug(f'<- READ LEN={size}, NUM={request_number}')
             msg = self._recv_decoded(size)
 
             if not wait_for_number:
@@ -69,7 +71,7 @@ class Client(TrackmaniaAPI):
             if request_number == wait_for_number:
                 return msg
             else:
-                self.logger.debug(f'Putting event to queue, size before={len(self._events)}')
+                logger.debug(f'Putting event to queue, size before={len(self._events)}')
                 self._events.append(msg)
 
     def _pack_message(self, msg):
@@ -82,13 +84,13 @@ class Client(TrackmaniaAPI):
         self.sock.connect((self.ip, self.port))
         data_length = self._read_init_resp_size()
         protocol_version = self._recv_decoded(data_length)
-        self.logger.info(f'Connected, protocol used: {protocol_version}')
+        logger.info(f'Connected, protocol used: {protocol_version}')
         if self.get_status().code != 4:
-            self.logger.error("Server is not ready yet.")
+            logger.error("Server is not ready yet.")
 
     def loop(self):
         self._handle_buffered_events()
-        self.logger.info('Waiting for events...')
+        logger.info('Waiting for events...')
         while True:
             self._handle_buffered_events()
             self._handle_event(self._read_any_message())
@@ -105,7 +107,7 @@ class Client(TrackmaniaAPI):
                 payload = EVENTS_MAP[event](*payload)
             else:
                 return
-            self.logger.debug(f'{event}: {payload}')
+            logger.debug(f'{event}: {payload}')
             if event in self._events_map:
                 for listener_method in self._events_map[event]:
                     if payload:
@@ -113,10 +115,10 @@ class Client(TrackmaniaAPI):
                     else:
                         listener_method()
         except UnicodeDecodeError as ex:
-            self.logger.debug(f'Parsing xml failed. ({ex})')
+            logger.debug(f'Parsing xml failed. ({ex})')
             return
         except Exception as ex:
-            self.logger.error(f'Error during handling event. ({ex})')
+            logger.error(f'Error during handling event. ({ex})')
             return
 
     def server_message(self, msg):
@@ -125,37 +127,37 @@ class Client(TrackmaniaAPI):
     def _no_response_request(self, methodname, params):
         request = dumps(params, methodname)
         self.request_num += 1
-        self.logger.debug(f'-> sending {methodname}')
+        logger.debug(f'-> sending {methodname}')
         self._send_request(request)
 
     def disconnect(self):
         self.server_message('pyseco disconnected')
         self.sock.close()
-        self.logger.info('Disconnected')
+        logger.info('Disconnected')
 
     def _handle_buffered_events(self):
-        self.logger.debug(f'Handling buffered {len(self._events)} event(s)')
+        logger.debug(f'Handling buffered {len(self._events)} event(s)')
         while self._events:
             event = self._events.pop(0)
-            self.logger.debug('Pop event from queue')
+            logger.debug('Pop event from queue')
             self._handle_event(event)
 
     def _request(self, methodname, params):
         request = dumps(params, methodname)
         try:
             self.request_num += 1
-            self.logger.debug(f'-> sending request: {methodname}, num: {self.request_num}')
+            logger.debug(f'-> sending request: {methodname}, num: {self.request_num}')
             self._send_request(request)
             resp = self._read_message(self.request_num)
             try:
                 response = loads(resp)[0][0]
             except Fault as ex:
-                self.logger.error(str(ex))
+                logger.error(str(ex))
                 response = False
-            self.logger.debug(f'<- received response: {response}')
+            logger.debug(f'<- received response: {response}')
             return response
         except BrokenPipeError:
-            self.logger.error('Connection lost')
+            logger.error('Connection lost')
             self.request_num -= 1
             raise
 
@@ -164,16 +166,15 @@ class Client(TrackmaniaAPI):
 
 
 class Method:
-    def __init__(self, send, name, logger):
+    def __init__(self, send, name):
         self._send = send
         self._name = name
-        self.logger = Logger(f'Method.{name}', logger.get_logging_mode())
 
     def __getattr__(self, name):
-        return Method(self._send, f'{self._name}.{name}', self.logger)
+        return Method(self._send, f'{self._name}.{name}')
 
     def __call__(self, *args):
-        self.logger.debug('calling')
+        logger.debug('calling')
         if 'noresponse.' in self._name:
             self._name = self._name.replace('noresponse.', '')
         return self._send(self._name, args)
