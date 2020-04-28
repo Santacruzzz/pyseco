@@ -1,7 +1,6 @@
-from typing import List
 from abc import abstractmethod
 
-from includes.trackmania_types import *
+from APIs.method_types import *
 
 
 # TODO add ABC meta
