@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from includes.trackmania_types import PlayerInfo, PlayerRanking
+from APIs.method_types import PlayerInfo, PlayerRanking
 
 
 class Player(object):

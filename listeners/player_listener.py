@@ -5,6 +5,8 @@ from listener import Listener
 from includes.events import Events
 from utils import strip_size
 
+from includes.events import EVENTS_MAP
+
 
 class PlayerListener(Listener):
     def __init__(self, name: str):
@@ -16,23 +18,18 @@ class PlayerListener(Listener):
         self.pyseco.register(Events.PLAYER_DISCONNECT, self.on_player_disconnect)
         self.pyseco.register(Events.PLAYER_CHECKPOINT, self.on_player_checkpoint)
 
-    def on_player_connect(self, data: Events.PLAYER_CONNECT.type):
+    def on_player_connect(self, data: EVENTS_MAP[Events.PLAYER_CONNECT]):
         login, is_spectator = data.login, data.is_spectator
         self.pyseco.add_player(login, is_spectator)
         player = self.pyseco.get_player(login)
         self.pyseco.client.server_message(f'{strip_size(player.info.nickname)}$z$s$888 has joined')
 
-    def on_player_disconnect(self, data: Events.PLAYER_DISCONNECT.type):
+    def on_player_disconnect(self, data: EVENTS_MAP[Events.PLAYER_DISCONNECT]):
         login = data.login
         player = self.pyseco.get_player(login)
         self.pyseco.client.server_message(f'{strip_size(player.info.nickname)}$z$s$888 has left')
         self.pyseco.remove_player(login)
 
-    def on_player_checkpoint(self, data: Events.PLAYER_CHECKPOINT.type):
-        player_uid = data.player_uid
-        login = data.login
-        time_or_score = data.time_or_score
-        cur_lap = data.cur_lap
-        checkpoint_index = data.checkpoint_index
-        player = self.pyseco.get_player(login)
+    def on_player_checkpoint(self, data: EVENTS_MAP[Events.PLAYER_CHECKPOINT]):
+        player = self.pyseco.get_player(data.login)
         self.pyseco.client.server_message(f'{strip_size(player.info.nickname)}$z$s$888 on cp')
