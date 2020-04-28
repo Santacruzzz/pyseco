@@ -1,4 +1,5 @@
 from collections import defaultdict
+import logging
 
 from errors import PlayerNotFound
 from player import Player
@@ -6,12 +7,13 @@ from server_context import ServerCtx
 from client import *
 from listener import Listener
 
+logger = logging.getLogger(__name__)
+
 
 class Pyseco(object):
-    def __init__(self, login, password, ip, port, logging_mode=DEBUG):
+    def __init__(self, login, password, ip, port, logging_mode='DEBUG'):
         self.login = login
         self.password = password
-        self.logger = Logger('Pyseco', logging_mode)
         self.events_map = defaultdict(set)
         self.server = ServerCtx()
         self.client = Client(ip, port, logging_mode, self.events_map)
@@ -29,7 +31,7 @@ class Pyseco(object):
 
     def register(self, event, listener_method):
         if not is_bound(listener_method):
-            self.logger.error(f'This is not a bound method "{listener_method.__name__}"')
+            logger.error(f'This is not a bound method "{listener_method.__name__}"')
             return
         self.events_map[event].add(listener_method)
 
@@ -42,15 +44,15 @@ class Pyseco(object):
             self.synchronize()
             self.client.loop()
         except KeyboardInterrupt:
-            self.logger.info('Exiting')
+            logger.info('Exiting')
         except Exception as ex:
-            self.logger.error(ex)
+            logger.error(ex)
 
     def register_listener(self, listener: Listener):
         listener.set_pyseco(self)
 
     def synchronize(self):
-        self.logger.info('Synchronizing data')
+        logger.info('Synchronizing data')
         self._synchronize_basic_data()
         self._synchronize_game_infos()
         self._synchronize_players()
@@ -73,9 +75,9 @@ class Pyseco(object):
 
     def _synchronize_challenges(self):
         self.server.current_challenge = self.client.get_current_challenge_info()
-        self.logger.info(self.server.current_challenge)
+        logger.info(self.server.current_challenge)
         self.client.server_message(f'Current map is {strip_size(self.server.current_challenge.name)}$z$s$888,'
-                                  f' author: {self.server.current_challenge.author}')
+                                   f' author: {self.server.current_challenge.author}')
         self.server.next_challenge = self.client.get_next_challenge_info()
 
     def add_player(self, login: str, is_spectator: bool = False):
@@ -94,5 +96,5 @@ class Pyseco(object):
         try:
             return Player(self.server.playersInfos[login], self.server.playersRankings[login])
         except KeyError:
-            self.logger.error(f'Login "{login}" not found')
+            logger.error(f'Login "{login}" not found')
             raise PlayerNotFound(f'Login "{login}" not found')
