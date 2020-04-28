@@ -7,4 +7,4 @@ from APIs.method_types import PlayerInfo, PlayerRanking
 class Player(object):
     def __init__(self, player_info: PlayerInfo, player_ranking: PlayerRanking):
         self.info = player_info
-        self.raking = player_ranking
+        self.ranking = player_ranking

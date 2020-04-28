@@ -9,11 +9,8 @@ from includes.events import EVENTS_MAP
 
 
 class PlayerListener(Listener):
-    def __init__(self, name: str):
-        super(PlayerListener, self).__init__(name)
-
-    def set_pyseco(self, pyseco_instance):
-        super().set_pyseco(pyseco_instance)
+    def __init__(self, name: str, pyseco_instance):
+        super(PlayerListener, self).__init__(name, pyseco_instance)
         self.pyseco.register(Events.PLAYER_CONNECT, self.on_player_connect)
         self.pyseco.register(Events.PLAYER_DISCONNECT, self.on_player_disconnect)
         self.pyseco.register(Events.PLAYER_CHECKPOINT, self.on_player_checkpoint)

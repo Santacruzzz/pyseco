@@ -4,6 +4,7 @@ import socket
 import logging
 from struct import unpack, pack
 
+from errors import NotAnEvent, EventDiscarded, PysecoException
 from includes.events import EVENTS_MAP
 from utils import *
 from xmlrpc.client import *
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class Client(TrackmaniaAPI):
-    def __init__(self, ip, port, logging_mode, events_map):
+    def __init__(self, ip, port, events_map):
         super().__init__()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.ip = ip
@@ -80,67 +81,45 @@ class Client(TrackmaniaAPI):
         preamble = pack('<LL', len(encoded_message), self.request_num)
         return b''.join([preamble, encoded_message])
 
-    def connect(self):
-        self.sock.connect((self.ip, self.port))
-        data_length = self._read_init_resp_size()
-        protocol_version = self._recv_decoded(data_length)
-        logger.info(f'Connected, protocol used: {protocol_version}')
-        if self.get_status().code != 4:
-            logger.error("Server is not ready yet.")
+    def _prepare_event(self, msg):
+        payload, event = loads(msg)
+        if not event:
+            # TODO this is an side effect of noresponse method which should be deleted
+            # if parsed xml has no "methodName" (second field in tuple) then this is a response
+            # which belongs to noresponse.Request and should be discarded
+            raise NotAnEvent('Not an event')
 
-    def loop(self):
-        self._handle_buffered_events()
-        logger.info('Waiting for events...')
-        while True:
-            self._handle_buffered_events()
-            self._handle_event(self._read_any_message())
+        if event not in self._events_map:
+            raise EventDiscarded(f'No action registered for {event}')
+
+        if EVENTS_MAP[event] is None:
+            return None, event
+
+        data = EVENTS_MAP[event](*payload)
+        return data, event
 
     def _handle_event(self, msg):
         try:
-            payload, event = loads(msg)
-            if not event:
-                # TODO this is an side effect of noresponse method which should be deleted
-                # if parsed xml has no "methodName" (second field in tuple) then this is a response
-                # which belongs to noresponse.Request and should be discarded
-                return
-            if event in self._events_map:
-                payload = EVENTS_MAP[event](*payload)
-            else:
-                return
-            logger.debug(f'{event}: {payload}')
+            payload, event = self._prepare_event(msg)
+
+            logger.debug(f'{event} Data: {payload}')
             if event in self._events_map:
                 for listener_method in self._events_map[event]:
                     if payload:
                         listener_method(payload)
                     else:
                         listener_method()
+
+        except PysecoException as ex:
+            logger.debug(f'Event discarded: {ex}')
         except UnicodeDecodeError as ex:
             logger.debug(f'Parsing xml failed. ({ex})')
-            return
-        except Exception as ex:
-            logger.error(f'Error during handling event. ({ex})')
-            return
-
-    def server_message(self, msg):
-        self.ChatSendServerMessage(f'${self.debug_data["color"]}~ $888{msg}')
 
     def _no_response_request(self, methodname, params):
         request = dumps(params, methodname)
         self.request_num += 1
         logger.debug(f'-> sending {methodname}')
         self._send_request(request)
-
-    def disconnect(self):
-        self.server_message('pyseco disconnected')
-        self.sock.close()
-        logger.info('Disconnected')
-
-    def _handle_buffered_events(self):
-        logger.debug(f'Handling buffered {len(self._events)} event(s)')
-        while self._events:
-            event = self._events.pop(0)
-            logger.debug('Pop event from queue')
-            self._handle_event(event)
 
     def _request(self, methodname, params):
         request = dumps(params, methodname)
@@ -161,6 +140,36 @@ class Client(TrackmaniaAPI):
             self.request_num -= 1
             raise
 
+    def _handle_buffered_events(self):
+        logger.debug(f'Handling buffered {len(self._events)} event(s)')
+        while self._events:
+            event = self._events.pop(0)
+            logger.debug('Pop event from queue')
+            self._handle_event(event)
+
+    def connect(self):
+        self.sock.connect((self.ip, self.port))
+        data_length = self._read_init_resp_size()
+        protocol_version = self._recv_decoded(data_length)
+        logger.info(f'Connected, protocol used: {protocol_version}')
+        if self.get_status().code != 4:
+            logger.error("Server is not ready yet.")
+
+    def loop(self):
+        self._handle_buffered_events()
+        logger.info('Waiting for events...')
+        while True:
+            self._handle_buffered_events()
+            self._handle_event(self._read_any_message())
+
+    def server_message(self, msg):
+        self.ChatSendServerMessage(f'${self.debug_data["color"]}~ $888{msg}')
+
+    def disconnect(self):
+        self.server_message('pyseco disconnected')
+        self.sock.close()
+        logger.info('Disconnected')
+
     def set_debug_data(self, data):
         self.debug_data = data
 
@@ -174,7 +183,7 @@ class Method:
         return Method(self._send, f'{self._name}.{name}')
 
     def __call__(self, *args):
-        logger.debug('calling')
+        logger.debug(f'calling {self._name}')
         if 'noresponse.' in self._name:
             self._name = self._name.replace('noresponse.', '')
         return self._send(self._name, args)
