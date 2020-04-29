@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
+import logging
 from listener import Listener
 from includes.events import Events
 from utils import strip_size
-
 from includes.events import EVENTS_MAP
+
+logger = logging.getLogger(__name__)
 
 
 class PlayerListener(Listener):
@@ -30,3 +29,4 @@ class PlayerListener(Listener):
     def on_player_checkpoint(self, data: EVENTS_MAP[Events.PLAYER_CHECKPOINT]):
         player = self.pyseco.get_player(data.login)
         self.pyseco.client.server_message(f'{strip_size(player.info.nickname)}$z$s$888 on cp')
+

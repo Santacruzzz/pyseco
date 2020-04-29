@@ -1,12 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import socket
 import logging
 from struct import unpack, pack
-
 from errors import NotAnEvent, EventDiscarded, PysecoException
 from includes.events import EVENTS_MAP
-from utils import *
 from xmlrpc.client import *
 from queue import Queue
 from APIs.trackmania_api import TrackmaniaAPI
@@ -30,13 +26,6 @@ class Client(TrackmaniaAPI):
         if name == 'noresponse':
             method.set_send(self._no_response_request)
         return method
-
-    def __enter__(self):
-        self.connect()
-        return self
-
-    def __exit__(self, *args):
-        self.disconnect()
 
     def _read_init_resp_size(self):
         return unpack('<L', self.sock.recv(4))[0]
@@ -145,12 +134,16 @@ class Client(TrackmaniaAPI):
             self._handle_event(self._events_queue.get())
 
     def connect(self):
-        self.sock.connect((self.ip, self.port))
-        data_length = self._read_init_resp_size()
-        protocol_version = self._recv_decoded(data_length)
-        logger.info(f'Connected, protocol used: {protocol_version}')
-        if self.get_status().code != 4:
-            logger.error("Server is not ready yet.")
+        try:
+            self.sock.connect((self.ip, self.port))
+            data_length = self._read_init_resp_size()
+            protocol_version = self._recv_decoded(data_length)
+            logger.info(f'Connected, protocol used: {protocol_version}')
+            if self.get_status().code != 4:
+                logger.error("Server is not ready yet.")
+        except BrokenPipeError as ex:
+            logger.error(ex)
+            raise
 
     def loop(self):
         logger.info('Waiting for events...')
@@ -163,9 +156,12 @@ class Client(TrackmaniaAPI):
         self.ChatSendServerMessage(f'${self.debug_data["color"]}~ $888{msg}')
 
     def disconnect(self):
-        self.server_message('pyseco disconnected')
-        self.sock.close()
-        logger.info('Disconnected')
+        try:
+            self.server_message('pyseco disconnected')
+            self.sock.close()
+            logger.info('Disconnected')
+        except Exception as ex:
+            logger.error(ex)
 
     def set_debug_data(self, data):
         self.debug_data = data
