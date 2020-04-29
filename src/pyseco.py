@@ -1,11 +1,11 @@
 from collections import defaultdict
 import logging
-from src.errors import PlayerNotFound
-from src.player import Player
-from src.server_context import ServerCtx
-from src.client import Client
-from src.listeners.player_listener import PlayerListener
-from src.utils import is_bound, strip_size
+from errors import PlayerNotFound
+from player import Player
+from server_context import ServerCtx
+from client import Client
+from listeners.player_listener import PlayerListener
+from utils import is_bound, strip_size
 
 logger = logging.getLogger(__name__)
 
