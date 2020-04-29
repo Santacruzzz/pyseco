@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from APIs.method_types import *
+from src.APIs.method_types import *
 
 
 # TODO add ABC meta

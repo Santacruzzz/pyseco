@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pyseco import Pyseco
+from src.pyseco import Pyseco
 import argparse
 import logging
 
