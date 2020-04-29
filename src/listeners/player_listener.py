@@ -1,8 +1,8 @@
 import logging
-from listener import Listener
-from includes.events import Events
-from utils import strip_size
-from includes.events import EVENTS_MAP
+from src.listener import Listener
+from src.includes.events import Events
+from src.utils import strip_size
+from src.includes.events import EVENTS_MAP
 
 logger = logging.getLogger(__name__)
 
