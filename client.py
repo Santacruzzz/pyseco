@@ -8,7 +8,7 @@ from errors import NotAnEvent, EventDiscarded, PysecoException
 from includes.events import EVENTS_MAP
 from utils import *
 from xmlrpc.client import *
-
+from queue import Queue
 from APIs.trackmania_api import TrackmaniaAPI
 
 logger = logging.getLogger(__name__)
@@ -22,15 +22,14 @@ class Client(TrackmaniaAPI):
         self.port = port
         self.request_num = 2147483648
         self._events_map = events_map
-        self._events = []
+        self._events_queue = Queue()
         self.debug_data = None
 
     def __getattr__(self, name):
-        msg = Method(self._request, name)
+        method = Method(self._request, name)
         if name == 'noresponse':
-            msg.set_send(self._no_response_request)
-        logger.debug(f'current events queue size = {len(self._events)}')
-        return msg
+            method.set_send(self._no_response_request)
+        return method
 
     def __enter__(self):
         self.connect()
@@ -72,8 +71,8 @@ class Client(TrackmaniaAPI):
             if request_number == wait_for_number:
                 return msg
             else:
-                logger.debug(f'Putting event to queue, size before={len(self._events)}')
-                self._events.append(msg)
+                logger.debug(f'Putting event to queue, size before={self._events_queue.qsize()}')
+                self._events_queue.put(msg)
 
     def _pack_message(self, msg):
         # server expects 8 bytes preamble, [4 bytes for msg size, 4 bytes for request number, *content]
@@ -141,11 +140,9 @@ class Client(TrackmaniaAPI):
             raise
 
     def _handle_buffered_events(self):
-        logger.debug(f'Handling buffered {len(self._events)} event(s)')
-        while self._events:
-            event = self._events.pop(0)
-            logger.debug('Pop event from queue')
-            self._handle_event(event)
+        logger.debug(f'Handling buffered {self._events_queue.qsize()} event(s)')
+        while self._events_queue.qsize():
+            self._handle_event(self._events_queue.get())
 
     def connect(self):
         self.sock.connect((self.ip, self.port))
@@ -156,10 +153,10 @@ class Client(TrackmaniaAPI):
             logger.error("Server is not ready yet.")
 
     def loop(self):
-        self._handle_buffered_events()
         logger.info('Waiting for events...')
         while True:
-            self._handle_buffered_events()
+            if self._events_queue.qsize():
+                self._handle_buffered_events()
             self._handle_event(self._read_any_message())
 
     def server_message(self, msg):
