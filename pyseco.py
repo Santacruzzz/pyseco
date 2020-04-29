@@ -5,7 +5,7 @@ from player import Player
 from server_context import ServerCtx
 from client import Client
 from listeners.player_listener import PlayerListener
-from utils import is_bound
+from utils import is_bound, strip_size
 
 logger = logging.getLogger(__name__)
 
