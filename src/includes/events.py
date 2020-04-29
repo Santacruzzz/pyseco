@@ -1,4 +1,4 @@
-from includes.events_types import *
+from src.includes.events_types import *
 
 
 class Events:

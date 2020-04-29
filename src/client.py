@@ -1,11 +1,11 @@
 import socket
 import logging
 from struct import unpack, pack
-from errors import NotAnEvent, EventDiscarded, PysecoException
-from includes.events import EVENTS_MAP
+from src.errors import NotAnEvent, EventDiscarded, PysecoException
+from src.includes.events import EVENTS_MAP
 from xmlrpc.client import *
 from queue import Queue
-from APIs.trackmania_api import TrackmaniaAPI
+from src.APIs.trackmania_api import TrackmaniaAPI
 
 logger = logging.getLogger(__name__)
 
