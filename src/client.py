@@ -70,21 +70,20 @@ class Client(TrackmaniaAPI):
         return b''.join([preamble, encoded_message])
 
     def _prepare_event(self, msg):
-        payload, event = loads(msg)
-        if not event:
+        payload, name = loads(msg)
+        event = EVENTS_MAP.get(name)
+        data = event(*payload) if payload else None
+
+        if not name:
             # TODO this is an side effect of noresponse method which should be deleted
             # if parsed xml has no "methodName" (second field in tuple) then this is a response
             # which belongs to noresponse.Request and should be discarded
             raise NotAnEvent('Not an event')
 
-        if event not in self._events_map:
-            raise EventDiscarded(f'No action registered for {event}')
+        if event.name not in self._events_map:
+            raise EventDiscarded(f'No action registered for {event.name}. Data: {data}')
 
-        if EVENTS_MAP[event] is None:
-            return None, event
-
-        data = EVENTS_MAP[event](*payload)
-        return data, event
+        return data, event.name
 
     def _handle_event(self, msg):
         try:

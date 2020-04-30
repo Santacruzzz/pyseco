@@ -1,17 +1,26 @@
 from dataclasses import dataclass
 from typing import List
 
+
+def event_decorator(cls):
+    cls.name = cls.__name__
+    return cls
+
+
+@event_decorator
 @dataclass
 class EventPlayerConnect:
     login: str
     is_spectator: bool
 
 
+@event_decorator
 @dataclass
 class EventPlayerDisconnect:
     login: str
 
 
+@event_decorator
 @dataclass
 class EventPlayerChat:
     player_uid: int
@@ -20,6 +29,7 @@ class EventPlayerChat:
     is_registered_cmd: bool
 
 
+@event_decorator
 @dataclass
 class EventPlayerManialinkPageAnswer:
     player_uid: int
@@ -27,12 +37,14 @@ class EventPlayerManialinkPageAnswer:
     answer: int
 
 
+@event_decorator
 @dataclass
 class EventEcho:
     internal: str
     public: str
 
 
+@event_decorator
 @dataclass
 class EventSChallengeInfo:
     uid: str
@@ -51,11 +63,13 @@ class EventSChallengeInfo:
     nb_checkpoints: int
 
 
+@event_decorator
 @dataclass
 class EventBeginRace:
     challenge: EventSChallengeInfo
 
 
+@event_decorator
 @dataclass
 class EventSPlayerRanking:
     login: str
@@ -69,12 +83,14 @@ class EventSPlayerRanking:
     ladder_score: float
 
 
+@event_decorator
 @dataclass
 class EventEndRace:
     rankings: List[EventSPlayerRanking]
     challenge: EventSChallengeInfo
 
 
+@event_decorator
 @dataclass
 class EventBeginChallenge:
     challenge: EventSChallengeInfo
@@ -82,6 +98,7 @@ class EventBeginChallenge:
     match_continuation: bool
 
 
+@event_decorator
 @dataclass
 class EventEndChallenge:
     rankings: List[EventSPlayerRanking]
@@ -91,12 +108,14 @@ class EventEndChallenge:
     restart_challenge: bool
 
 
+@event_decorator
 @dataclass
 class EventStatusChanged:
     status_code: int
     status_name: str
 
 
+@event_decorator
 @dataclass
 class EventPlayerCheckpoint:
     player_uid: int
@@ -106,6 +125,7 @@ class EventPlayerCheckpoint:
     checkpoint_index: int
 
 
+@event_decorator
 @dataclass
 class EventPlayerFinish:
     player_uid: int
@@ -113,12 +133,14 @@ class EventPlayerFinish:
     time_or_score: int
 
 
+@event_decorator
 @dataclass
 class EventPlayerIncoherence:
     player_uid: int
     login: str
 
 
+@event_decorator
 @dataclass
 class EventBillUpdated:
     bill_id: int
@@ -128,12 +150,14 @@ class EventBillUpdated:
 
 
 # TODO add handling for base64, https://app.zenhub.com/workspaces/pyseco-5ea546214d7b49c27b6b7380/issues/santacruzzz/pyseco/19
-# @dataclass
+# @event_decorator
+@dataclass
 # class EventTunnelDataReceived:
 #     player_uid: int
 #     login: str
 #     data: base64
 
+@event_decorator
 @dataclass
 class EventChallengeListModified:
     cur_challenge_index: int
@@ -141,6 +165,7 @@ class EventChallengeListModified:
     is_list_modified: bool
 
 
+@event_decorator
 @dataclass
 class EventSPlayerInfo:
     login: str
@@ -152,16 +177,19 @@ class EventSPlayerInfo:
     flags: int
 
 
+@event_decorator
 @dataclass
 class EventPlayerInfoChanged:
     player_info: EventSPlayerInfo
 
 
+@event_decorator
 @dataclass
 class EventManualFlowControlTransition:
     transition: str
 
 
+@event_decorator
 @dataclass
 class EventVoteUpdated:
     # StateName values: NewVote, VoteCancelled, VotePassed or VoteFailed
@@ -169,3 +197,27 @@ class EventVoteUpdated:
     login: str
     cmd_name: str
     cmd_param: str
+
+
+@event_decorator
+@dataclass
+class EventServerStart:
+    pass
+
+
+@event_decorator
+@dataclass
+class EventServerStop:
+    pass
+
+
+@event_decorator
+@dataclass
+class EventBeginRound:
+    pass
+
+
+@event_decorator
+@dataclass
+class EventEndRound:
+    pass
