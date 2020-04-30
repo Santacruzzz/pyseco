@@ -62,6 +62,7 @@ class Pyseco(object):
         if not is_bound(listener_method):
             logger.error(f'This is not a bound method "{listener_method.__name__}"')
             return
+
         self.events_map[event].add(listener_method)
 
     def run(self):
