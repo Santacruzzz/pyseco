@@ -1,7 +1,7 @@
 import logging
 from src.listener import Listener
 from src.utils import strip_size
-from src.includes.events_types import EventPlayerConnect, EventPlayerDisconnect, EventPlayerCheckpoint
+from src.includes.events_types import *
 
 logger = logging.getLogger(__name__)
 
@@ -28,4 +28,3 @@ class PlayerListener(Listener):
     def on_player_checkpoint(self, data: EventPlayerCheckpoint):
         player = self.pyseco.get_player(data.login)
         self.pyseco.client.server_message(f'{strip_size(player.info.nickname)}$z$s$888 on cp')
-

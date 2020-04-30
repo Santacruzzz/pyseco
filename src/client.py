@@ -72,7 +72,7 @@ class Client(TrackmaniaAPI):
     def _prepare_event(self, msg):
         payload, name = loads(msg)
         event = EVENTS_MAP.get(name)
-        data = event(*payload)
+        data = event(*payload) if payload else None
 
         if not name:
             # TODO this is an side effect of noresponse method which should be deleted
