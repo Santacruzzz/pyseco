@@ -1,6 +1,5 @@
 import pytest
 from src.pyseco import Pyseco
-from collections import defaultdict
 from typing import NamedTuple
 
 
@@ -13,7 +12,7 @@ class DefaultParams(NamedTuple):
 
 @pytest.fixture
 def client(mocker):
-    return mocker.patch('src.pyseco.Client')
+    return mocker.patch('src.APIs.trackmania_api.Client')
 
 
 @pytest.fixture
@@ -27,8 +26,8 @@ def default_params():
 
 
 def test_should_create_object(client, default_params, no_listeners):
-    Pyseco(*default_params)
-    client.assert_called_once_with(default_params.ip, default_params.port, defaultdict(set))
+    pyseco = Pyseco(*default_params)
+    client.assert_called_once_with(default_params.ip, default_params.port, pyseco)
 
 
 def test_should_disconnect_on_exit(client, default_params):
