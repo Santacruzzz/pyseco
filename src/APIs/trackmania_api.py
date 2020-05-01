@@ -1,16 +1,25 @@
-from abc import abstractmethod
-
 from src.APIs.method_types import *
+from src.client import Client
 
 
-# TODO add ABC meta
 class TrackmaniaAPI(object):
-    def __init__(self):
-        pass
+    def __init__(self, ip, port, pyseco):
+        self._client = Client(ip, port, pyseco)
 
-    @abstractmethod
-    def __getattr__(self, item):
-        pass
+    def __getattr__(self, name):
+        method = Method(self._client.request, name)
+        if name == 'noresponse':
+            method.set_send(self._client.no_response_request)
+        return method
+
+    def start_listening(self):
+        self._client.loop()
+
+    def connect(self):
+        self._client.connect()
+
+    def disconnect(self):
+        self._client.disconnect()
 
     def authenticate(self, login: str, password: str) -> bool:
         """Allow user authentication by specifying a login and a password, to gain access to the set of
@@ -1200,3 +1209,20 @@ class TrackmaniaAPI(object):
     def get_skins_directory(self) -> str:
         """Returns the path of the skins directory. Only available to Admin."""
         return self.GetSkinsDirectory()
+
+
+class Method:
+    def __init__(self, send, name):
+        self._send = send
+        self._name = name
+
+    def __getattr__(self, name):
+        return Method(self._send, f'{self._name}.{name}')
+
+    def __call__(self, *args):
+        if 'noresponse.' in self._name:
+            self._name = self._name.replace('noresponse.', '')
+        return self._send(self._name, args)
+
+    def set_send(self, send):
+        self._send = send
