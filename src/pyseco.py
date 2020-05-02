@@ -5,6 +5,7 @@ from xmlrpc.client import loads
 from src.APIs.trackmania_api import TrackmaniaAPI
 from src.errors import PlayerNotFound, NotAnEvent, EventDiscarded, PysecoException
 from src.listeners.player_listener import PlayerListener, EventData
+from src.listeners.chat_listener import ChatListener
 from src.player import Player
 from src.server_context import ServerCtx
 from src.utils import is_bound, strip_size
@@ -30,6 +31,7 @@ class Pyseco(TrackmaniaAPI):
 
     def _register_listeners(self):
         PlayerListener('PlayerListener', self)
+        ChatListener('ChatListener', self)
         # and so on
 
     def _synchronize_basic_data(self):
