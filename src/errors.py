@@ -12,3 +12,11 @@ class NotAnEvent(PysecoException):
 
 class EventDiscarded(PysecoException):
     pass
+
+
+class WrongCommand(PysecoException):
+    pass
+
+
+class WrongNumberOfParams(PysecoException):
+    pass
