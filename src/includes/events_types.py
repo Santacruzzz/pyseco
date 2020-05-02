@@ -7,7 +7,7 @@ def event_decorator(cls):
     return cls
 
 
-class Event:
+class EventData:
     def __init__(self, payload, name: str):
         self.type = EVENTS_MAP[name]
         self.name = self.type.name
