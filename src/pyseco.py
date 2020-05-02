@@ -4,7 +4,7 @@ from collections import defaultdict
 from xmlrpc.client import loads
 from src.APIs.trackmania_api import TrackmaniaAPI
 from src.errors import PlayerNotFound, NotAnEvent, EventDiscarded, PysecoException
-from src.listeners.player_listener import PlayerListener, Event
+from src.listeners.player_listener import PlayerListener, EventData
 from src.player import Player
 from src.server_context import ServerCtx
 from src.utils import is_bound, strip_size
@@ -62,7 +62,7 @@ class Pyseco(TrackmaniaAPI):
         self._synchronize_challenges()
 
     def _prepare_event(self, msg):
-        event = Event(*loads(msg))
+        event = EventData(*loads(msg))
         if not event.name:
             # TODO this is an side effect of noresponse method which should be deleted
             # if parsed xml has no "methodName" (second field in tuple) then this is a response
@@ -130,7 +130,7 @@ class Pyseco(TrackmaniaAPI):
         except PysecoException as ex:
             logger.debug(f'Event discarded: {ex}')
         except UnicodeDecodeError as ex:
-            logger.debug(f'Parsing xml failed. ({ex})')
+            logger.error(f'Parsing xml failed. ({ex})')
 
     def set_debug_data(self, data):
         self.debug_data = data
