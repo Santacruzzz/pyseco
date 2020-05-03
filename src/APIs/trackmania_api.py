@@ -201,7 +201,7 @@ class TrackmaniaAPI(object):
         int PlayerId, int Result} Result==0 -> no answer, Result>0.... -> answer from the player."""
         return [ManialinkPageAnswers(*result.values()) for result in self.GetManialinkPageAnswers()]
 
-    def kick(self, login: str, message: str) -> bool:
+    def kick(self, login: str, message='') -> bool:
         """Kick the player with the specified login, with an optional message. Only available to Admin."""
         return self.Kick(login, message)
 
