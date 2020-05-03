@@ -1,7 +1,7 @@
 import abc
 import pytest
 from collections import namedtuple
-from unittest.mock import Mock, call
+from unittest.mock import Mock, call, MagicMock
 from random import randint
 from src.errors import NotAnEvent, EventDiscarded
 from src.listener import Listener
@@ -33,12 +33,8 @@ class DummyListener(Listener):
         self.on_dummy_event5 = mocker.stub(name='on_dummy_event5_stub')
 
 
-def without_params(method, name):
-    return CallAssert(call(method.request, name), call())
-
-
-def with_params(client, name, *params):
-    return CallAssert(call(client.request, name), call(*params))
+def request_call(name, *params):
+    return call(name, params)
 
 
 # .assert_called_with(Any(str, int))
@@ -49,13 +45,6 @@ def Any(*cls):
     for c in cls:
         AnyComparator.register(c)
     return AnyComparator()
-
-
-def assert_method_calls(method, calls):
-    get_attrs = method.call_args_list
-    obj_calls = method.return_value.call_args_list
-    assert get_attrs == [item.call for item in calls]
-    assert obj_calls == [item.params for item in calls]
 
 
 def random_data():
@@ -78,11 +67,6 @@ def client(mocker):
 @pytest.fixture(autouse=True)
 def no_listeners(mocker):
     mocker.patch('src.pyseco.Pyseco._register_listeners')
-
-
-@pytest.fixture(autouse=True)
-def method(mocker):
-    return mocker.patch('src.APIs.trackmania_api.Method')
 
 
 @pytest.fixture
@@ -110,25 +94,25 @@ def test_events_map_should_be_empty_when_no_listeners_registered():
     assert len(pyseco.events_map) == 0
 
 
-def test_should_sync_data_on_run(client, pyseco, method):
+def test_should_sync_data_on_run(client, pyseco):
     pyseco.run()
     client.connect.assert_called_once()
 
-    assert_method_calls(method, [
-        with_params(client, 'Authenticate', DEFAULT_PARAMS.login, DEFAULT_PARAMS.password),
-        with_params(client, 'ChatSendServerMessage', Any(str)),
-        with_params(client, 'EnableCallbacks', True),
-        without_params(client, 'GetVersion'),
-        without_params(client, 'GetSystemInfo'),
-        with_params(client, 'GetDetailedPlayerInfo', 'edenik'),
-        without_params(client, 'GetLadderServerLimits'),
-        with_params(client, 'GetCurrentGameInfo', 0),
-        with_params(client, 'GetNextGameInfo', 0),
-        with_params(client, 'GetPlayerList', 50, 0, 0),
-        without_params(client, 'GetCurrentChallengeInfo'),
-        with_params(client, 'ChatSendServerMessage', Any(str)),
-        without_params(client, 'GetNextChallengeInfo')
-    ])
+    assert client.request.call_args_list == [
+        request_call('Authenticate', DEFAULT_PARAMS.login, DEFAULT_PARAMS.password),
+        request_call('ChatSendServerMessage', Any(str)),
+        request_call('EnableCallbacks', True),
+        request_call('GetVersion'),
+        request_call('GetSystemInfo'),
+        request_call('GetDetailedPlayerInfo', 'edenik'),
+        request_call('GetLadderServerLimits'),
+        request_call('GetCurrentGameInfo', 0),
+        request_call('GetNextGameInfo', 0),
+        request_call('GetPlayerList', 50, 0, 0),
+        request_call('GetCurrentChallengeInfo'),
+        request_call('ChatSendServerMessage', Any(str)),
+        request_call('GetNextChallengeInfo')
+    ]
 
     client.loop.assert_called_once()
 
