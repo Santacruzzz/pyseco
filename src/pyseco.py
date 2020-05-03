@@ -2,7 +2,7 @@ import logging
 import traceback
 from collections import defaultdict
 from xmlrpc.client import loads
-from src.APIs.trackmania_api import TrackmaniaAPI
+from src.APIs.trackmania_api import TrackmaniaAPI, StateValue
 from src.errors import PlayerNotFound, NotAnEvent, EventDiscarded, PysecoException
 from src.listeners.player_listener import PlayerListener, EventData
 from src.listeners.chat_listener import ChatListener
@@ -39,7 +39,8 @@ class Pyseco(TrackmaniaAPI):
         self.server.system_info = self.get_system_info()
         self.server.detailed_player_info = self.get_detailed_player_info('edenik')
         self.server.ladder_server_limits = self.get_ladder_server_limits()
-        self.server.max_players = self.get_max_players()
+        # self.server.max_players = self.get_max_players()
+        self.server.max_players = StateValue(50, 50)
 
     def _synchronize_game_infos(self):
         self.server.current_game_info = self.get_current_game_info(0)
@@ -96,6 +97,7 @@ class Pyseco(TrackmaniaAPI):
             logger.info('Exiting')
         except Exception as ex:
             logger.error(traceback.format_exc())
+            raise
 
     def add_player(self, login: str, is_spectator: bool = False):
         if login not in self.server.playersInfos:
