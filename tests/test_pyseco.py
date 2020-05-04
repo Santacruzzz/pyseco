@@ -13,6 +13,7 @@ DummyEvent = namedtuple('DummyEvent', ['name'])
 DefaultParams = namedtuple('DefaultParams', ['login', 'password', 'ip', 'port'])
 DEFAULT_PARAMS = DefaultParams('login', 'password', 'ip', 1234)
 CallAssert = namedtuple('CallAssert', ['call', 'params'])
+TM_FOREVER = 1
 
 
 class Events:
@@ -104,17 +105,31 @@ def test_should_sync_data_on_run(client, pyseco):
         request_call('EnableCallbacks', True),
         request_call('GetVersion'),
         request_call('GetSystemInfo'),
-        request_call('GetDetailedPlayerInfo', 'edenik'),
+        request_call('GetDetailedPlayerInfo', Any(str)),
         request_call('GetLadderServerLimits'),
-        request_call('GetCurrentGameInfo', 0),
-        request_call('GetNextGameInfo', 0),
-        request_call('GetPlayerList', 50, 0, 0),
+        request_call('GetGameInfos', TM_FOREVER),
+        request_call('GetPlayerList', Any(int), Any(int), TM_FOREVER),
         request_call('GetCurrentChallengeInfo'),
         request_call('ChatSendServerMessage', Any(str)),
         request_call('GetNextChallengeInfo')
     ]
 
     client.loop.assert_called_once()
+
+
+def test_an_exception_other_than_keyboardinterrupt_should_be_passed_further(client, pyseco):
+    client.request.side_effect = [True, True, Exception]
+    with pytest.raises(Exception):
+        pyseco.run()
+
+
+def test_should_send_disconnect_message_on_keyboardinterrupt(client, pyseco):
+    client.request.side_effect = [True, KeyboardInterrupt]
+    pyseco.run()
+    assert client.request.call_args_list == [
+        request_call('Authenticate', DEFAULT_PARAMS.login, DEFAULT_PARAMS.password),
+        request_call('ChatSendServerMessage', Any(str)),
+    ]
 
 
 def test_should_add_registered_listener_to_events_map(mocker, pyseco):

@@ -553,7 +553,7 @@ class TrackmaniaAPI(object):
         return self.SetServerOptions(server_options)
 
     # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
-    def get_server_options(self, tm_version: int) -> ServerOptions:
+    def get_server_options(self, tm_version: int = 1) -> ServerOptions:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever).
         Returns a struct containing the server options: Name, Comment, Password, PasswordForSpectator,
         CurrentMaxPlayers, NextMaxPlayers, CurrentMaxSpectators, NextMaxSpectators, IsP2PUpload, IsP2PDownload,
@@ -678,7 +678,7 @@ class TrackmaniaAPI(object):
         return self.SetGameInfos(game_infos)
 
     # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
-    def get_current_game_info(self, tm_version: int) -> GameInfo:
+    def get_current_game_info(self, tm_version: int = 1) -> GameInfo:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever). Returns a struct containing
         the current game settings, ie: GameMode, ChatTime, NbChallenge, RoundsPointsLimit, RoundsUseNewRules,
         RoundsForcedLaps, TimeAttackLimit, TimeAttackSynchStartPeriod, TeamPointsLimit, TeamMaxPoints, TeamUseNewRules,
@@ -688,7 +688,7 @@ class TrackmaniaAPI(object):
         return GameInfo(*self.GetCurrentGameInfo(tm_version).values())
 
     # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
-    def get_next_game_info(self, tm_version: int) -> GameInfo:
+    def get_next_game_info(self, tm_version: int = 1) -> GameInfo:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever).
         Returns a struct containing the game settings for the next challenge, ie: GameMode, ChatTime, NbChallenge,
         RoundsPointsLimit, RoundsUseNewRules, RoundsForcedLaps, TimeAttackLimit, TimeAttackSynchStartPeriod,
@@ -699,7 +699,7 @@ class TrackmaniaAPI(object):
         return GameInfo(*self.GetNextGameInfo(tm_version).values())
 
     # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
-    def get_game_infos(self, tm_version: int) -> StateValue:
+    def get_game_infos(self, tm_version: int = 1) -> StateValue:
         """Optional parameter for compatibility: struct version (0 = united, 1 = forever).
         Returns a struct containing two other structures, the first containing the current game settings and
         the second the game settings for next challenge. The first structure is named CurrentGameInfos and the
@@ -1024,7 +1024,7 @@ class TrackmaniaAPI(object):
         return self.InsertPlaylistFromMatchSettings(filename)
 
     # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
-    def get_player_info(self, login: str, tm_version: int) -> PlayerInfo:
+    def get_player_info(self, login: str, tm_version: int = 1) -> PlayerInfo:
         """
         Returns a struct containing the infos on the player with the specified login, with an optional parameter for
         compatibility: struct version (0 = united, 1 = forever). The structure is identical to the ones from
@@ -1050,7 +1050,7 @@ class TrackmaniaAPI(object):
     def get_player_list(self,
                         max_number_of_infos: int,
                         starting_index: int = 0,
-                        compatibility: int = 0) -> List[PlayerInfo]:
+                        compatibility: int = 1) -> List[PlayerInfo]:
         """
         Returns the list of players on the server. This method take two parameters.
         The first parameter specifies the maximum number of infos to be returned, and the second one the starting
@@ -1067,7 +1067,7 @@ class TrackmaniaAPI(object):
         return [PlayerInfo(*result.values()) for result in
                 self.GetPlayerList(max_number_of_infos, starting_index, compatibility)]
 
-    def get_main_server_player_info(self, compatibility: int) -> PlayerInfo:
+    def get_main_server_player_info(self, compatibility: int = 1) -> PlayerInfo:
         """
         Returns a struct containing the player infos of the game server (ie: in case of a basic server, itself;
         in case of a relay server, the main server),

@@ -43,8 +43,9 @@ class Pyseco(TrackmaniaAPI):
         self.server.max_players = StateValue(50, 50)
 
     def _synchronize_game_infos(self):
-        self.server.current_game_info = self.get_current_game_info(0)
-        self.server.next_game_info = self.get_next_game_info(0)
+        game_infos = self.get_game_infos(1)
+        self.server.current_game_info = game_infos.current_value
+        self.server.next_game_info = game_infos.next_value
 
     def _synchronize_players(self):
         for player in self.get_player_list(self.server.max_players.current_value):
