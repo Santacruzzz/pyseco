@@ -133,12 +133,14 @@ class LadderServerLimits:
     ladder_limit_max: int = 0
 
 
+# aligned to FOREVER version
 @dataclass
 class ServerOptions:
     name: str = ''
     comment: str = ''
     password: str = ''
     password_for_spectator: str = ''
+    hide_server: int = 0
     current_max_players: int = 0
     next_max_players: int = 0
     current_max_spectators: int = 0
@@ -147,6 +149,8 @@ class ServerOptions:
     is_p2p_download: bool = True
     current_ladder_mode: int = 0
     next_ladder_mode: int = 0
+    ladder_server_limit_max: float = 0
+    ladder_server_limit_min: float = 0
     current_vehicle_net_quality: int = 0
     next_vehicle_net_quality: int = 0
     current_callvote_timeout: int = 0
@@ -154,12 +158,34 @@ class ServerOptions:
     callvote_ratio: float = 0
     allow_challenge_download: bool = True
     autosave_replays: bool = True
+    autosave_validation_replays: bool = True
     referee_password: str = ''
     referee_mode: int = 0
-    autosave_validation_replays: bool = True
-    hide_server: int = 0
     current_use_changing_validation_seed: bool = True
     next_use_changing_validation_seed: bool = True
+
+    def as_dict(self):
+        return {
+            'Name': self.name,
+            'Comment': self.comment,
+            'Password': self.password,
+            'PasswordForSpectator': self.password_for_spectator,
+            'NextMaxPlayers': self.next_max_players,
+            'NextMaxSpectators': self.next_max_spectators,
+            'IsP2PUpload': self.is_p2p_upload,
+            'IsP2PDownload': self.is_p2p_download,
+            'NextLadderMode': self.next_ladder_mode,
+            'NextVehicleNetQuality': self.next_vehicle_net_quality,
+            'NextCallVoteTimeOut': self.next_callvote_timeout,
+            'CallVoteRatio': self.callvote_ratio,
+            'AllowChallengeDownload': self.allow_challenge_download,
+            'AutoSaveReplays': self.autosave_replays,
+            'RefereePassword': self.referee_password,
+            'RefereeMode': self.referee_mode,
+            'AutoSaveValidationReplays': self.autosave_validation_replays,
+            'HideServer': self.hide_server,
+            'UseChangingValidationSeed': self.current_use_changing_validation_seed
+        }
 
 
 @dataclass
