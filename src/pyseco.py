@@ -37,6 +37,7 @@ class Pyseco(TrackmaniaAPI):
 
     def _synchronize_basic_data(self):
         self.server.version = self.get_version()
+        self.server.options = self.get_server_options()
         self.server.system_info = self.get_system_info()
         self.server.detailed_player_info = self.get_detailed_player_info('edenik')
         self.server.ladder_server_limits = self.get_ladder_server_limits()
@@ -44,7 +45,7 @@ class Pyseco(TrackmaniaAPI):
         self.server.max_players = StateValue(50, 50)
 
     def _synchronize_game_infos(self):
-        game_infos = self.get_game_infos(1)
+        game_infos = self.get_game_infos()
         self.server.current_game_info = game_infos.current_value
         self.server.next_game_info = game_infos.next_value
 

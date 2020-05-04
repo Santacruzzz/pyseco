@@ -4,6 +4,7 @@
 class ServerCtx:
     def __init__(self):
         self.version = None
+        self.options = None
         self.system_info = None
         self.max_players = None
         self.detailed_player_info = None

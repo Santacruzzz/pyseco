@@ -550,7 +550,7 @@ class TrackmaniaAPI(object):
         HideServer, UseChangingValidationSeed. Only available to Admin. A change of NextMaxPlayers, NextMaxSpectators,
         NextLadderMode, NextVehicleNetQuality, NextCallVoteTimeOut or UseChangingValidationSeed
         requires a challenge restart to be taken into account."""
-        return self.SetServerOptions(server_options)
+        return self.SetServerOptions(server_options.as_dict())
 
     # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
     def get_server_options(self, tm_version: int = 1) -> ServerOptions:

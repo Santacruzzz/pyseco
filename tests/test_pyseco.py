@@ -104,6 +104,7 @@ def test_should_sync_data_on_run(client, pyseco):
         request_call('ChatSendServerMessage', Any(str)),
         request_call('EnableCallbacks', True),
         request_call('GetVersion'),
+        request_call('GetServerOptions', TM_FOREVER),
         request_call('GetSystemInfo'),
         request_call('GetDetailedPlayerInfo', Any(str)),
         request_call('GetLadderServerLimits'),
