@@ -16,7 +16,7 @@ class Transport:
     def _read_response(self, wait_for_number):
         while True:
             size, request_number = self.read_message_info()
-            logger.debug(f'<- READ LEN={size}, NUM={request_number}')
+            logger.debug(f'READ LEN={size}, NUM={request_number}')
             msg = self.recv_decoded(size)
 
             if not wait_for_number or request_number == wait_for_number:
