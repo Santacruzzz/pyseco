@@ -1,8 +1,8 @@
-import logging
 import socket
 from struct import unpack, pack
+from src.includes.log import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 
 class Transport:

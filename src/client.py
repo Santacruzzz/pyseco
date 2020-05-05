@@ -1,9 +1,9 @@
-import logging
 from queue import Queue
 from xmlrpc.client import loads, dumps, Fault
+from src.includes.log import setup_logger
 from src.transport import Transport
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 
 class Client:

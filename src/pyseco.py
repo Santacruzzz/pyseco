@@ -4,13 +4,14 @@ from collections import defaultdict
 from xmlrpc.client import loads
 from src.APIs.trackmania_api import TrackmaniaAPI, StateValue
 from src.errors import PlayerNotFound, NotAnEvent, EventDiscarded, PysecoException
+from src.includes.log import setup_logger
 from src.listeners.player_listener import PlayerListener, EventData
 from src.listeners.chat_listener import ChatListener
 from src.player import Player
 from src.server_context import ServerCtx
 from src.utils import is_bound, strip_size
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 
 class Pyseco(TrackmaniaAPI):
