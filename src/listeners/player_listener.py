@@ -1,9 +1,9 @@
-import logging
+from src.includes.log import setup_logger
 from src.listener import Listener
 from src.utils import strip_size
 from src.includes.events_types import *
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 
 class PlayerListener(Listener):

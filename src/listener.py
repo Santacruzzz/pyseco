@@ -1,6 +1,6 @@
-import logging
+from src.includes.log import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 
 class Listener(object):
