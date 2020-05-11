@@ -3,7 +3,7 @@ from typing import Any
 
 
 # TODO add inheritance to types returned by functions which takes compatibility version in parameter (united/nations)
-# TODO DetailedPlayerInfo -> class
+
 from typing import List
 
 
