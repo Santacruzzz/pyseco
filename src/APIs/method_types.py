@@ -49,6 +49,12 @@ class CallVoteRatio:
     command: str = ''
     ratio: float = 0
 
+    def as_dict(self):
+        return {
+            'Command': self.command,
+            'Ratio': self.ratio
+        }
+
 
 @dataclass
 class ManialinkPageAnswers:
@@ -224,6 +230,23 @@ class GameInfo:
     laps_time_limit: int = 0
     finish_timeout: int = 0
 
+    def as_dict(self):
+        return {
+            'GameMode': self.game_mode,
+            'ChatTime': self.chat_time,
+            'RoundsPointsLimit': self.rounds_points_limit,
+            'RoundsUseNewRules': self.rounds_use_new_rules,
+            'RoundsForcedLaps': self.rounds_forced_laps,
+            'TimeAttackLimit,': self.timeattack_limit,
+            'TimeAttackSynchStartPeriod': self.timeattack_synch_start_period,
+            'TeamPointsLimit': self.team_points_limit,
+            'TeamMaxPoints': self.team_max_points,
+            'TeamUseNewRules': self.team_use_new_rules,
+            'LapsNbLaps': self.laps_nb_laps,
+            'LapsTimeLimit': self.laps_time_limit,
+            'FinishTimeout': self.finish_timeout
+        }
+
 
 @dataclass
 class ChallengeInfo:
@@ -310,3 +333,9 @@ class NetworkStats:
 class TextWithLanguage:
     lang: str = ''
     text: str = ''
+
+    def as_dict(self):
+        return {
+            'Lang': self.lang,
+            'Text': self.text
+        }

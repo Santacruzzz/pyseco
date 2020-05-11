@@ -1,12 +1,10 @@
-import logging
 import traceback
 from collections import defaultdict
 from xmlrpc.client import loads
 from src.APIs.trackmania_api import TrackmaniaAPI, StateValue
 from src.errors import PlayerNotFound, NotAnEvent, EventDiscarded, PysecoException
+from src.includes.events_types import EventData
 from src.includes.log import setup_logger
-from src.listeners.player_listener import PlayerListener, EventData
-from src.listeners.chat_listener import ChatListener
 from src.player import Player
 from src.server_context import ServerCtx
 from src.utils import is_bound, strip_size
@@ -21,7 +19,6 @@ class Pyseco(TrackmaniaAPI):
         self.password = password
         self.events_map = defaultdict(set)
         self.server = ServerCtx()
-        self._register_listeners()
         self.debug_data = None
 
     def __enter__(self):
@@ -30,10 +27,8 @@ class Pyseco(TrackmaniaAPI):
     def __exit__(self, *args):
         self.disconnect()
 
-    def _register_listeners(self):
-        PlayerListener('PlayerListener', self)
-        ChatListener('ChatListener', self)
-        # and so on
+    def add_listener(self, class_name, listener_name):
+        class_name(listener_name, self)
 
     def _synchronize_basic_data(self):
         self.server.version = self.get_version()
@@ -114,7 +109,7 @@ class Pyseco(TrackmaniaAPI):
         if login in self.server.playersRankings:
             del self.server.playersRankings[login]
 
-    def get_player(self, login):
+    def get_player(self, login: str) -> Player:
         try:
             return Player(self.server.playersInfos[login], self.server.playersRankings[login])
         except KeyError:
@@ -141,3 +136,13 @@ class Pyseco(TrackmaniaAPI):
 
     def set_debug_data(self, data):
         self.debug_data = data
+
+
+class Listener(object):
+    def __init__(self, name: str, pyseco_instance: Pyseco):
+        self._name = name
+        self.pyseco = pyseco_instance
+        logger.debug(f'{name} registered')
+
+    def __str__(self):
+        return f'Listener: {self._name}'

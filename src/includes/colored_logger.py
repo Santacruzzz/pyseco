@@ -22,7 +22,7 @@ class ColoredFormatter(logging.Formatter):
         logging.Formatter.format(self, record)
 
         date_time = record.asctime
-        func_name = record.funcName
+        func_name = colored(record.funcName, 'white', attrs=['bold'])
         message = record.message
         file_name = f'{record.filename}:{str(record.lineno)}'
         levelname = record.levelname
@@ -33,7 +33,7 @@ class ColoredFormatter(logging.Formatter):
             message = message.replace('<-', colored('<-', 'green')).replace('->', colored('->', 'red'))
             file_name = colored(file_name, 'green', attrs=['dark'])
 
-        return '{} {:20} {}: {} ({})'.format(date_time, func_name, levelname, message, file_name)
+        return '{} {:35}{}: {} ({})'.format(date_time, func_name, levelname, message, file_name)
 
 
 class ColoredLogger(logging.Logger):
