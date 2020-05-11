@@ -1,7 +1,7 @@
 import logging
 from inspect import signature
 
-from src.listener import Listener
+from src.pyseco import Listener
 from src.includes.events_types import *
 from src.controllers.admin_controller import AdminController
 from src.utils import CommandParser

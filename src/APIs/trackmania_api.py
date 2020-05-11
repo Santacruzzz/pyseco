@@ -83,7 +83,7 @@ class TrackmaniaAPI(object):
     def set_call_vote_ratios(self, vote_ratios: List[CallVoteRatio]) -> bool:
         """Set new ratios for passing specific votes. The parameter is an array of structs {string Command,
         double Ratio}, ratio is in [0,1] or -1 for vote disabled. Only available to Admin. """
-        return self.SetCallVoteRatios(vote_ratios)
+        return self.SetCallVoteRatios([vote_ratio.as_dict() for vote_ratio in vote_ratios])
 
     def get_call_vote_ratios(self) -> List[CallVoteRatio]:
         """Get the current ratios for passing votes."""
@@ -97,7 +97,7 @@ class TrackmaniaAPI(object):
         """Send a localised text message to all clients without the server login, or optionally to a Login (which can
         be a single login or a list of comma-separated logins). The parameter is an array of structures {Lang=??,
         Text=...}. If no matching language is found, the last text in the array is used. Only available to Admin. """
-        return self.ChatSendServerMessageToLanguage(messages, logins)
+        return self.ChatSendServerMessageToLanguage([message.as_dict() for message in messages], logins)
 
     def chat_send_server_message_to_id(self, message: str, player_id: int) -> bool:
         """Send a text message without the server login to the client with the specified PlayerId.
@@ -117,7 +117,7 @@ class TrackmaniaAPI(object):
         """Send a localised text message to all clients, or optionally to a Login (which can be a single
         login or a list of comma-separated logins). The parameter is an array of structures {Lang=??, Text=...}.
         If no matching language is found, the last text in the array is used. Only available to Admin."""
-        return self.ChatSendToLanguage(messages, login)
+        return self.ChatSendToLanguage([message.as_dict() for message in messages], login)
 
     def chat_send_to_login(self, message: str, logins: str) -> bool:
         """Send a text message to the client with the specified login. Login can be a single
@@ -236,7 +236,7 @@ class TrackmaniaAPI(object):
         The list is an array of structures. Each structure contains the following fields :
         Login, ClientName and IPAddress."""
         return [BanItem(*result.values()) for result in
-                self.GetList[BanItem](max_number_of_infos, starting_index)]
+                self.GetBanList(max_number_of_infos, starting_index)]
 
     def black_list(self, login: str) -> bool:
         """Blacklist the player with the specified login. Only available to SuperAdmin."""
@@ -675,7 +675,7 @@ class TrackmaniaAPI(object):
         FinishTimeout, and optionally: AllWarmUpDuration, DisableRespawn, ForceShowAllOpponents,
         RoundsPointsLimitNewRules, TeamPointsLimitNewRules, CupPointsLimit, CupRoundsPerChallenge, CupNbWinners,
         CupWarmUpDuration. Only available to Admin. Requires a challenge restart to be taken into account."""
-        return self.SetGameInfos(game_infos)
+        return self.SetGameInfos(game_infos.as_dict())
 
     # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
     def get_current_game_info(self, tm_version: int = 1) -> GameInfo:
@@ -962,7 +962,7 @@ class TrackmaniaAPI(object):
         index in the selection. The list is an array of structures. Each structure contains the following fields :
         Name, UId, FileName, Environnement, Author, GoldTime and CopperPrice."""
         return [ChallengeInfo(*result.values()) for result in
-                self.GetList[ChallengeInfo](max_number_of_infos, starting_index)]
+                self.GetChallengeList(max_number_of_infos, starting_index)]
 
     def add_challenge(self, filename: str) -> bool:
         """Add the challenge with the specified filename at the end of the current selection.
