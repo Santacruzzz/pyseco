@@ -1,5 +1,5 @@
 import pytest
-from src.utils import CommandParser
+from src.utils import CommandParser, strip_nickname
 from src.errors import WrongCommand
 
 
@@ -40,3 +40,12 @@ class TestCommandParser:
     def test_should_raise_wrong_command(self):
         with pytest.raises(WrongCommand):
             CommandParser.parser_regex(DummyClassWithCommands, '*unexcpected_command')
+
+
+@pytest.mark.parametrize('nickname, expected', [
+    ('$fffKas$i$a06ia$000tak', 'Kasiatak'),
+    ('$l[http://www.google.com]$f99Tomek$n$w$o$snie', 'Tomeknie'),
+    ('$fff$aaa$000', ''), ('$o$w$i$n$s', ''), ('$l[http://www.google.com]', '')
+])
+def test_strip_nickname(nickname, expected):
+    assert strip_nickname(nickname) == expected
