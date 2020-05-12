@@ -3,7 +3,7 @@ from typing import Any
 
 
 # TODO add inheritance to types returned by functions which takes compatibility version in parameter (united/nations)
-# TODO DetailedPlayerInfo -> class
+
 from typing import List
 
 
@@ -48,6 +48,12 @@ class Version:
 class CallVoteRatio:
     command: str = ''
     ratio: float = 0
+
+    def as_dict(self):
+        return {
+            'Command': self.command,
+            'Ratio': self.ratio
+        }
 
 
 @dataclass
@@ -133,12 +139,14 @@ class LadderServerLimits:
     ladder_limit_max: int = 0
 
 
+# aligned to FOREVER version
 @dataclass
 class ServerOptions:
     name: str = ''
     comment: str = ''
     password: str = ''
     password_for_spectator: str = ''
+    hide_server: int = 0
     current_max_players: int = 0
     next_max_players: int = 0
     current_max_spectators: int = 0
@@ -147,6 +155,8 @@ class ServerOptions:
     is_p2p_download: bool = True
     current_ladder_mode: int = 0
     next_ladder_mode: int = 0
+    ladder_server_limit_max: float = 0
+    ladder_server_limit_min: float = 0
     current_vehicle_net_quality: int = 0
     next_vehicle_net_quality: int = 0
     current_callvote_timeout: int = 0
@@ -154,12 +164,34 @@ class ServerOptions:
     callvote_ratio: float = 0
     allow_challenge_download: bool = True
     autosave_replays: bool = True
+    autosave_validation_replays: bool = True
     referee_password: str = ''
     referee_mode: int = 0
-    autosave_validation_replays: bool = True
-    hide_server: int = 0
     current_use_changing_validation_seed: bool = True
     next_use_changing_validation_seed: bool = True
+
+    def as_dict(self):
+        return {
+            'Name': self.name,
+            'Comment': self.comment,
+            'Password': self.password,
+            'PasswordForSpectator': self.password_for_spectator,
+            'NextMaxPlayers': self.next_max_players,
+            'NextMaxSpectators': self.next_max_spectators,
+            'IsP2PUpload': self.is_p2p_upload,
+            'IsP2PDownload': self.is_p2p_download,
+            'NextLadderMode': self.next_ladder_mode,
+            'NextVehicleNetQuality': self.next_vehicle_net_quality,
+            'NextCallVoteTimeOut': self.next_callvote_timeout,
+            'CallVoteRatio': self.callvote_ratio,
+            'AllowChallengeDownload': self.allow_challenge_download,
+            'AutoSaveReplays': self.autosave_replays,
+            'RefereePassword': self.referee_password,
+            'RefereeMode': self.referee_mode,
+            'AutoSaveValidationReplays': self.autosave_validation_replays,
+            'HideServer': self.hide_server,
+            'UseChangingValidationSeed': self.current_use_changing_validation_seed
+        }
 
 
 @dataclass
@@ -197,6 +229,23 @@ class GameInfo:
     laps_nb_laps: int = 0
     laps_time_limit: int = 0
     finish_timeout: int = 0
+
+    def as_dict(self):
+        return {
+            'GameMode': self.game_mode,
+            'ChatTime': self.chat_time,
+            'RoundsPointsLimit': self.rounds_points_limit,
+            'RoundsUseNewRules': self.rounds_use_new_rules,
+            'RoundsForcedLaps': self.rounds_forced_laps,
+            'TimeAttackLimit,': self.timeattack_limit,
+            'TimeAttackSynchStartPeriod': self.timeattack_synch_start_period,
+            'TeamPointsLimit': self.team_points_limit,
+            'TeamMaxPoints': self.team_max_points,
+            'TeamUseNewRules': self.team_use_new_rules,
+            'LapsNbLaps': self.laps_nb_laps,
+            'LapsTimeLimit': self.laps_time_limit,
+            'FinishTimeout': self.finish_timeout
+        }
 
 
 @dataclass
@@ -284,3 +333,9 @@ class NetworkStats:
 class TextWithLanguage:
     lang: str = ''
     text: str = ''
+
+    def as_dict(self):
+        return {
+            'Lang': self.lang,
+            'Text': self.text
+        }

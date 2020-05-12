@@ -4,8 +4,7 @@ from collections import namedtuple
 from unittest.mock import Mock, call, MagicMock
 from random import randint
 from src.errors import NotAnEvent, EventDiscarded
-from src.listener import Listener
-from src.pyseco import Pyseco
+from src.pyseco import Listener, Pyseco
 
 
 DummyEventData = namedtuple('DummyEventData', ['name', 'data'])
@@ -65,11 +64,6 @@ def client(mocker):
     return mocker.patch('src.APIs.trackmania_api.Client').return_value
 
 
-@pytest.fixture(autouse=True)
-def no_listeners(mocker):
-    mocker.patch('src.pyseco.Pyseco._register_listeners')
-
-
 @pytest.fixture
 def pyseco(mocker):
     mocker.patch('src.pyseco.is_bound').return_value = True
@@ -104,6 +98,7 @@ def test_should_sync_data_on_run(client, pyseco):
         request_call('ChatSendServerMessage', Any(str)),
         request_call('EnableCallbacks', True),
         request_call('GetVersion'),
+        request_call('GetServerOptions', TM_FOREVER),
         request_call('GetSystemInfo'),
         request_call('GetDetailedPlayerInfo', Any(str)),
         request_call('GetLadderServerLimits'),

@@ -1,7 +1,7 @@
-from src.includes.log import setup_logger
-from src.listener import Listener
-from src.utils import strip_size
 from src.includes.events_types import *
+from src.includes.log import setup_logger
+from src.pyseco import Listener
+from src.utils import strip_size
 
 logger = setup_logger(__name__)
 
