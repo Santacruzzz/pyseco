@@ -1,5 +1,5 @@
 import pytest
-from src.utils import CommandParser, strip_nickname
+from src.utils import CommandParser, strip_nickname, strip_size
 from src.errors import WrongCommand
 
 
@@ -42,10 +42,23 @@ class TestCommandParser:
             CommandParser.parser_regex(DummyClassWithCommands, '*unexcpected_command')
 
 
+@pytest.mark.parametrize('text, expected', [
+    ('$o$s$w$nKasia$l[http://www.google.com]tekst', 'Kasiatekst'),
+    ('$fffKas$i$a06ia$000tak', '$fffKas$a06ia$000tak'),
+    ('Kasia', 'Kasia'),
+    ('$$idupa', '$$idupa')
+])
+
+def test_strip_size(text, expected):
+    assert strip_size(text) == expected
+
+
 @pytest.mark.parametrize('nickname, expected', [
-    ('$fffKas$i$a06ia$000tak', 'Kasiatak'),
-    ('$l[http://www.google.com]$f99Tomek$n$w$o$snie', 'Tomeknie'),
-    ('$fff$aaa$000', ''), ('$o$w$i$n$s', ''), ('$l[http://www.google.com]', '')
+    ('$fffKas$a06ia$000tak', 'Kasiatak'),
+    ('$fff$aaa$000', ''),
+    ('Kasia', 'Kasia'),
+    ('$$antacruz', '$$antacruz'),
+    ('$fff$$aaadupa', '$$aaadupa')
 ])
 def test_strip_nickname(nickname, expected):
     assert strip_nickname(nickname) == expected

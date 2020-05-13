@@ -23,14 +23,12 @@ class CommandParser:
 
 
 def strip_size(text):
-    return text.replace('$o', '').replace('$w', '')
+    return re.sub(r'(?<!\$)\$[iwosn]|(?<!\$)\$l\[\S*\]', '', text)
+
 
 def strip_nickname(nickname):
+    return re.sub(r'(?<!\$)\$[0-9a-fA-F]{3}', '', strip_size(nickname))
 
-    nickname = nickname.replace('$i', '').replace('$w', '').replace('$o', '').replace('$s', '').replace('$n', '')
-    nickname = re.sub(r'\$[0-9a-fA-F]{3}', '', nickname)
-    nickname = re.sub(r'\$l\[\S*\]', '', nickname)
-    return nickname
 
 def is_bound(m):
     return hasattr(m, '__self__')
