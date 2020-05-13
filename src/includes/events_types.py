@@ -2,6 +2,10 @@ from dataclasses import dataclass
 from typing import List
 
 
+def init_from_list(class_name, items):
+    return [class_name(*item.values()) for item in items]
+
+
 def event_decorator(cls):
     cls.name = cls.__name__
     return cls
@@ -56,9 +60,8 @@ class EventEcho:
     public: str
 
 
-@event_decorator
 @dataclass
-class EventSChallengeInfo:
+class ChallengeInfo:
     uid: str
     name: str
     filename: str
@@ -78,12 +81,14 @@ class EventSChallengeInfo:
 @event_decorator
 @dataclass
 class EventBeginRace:
-    challenge: EventSChallengeInfo
+    challenge: ChallengeInfo
+
+    def __init__(self, challenge):
+        self.challenge = ChallengeInfo(*challenge.values())
 
 
-@event_decorator
 @dataclass
-class EventSPlayerRanking:
+class PlayerRanking:
     login: str
     nickname: str
     player_id: int
@@ -98,26 +103,42 @@ class EventSPlayerRanking:
 @event_decorator
 @dataclass
 class EventEndRace:
-    rankings: List[EventSPlayerRanking]
-    challenge: EventSChallengeInfo
+    rankings: List[PlayerRanking]
+    challenge: ChallengeInfo
+
+    def __init__(self, rankings, challenge):
+        self.rankings = init_from_list(PlayerRanking, rankings)
+        self.challenge = ChallengeInfo(*challenge.values())
 
 
 @event_decorator
 @dataclass
 class EventBeginChallenge:
-    challenge: EventSChallengeInfo
+    challenge: ChallengeInfo
     warm_up: bool
     match_continuation: bool
+
+    def __init__(self, challenge, warm_up, match_continuation):
+        self.challenge = ChallengeInfo(*challenge.values())
+        self.warm_up = warm_up
+        self.match_continuation = match_continuation
 
 
 @event_decorator
 @dataclass
 class EventEndChallenge:
-    rankings: List[EventSPlayerRanking]
-    challenge: EventSChallengeInfo
+    rankings: List[PlayerRanking]
+    challenge: ChallengeInfo
     was_warm_up: bool
     match_continues_on_next_challenge: bool
     restart_challenge: bool
+
+    def __init__(self, rankings, challenge, was_warm_up, match_continues_on_next_challenge, restart_challenge):
+        self.rankings = init_from_list(PlayerRanking, rankings)
+        self.challenge = ChallengeInfo(*challenge.values())
+        self.was_warm_up = was_warm_up
+        self.match_continues_on_next_challenge = match_continues_on_next_challenge
+        self.restart_challenge = restart_challenge
 
 
 @event_decorator
@@ -172,14 +193,13 @@ class EventBillUpdated:
 @event_decorator
 @dataclass
 class EventChallengeListModified:
-    cur_challenge_index: int
-    nex_challenge_index: int
+    curr_challenge_index: int
+    next_challenge_index: int
     is_list_modified: bool
 
 
-@event_decorator
 @dataclass
-class EventSPlayerInfo:
+class PlayerInfo:
     login: str
     nickname: str
     player_id: int
@@ -192,7 +212,10 @@ class EventSPlayerInfo:
 @event_decorator
 @dataclass
 class EventPlayerInfoChanged:
-    player_info: EventSPlayerInfo
+    player_info: PlayerInfo
+
+    def __init__(self, player_info):
+        self.player_info = PlayerInfo(*player_info.values())
 
 
 @event_decorator
