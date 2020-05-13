@@ -23,7 +23,11 @@ class CommandParser:
 
 
 def strip_size(text):
-    return text.replace('$o', '').replace('$w', '')
+    return re.sub(r'(?<!\$)\$[iwosn]|(?<!\$)\$l\[\S*\]', '', text)
+
+
+def strip_nickname(nickname):
+    return re.sub(r'(?<!\$)\$[0-9a-fA-F]{3}', '', strip_size(nickname))
 
 
 def is_bound(m):
