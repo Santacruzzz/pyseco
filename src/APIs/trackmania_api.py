@@ -1,10 +1,14 @@
 from src.APIs.method_types import *
 from src.client import Client
+from src.includes.config import Config
+from src.includes.mysql_wrapper import MySqlWrapper
 
 
 class TrackmaniaAPI(object):
-    def __init__(self, ip, port, pyseco):
-        self._client = Client(ip, port, pyseco)
+    def __init__(self, config_file):
+        self.config = Config(config_file)
+        self._client = Client(self.config.rcp_ip, self.config.rcp_port, self)
+        self.mysql = MySqlWrapper(self.config)
 
     def __getattr__(self, name):
         method = Method(self._client.request, name)

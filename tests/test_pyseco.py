@@ -1,18 +1,25 @@
 import abc
 import pytest
 from collections import namedtuple
-from unittest.mock import Mock, call, MagicMock
+from unittest.mock import Mock, call
 from random import randint
+
 from src.errors import NotAnEvent, EventDiscarded
 from src.pyseco import Listener, Pyseco
 
 
 DummyEventData = namedtuple('DummyEventData', ['name', 'data'])
 DummyEvent = namedtuple('DummyEvent', ['name'])
-DefaultParams = namedtuple('DefaultParams', ['login', 'password', 'ip', 'port'])
-DEFAULT_PARAMS = DefaultParams('login', 'password', 'ip', 1234)
 CallAssert = namedtuple('CallAssert', ['call', 'params'])
 TM_FOREVER = 1
+
+DummyConfig = namedtuple('Dummyconfig',
+                         ['prefix', 'color', 'tm_login', 'rcp_login',
+                          'rcp_password', 'rcp_ip', 'rcp_port', 'db_hostname',
+                          'db_user', 'db_password', 'db_name', 'db_charset'])
+DUMMY_CONFIG = DummyConfig("T", "$00f", "server_login", "login", "password", "11.22.33.44",
+                           5002, "localhost", "root", "passwd", "aseco", "utf8")
+DUMMY_PATH_TO_CONFIG = '/path/to/config.yaml'
 
 
 class Events:
@@ -67,25 +74,41 @@ def client(mocker):
 @pytest.fixture
 def pyseco(mocker):
     mocker.patch('src.pyseco.is_bound').return_value = True
-    pyseco = Pyseco(*DEFAULT_PARAMS)
-    pyseco.debug_data = {'color': '$fff'}
+    pyseco = Pyseco(DUMMY_PATH_TO_CONFIG)
     return pyseco
+
+
+@pytest.fixture(autouse=True)
+def config(mocker):
+    mocker.patch('src.APIs.trackmania_api.Config').return_value = DUMMY_CONFIG
+
+
+@pytest.fixture(autouse=True)
+def mysql(mocker):
+    return mocker.patch('src.APIs.trackmania_api.MySqlWrapper')
 
 
 def test_should_create_object(mocker):
     client_mock = mocker.patch('src.APIs.trackmania_api.Client')
-    pyseco = Pyseco(*DEFAULT_PARAMS)
-    client_mock.assert_called_once_with(DEFAULT_PARAMS.ip, DEFAULT_PARAMS.port, pyseco)
+    config_mock = mocker.patch('src.APIs.trackmania_api.Config')
+    mysql_mock = mocker.patch('src.APIs.trackmania_api.MySqlWrapper')
+    config_mock.return_value = DUMMY_CONFIG
+
+    pyseco = Pyseco(DUMMY_PATH_TO_CONFIG)
+
+    client_mock.assert_called_once_with(DUMMY_CONFIG.rcp_ip, DUMMY_CONFIG.rcp_port, pyseco)
+    config_mock.assert_called_once_with(DUMMY_PATH_TO_CONFIG)
+    mysql_mock.assert_called_once_with(DUMMY_CONFIG)
 
 
 def test_should_disconnect_on_exit(client):
-    with Pyseco(*DEFAULT_PARAMS):
+    with Pyseco(DUMMY_PATH_TO_CONFIG):
         client.return_value.disconnect.assert_not_called()
     client.disconnect.assert_called_once()
 
 
 def test_events_map_should_be_empty_when_no_listeners_registered():
-    pyseco = Pyseco(*DEFAULT_PARAMS)
+    pyseco = Pyseco(DUMMY_PATH_TO_CONFIG)
     assert len(pyseco.events_map) == 0
 
 
@@ -94,7 +117,7 @@ def test_should_sync_data_on_run(client, pyseco):
     client.connect.assert_called_once()
 
     assert client.request.call_args_list == [
-        request_call('Authenticate', DEFAULT_PARAMS.login, DEFAULT_PARAMS.password),
+        request_call('Authenticate', DUMMY_CONFIG.rcp_login, DUMMY_CONFIG.rcp_password),
         request_call('ChatSendServerMessage', Any(str)),
         request_call('EnableCallbacks', True),
         request_call('GetVersion'),
@@ -122,7 +145,7 @@ def test_should_send_disconnect_message_on_keyboardinterrupt(client, pyseco):
     client.request.side_effect = [True, KeyboardInterrupt]
     pyseco.run()
     assert client.request.call_args_list == [
-        request_call('Authenticate', DEFAULT_PARAMS.login, DEFAULT_PARAMS.password),
+        request_call('Authenticate', DUMMY_CONFIG.rcp_login, DUMMY_CONFIG.rcp_password),
         request_call('ChatSendServerMessage', Any(str)),
     ]
 

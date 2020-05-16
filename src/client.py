@@ -18,23 +18,25 @@ class Client:
         while self.events_queue.qsize():
             self.pyseco.handle_event(self.events_queue.get())
 
-    def no_response_request(self, methodname, params):
-        request = dumps(params, methodname)
-        logger.debug(f'-> sending {methodname}')
+    def no_response_request(self, method_name, params):
+        request = dumps(params, method_name)
+        logger.debug(f'-> sending {method_name}')
         self.transport.send_request(request)
 
-    def request(self, methodname, params):
-        request = dumps(params, methodname)
+    def request(self, method_name, params):
+        request = dumps(params, method_name)
         try:
+            time_start = time.time()
             request_num = self.transport.send_request(request)
-            logger.debug(f'-> request sent: {methodname}, num: {request_num}')
+            logger.debug(f'-> request sent: {method_name}, num: {request_num}')
             resp = self.transport.get_response()
+            time_end = time.time()
             try:
                 response = loads(resp)[0][0]
             except Fault as ex:
                 logger.error(str(ex))
                 response = False
-            logger.debug(f'<- received response: {response}')
+            logger.debug('<- received response: {}, took: {:.2f} ms'.format(response, (time_end - time_start) * 1000))
             return response
         except BrokenPipeError as ex:
             logger.error(ex)
