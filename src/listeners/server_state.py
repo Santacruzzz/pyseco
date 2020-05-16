@@ -45,5 +45,3 @@ class ServerStateListener(Listener):
 
     def on_begin_round(self):
         pass
-
-

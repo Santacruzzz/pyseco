@@ -1,3 +1,4 @@
+import time
 from queue import Queue
 from xmlrpc.client import loads, dumps, Fault
 from src.includes.log import setup_logger
@@ -42,8 +43,11 @@ class Client:
     def connect(self):
         try:
             self.transport.connect()
-            if self.pyseco.get_status().code != 4:
-                logger.error("Server is not ready yet.")
+            status = self.pyseco.get_status()
+            while status.code != 4:
+                logger.info(f'Server is not ready: {status.name}')
+                time.sleep(5)
+                status = self.pyseco.get_status()
         except BrokenPipeError as ex:
             logger.error(ex)
             raise
