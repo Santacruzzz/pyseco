@@ -972,7 +972,7 @@ class TrackmaniaAPI(object):
     def add_challenge_list(self, filenames: List[str]) -> int:
         """Add the list of challenges with the specified filenames at the end of the current selection.
         The list of challenges to add is an array of strings. Only available to Admin."""
-        return self.AddList[ChallengeInfo](filenames)
+        return self.AddChallengeList[ChallengeInfo](filenames)
 
     def remove_challenge(self, filename: str) -> bool:
         """Remove the challenge with the specified filename from the current selection. Only available to Admin."""
@@ -981,7 +981,7 @@ class TrackmaniaAPI(object):
     def remove_challenge_list(self, filenames: List[str]) -> int:
         """Remove the list of challenges with the specified filenames from the current selection.
         The list of challenges to remove is an array of strings. Only available to Admin."""
-        return self.RemoveList[ChallengeInfo](filenames)
+        return self.RemoveChallengeList[ChallengeInfo](filenames)
 
     def insert_challenge(self, filename: str) -> bool:
         """Insert the challenge with the specified filename after the current challenge. Only available to Admin."""
@@ -990,7 +990,7 @@ class TrackmaniaAPI(object):
     def insert_challenge_list(self, filenames: List[str]) -> int:
         """Insert the list of challenges with the specified filenames after the current challenge.
         The list of challenges to insert is an array of strings. Only available to Admin."""
-        return self.InsertList[ChallengeInfo](filenames)
+        return self.InsertChallengeList[ChallengeInfo](filenames)
 
     def choose_next_challenge(self, filename: str) -> bool:
         """Set as next challenge the one with the specified filename, if it is present in the selection.
@@ -1001,7 +1001,7 @@ class TrackmaniaAPI(object):
         """Set as next challenges the list of challenges with the specified filenames,
         if they are present in the selection. The list of challenges to choose is an array of strings.
         Only available to Admin."""
-        return self.ChooseNextList[ChallengeInfo](filenames)
+        return self.ChooseNextChallengeList[ChallengeInfo](filenames)
 
     def load_match_settings(self, filename) -> int:
         """Set a list of challenges defined in the playlist with the specified filename as the current selection
