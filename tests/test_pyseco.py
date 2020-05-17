@@ -66,11 +66,6 @@ def make_empty_event(ev):
     return DummyEventData(name=ev.name, data=None)
 
 
-@pytest.fixture(autouse=True)
-def client(mocker):
-    return mocker.patch('src.APIs.trackmania_api.Client').return_value
-
-
 @pytest.fixture
 def pyseco(mocker):
     mocker.patch('src.pyseco.is_bound').return_value = True
@@ -79,8 +74,15 @@ def pyseco(mocker):
 
 
 @pytest.fixture(autouse=True)
+def client(mocker):
+    return mocker.patch('src.APIs.trackmania_api.Client')
+
+
+@pytest.fixture(autouse=True)
 def config(mocker):
-    mocker.patch('src.APIs.trackmania_api.Config').return_value = DUMMY_CONFIG
+    config_mock = mocker.patch('src.APIs.trackmania_api.Config')
+    config_mock.return_value = DUMMY_CONFIG
+    return config_mock
 
 
 @pytest.fixture(autouse=True)
@@ -88,23 +90,18 @@ def mysql(mocker):
     return mocker.patch('src.APIs.trackmania_api.MySqlWrapper')
 
 
-def test_should_create_object(mocker):
-    client_mock = mocker.patch('src.APIs.trackmania_api.Client')
-    config_mock = mocker.patch('src.APIs.trackmania_api.Config')
-    mysql_mock = mocker.patch('src.APIs.trackmania_api.MySqlWrapper')
-    config_mock.return_value = DUMMY_CONFIG
-
+def test_should_create_object(client, mysql, config):
     pyseco = Pyseco(DUMMY_PATH_TO_CONFIG)
 
-    client_mock.assert_called_once_with(DUMMY_CONFIG.rcp_ip, DUMMY_CONFIG.rcp_port, pyseco)
-    config_mock.assert_called_once_with(DUMMY_PATH_TO_CONFIG)
-    mysql_mock.assert_called_once_with(DUMMY_CONFIG)
+    client.assert_called_once_with(DUMMY_CONFIG.rcp_ip, DUMMY_CONFIG.rcp_port, pyseco)
+    config.assert_called_once_with(DUMMY_PATH_TO_CONFIG)
+    mysql.assert_called_once_with(DUMMY_CONFIG)
 
 
 def test_should_disconnect_on_exit(client):
     with Pyseco(DUMMY_PATH_TO_CONFIG):
         client.return_value.disconnect.assert_not_called()
-    client.disconnect.assert_called_once()
+    client.return_value.disconnect.assert_called_once()
 
 
 def test_events_map_should_be_empty_when_no_listeners_registered():
@@ -114,9 +111,9 @@ def test_events_map_should_be_empty_when_no_listeners_registered():
 
 def test_should_sync_data_on_run(client, pyseco):
     pyseco.run()
-    client.connect.assert_called_once()
+    client.return_value.connect.assert_called_once()
 
-    assert client.request.call_args_list == [
+    assert client.return_value.request.call_args_list == [
         request_call('Authenticate', DUMMY_CONFIG.rcp_login, DUMMY_CONFIG.rcp_password),
         request_call('ChatSendServerMessage', Any(str)),
         request_call('EnableCallbacks', True),
@@ -132,19 +129,19 @@ def test_should_sync_data_on_run(client, pyseco):
         request_call('GetNextChallengeInfo')
     ]
 
-    client.loop.assert_called_once()
+    client.return_value.loop.assert_called_once()
 
 
 def test_an_exception_other_than_keyboardinterrupt_should_be_passed_further(client, pyseco):
-    client.request.side_effect = [True, True, Exception]
+    client.return_value.request.side_effect = [True, True, Exception]
     with pytest.raises(Exception):
         pyseco.run()
 
 
 def test_should_send_disconnect_message_on_keyboardinterrupt(client, pyseco):
-    client.request.side_effect = [True, KeyboardInterrupt]
+    client.return_value.request.side_effect = [True, KeyboardInterrupt]
     pyseco.run()
-    assert client.request.call_args_list == [
+    assert client.return_value.request.call_args_list == [
         request_call('Authenticate', DUMMY_CONFIG.rcp_login, DUMMY_CONFIG.rcp_password),
         request_call('ChatSendServerMessage', Any(str)),
     ]
