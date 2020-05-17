@@ -13,12 +13,10 @@ DummyEvent = namedtuple('DummyEvent', ['name'])
 CallAssert = namedtuple('CallAssert', ['call', 'params'])
 TM_FOREVER = 1
 
-DummyConfig = namedtuple('Dummyconfig',
-                         ['prefix', 'color', 'tm_login', 'rcp_login',
-                          'rcp_password', 'rcp_ip', 'rcp_port', 'db_hostname',
-                          'db_user', 'db_password', 'db_name', 'db_charset'])
-DUMMY_CONFIG = DummyConfig("T", "$00f", "server_login", "login", "password", "11.22.33.44",
-                           5002, "localhost", "root", "passwd", "aseco", "utf8")
+DummyConfig = namedtuple('Dummyconfig', ['prefix', 'color', 'tm_login', 'rcp_login', 'rcp_password', 'rcp_ip',
+                                         'rcp_port', 'db_hostname', 'db_user', 'db_password', 'db_name', 'db_charset'])
+DUMMY_CONFIG = DummyConfig("T", "$00f", "server_login", "login", "password", "11.22.33.44", 5002, "localhost", "root",
+                           "passwd", "aseco", "utf8")
 DUMMY_PATH_TO_CONFIG = '/path/to/config.yaml'
 
 
@@ -122,6 +120,7 @@ def test_should_sync_data_on_run(client, pyseco):
         request_call('GetSystemInfo'),
         request_call('GetDetailedPlayerInfo', Any(str)),
         request_call('GetLadderServerLimits'),
+        request_call('GetMaxPlayers'),
         request_call('GetGameInfos', TM_FOREVER),
         request_call('GetPlayerList', Any(int), Any(int), TM_FOREVER),
         request_call('GetCurrentChallengeInfo'),
