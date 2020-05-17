@@ -1,14 +1,22 @@
+from pymysql.err import OperationalError
+
 from src.APIs.method_types import *
 from src.client import Client
 from src.includes.config import Config
 from src.includes.mysql_wrapper import MySqlWrapper
+from src.includes.log import setup_logger
+
+logger = setup_logger(__name__)
 
 
 class TrackmaniaAPI(object):
     def __init__(self, config_file):
         self.config = Config(config_file)
         self._client = Client(self.config.rcp_ip, self.config.rcp_port, self)
-        self.mysql = MySqlWrapper(self.config)
+        try:
+            self.mysql = MySqlWrapper(self.config)
+        except OperationalError as e:
+            logger.debug(f'Cannot connect to database, error: {e}')
 
     def __getattr__(self, name):
         method = Method(self._client.request, name)
