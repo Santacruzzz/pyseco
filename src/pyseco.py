@@ -1,7 +1,8 @@
 import traceback
 from collections import defaultdict
 from xmlrpc.client import loads
-from src.APIs.trackmania_api import TrackmaniaAPI, StateValue
+
+from src.APIs.trackmania_api import TrackmaniaAPI
 from src.errors import PlayerNotFound, NotAnEvent, EventDiscarded, PysecoException
 from src.includes.events_types import EventData
 from src.includes.log import setup_logger
