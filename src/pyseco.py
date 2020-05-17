@@ -13,13 +13,10 @@ logger = setup_logger(__name__)
 
 
 class Pyseco(TrackmaniaAPI):
-    def __init__(self, login, password, ip, port):
-        super().__init__(ip, port, self)
-        self.login = login
-        self.password = password
+    def __init__(self, config_file):
+        super().__init__(config_file)
         self.events_map = defaultdict(set)
         self.server = ServerCtx()
-        self.debug_data = None
 
     def __enter__(self):
         return self
@@ -34,9 +31,8 @@ class Pyseco(TrackmaniaAPI):
         self.server.version = self.get_version()
         self.server.options = self.get_server_options()
         self.server.system_info = self.get_system_info()
-        self.server.detailed_player_info = self.get_detailed_player_info('edenik')
+        self.server.detailed_player_info = self.get_detailed_player_info(self.config.tm_login)
         self.server.ladder_server_limits = self.get_ladder_server_limits()
-        # self.server.max_players = self.get_max_players()
         self.server.max_players = StateValue(50, 50)
 
     def _synchronize_game_infos(self):
@@ -86,7 +82,7 @@ class Pyseco(TrackmaniaAPI):
     def run(self):
         try:
             self.connect()
-            self.authenticate(self.login, self.password)
+            self.authenticate(self.config.rcp_login, self.config.rcp_password)
             self.server_message('pyseco connected')
             self.enable_callbacks(True)
             self._synchronize()
@@ -117,7 +113,7 @@ class Pyseco(TrackmaniaAPI):
             raise PlayerNotFound(f'Login "{login}" not found')
 
     def server_message(self, msg):
-        self.ChatSendServerMessage(f'${self.debug_data["color"]}~ $888{msg}')
+        self.ChatSendServerMessage(f'{self.config.color}{self.config.prefix}~ $888{msg}')
 
     def handle_event(self, event):
         try:
@@ -133,9 +129,6 @@ class Pyseco(TrackmaniaAPI):
             logger.debug(f'Event discarded: {ex}')
         except UnicodeDecodeError as ex:
             logger.error(f'Parsing xml failed. ({ex})')
-
-    def set_debug_data(self, data):
-        self.debug_data = data
 
 
 class Listener(object):
