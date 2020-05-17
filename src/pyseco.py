@@ -33,7 +33,7 @@ class Pyseco(TrackmaniaAPI):
         self.server.system_info = self.get_system_info()
         self.server.detailed_player_info = self.get_detailed_player_info(self.config.tm_login)
         self.server.ladder_server_limits = self.get_ladder_server_limits()
-        self.server.max_players = StateValue(50, 50)
+        self.server.max_players = self.get_max_players()
 
     def _synchronize_game_infos(self):
         game_infos = self.get_game_infos()
@@ -94,20 +94,20 @@ class Pyseco(TrackmaniaAPI):
             raise
 
     def add_player(self, login: str, is_spectator: bool = False):
-        if login not in self.server.playersInfos:
-            self.server.playersInfos[login] = self.get_detailed_player_info(login)
-        if login not in self.server.playersRankings:
-            self.server.playersRankings[login] = self.get_current_ranking_for_login(login)[0]
+        if login not in self.server.players_infos:
+            self.server.players_infos[login] = self.get_detailed_player_info(login)
+        if login not in self.server.players_rankings:
+            self.server.players_rankings[login] = self.get_current_ranking_for_login(login)[0]
 
     def remove_player(self, login: str):
-        if login in self.server.playersInfos:
-            del self.server.playersInfos[login]
-        if login in self.server.playersRankings:
-            del self.server.playersRankings[login]
+        if login in self.server.players_infos:
+            del self.server.players_infos[login]
+        if login in self.server.players_rankings:
+            del self.server.players_rankings[login]
 
     def get_player(self, login: str) -> Player:
         try:
-            return Player(self.server.playersInfos[login], self.server.playersRankings[login])
+            return Player(self.server.players_infos[login], self.server.players_rankings[login])
         except KeyError:
             logger.error(f'Login "{login}" not found')
             raise PlayerNotFound(f'Login "{login}" not found')
