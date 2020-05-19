@@ -1,7 +1,6 @@
 from src.includes.events_types import *
 from src.includes.log import setup_logger
 from src.pyseco import Listener
-from src.utils import strip_size
 
 logger = setup_logger(__name__)
 
@@ -19,29 +18,33 @@ class ServerStateListener(Listener):
         self.pyseco.register(EventBeginRound.name, self.on_begin_round)
 
     def on_end_round(self):
+        logger.info('EventEndRound')
         pass
 
     def on_end_race(self, data: EventEndRace):
-        logger.info(f'Race end, results: {[rank.nickname for rank in data.rankings]}')
+        logger.info(data)
         pass
 
     def on_end_challenge(self, data: EventEndChallenge):
-        logger.info(f'Challenge {data.challenge.name} finished')
+        logger.info(data)
         pass
 
     def on_status_changed(self, data: EventStatusChanged):
-        logger.info(data.status_name)
+        logger.info(data)
         pass
 
     def on_challenge_list_modified(self, data: EventChallengeListModified):
-        logger.info(f'curr: {data.curr_challenge_index}, next: {data.next_challenge_index}')
+        logger.info(data)
         pass
 
     def on_begin_challenge(self, data: EventBeginChallenge):
+        logger.info(data)
         pass
 
     def on_begin_race(self, data: EventBeginRace):
+        logger.info(data)
         pass
 
     def on_begin_round(self):
+        logger.info('EventBeginRound')
         pass
