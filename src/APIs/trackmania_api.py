@@ -1,37 +1,16 @@
-from pymysql.err import OperationalError
-
 from src.APIs.method_types import *
 from src.client import Client
-from src.includes.config import Config
-from src.includes.mysql_wrapper import MySqlWrapper
 from src.includes.log import setup_logger
 
 logger = setup_logger(__name__)
 
 
-class TrackmaniaAPI(object):
-    def __init__(self, config_file):
-        self.config = Config(config_file)
-        self._client = Client(self.config.rcp_ip, self.config.rcp_port, self)
-        try:
-            self.mysql = MySqlWrapper(self.config)
-        except OperationalError as e:
-            logger.debug(f'Cannot connect to database, error: {e}')
+class XmlRpc:
+    def __init__(self, client: Client):
+        self.sender = client
 
     def __getattr__(self, name):
-        method = Method(self._client.request, name)
-        if name == 'noresponse':
-            method.set_send(self._client.no_response_request)
-        return method
-
-    def start_listening(self):
-        self._client.loop()
-
-    def connect(self):
-        self._client.connect()
-
-    def disconnect(self):
-        self._client.disconnect()
+        return Method(self.sender, name)
 
     def authenticate(self, login: str, password: str) -> bool:
         """Allow user authentication by specifying a login and a password, to gain access to the set of
@@ -1224,17 +1203,12 @@ class TrackmaniaAPI(object):
 
 
 class Method:
-    def __init__(self, send, name):
-        self._send = send
+    def __init__(self, sender: Client, name: str):
+        self.sender = sender
         self._name = name
 
     def __getattr__(self, name):
-        return Method(self._send, f'{self._name}.{name}')
+        return Method(self.sender, f'{self._name}.{name}')
 
     def __call__(self, *args):
-        if 'noresponse.' in self._name:
-            self._name = self._name.replace('noresponse.', '')
-        return self._send(self._name, args)
-
-    def set_send(self, send):
-        self._send = send
+        return self.sender.request(self._name, args)
