@@ -18,11 +18,6 @@ class Client:
         while self.events_queue.qsize():
             self.pyseco.handle_event(self.events_queue.get())
 
-    def no_response_request(self, method_name, params):
-        request = dumps(params, method_name)
-        logger.debug(f'-> sending {method_name}')
-        self.transport.send_request(request)
-
     def request(self, method_name, params):
         request = dumps(params, method_name)
         try:
@@ -45,11 +40,13 @@ class Client:
     def connect(self):
         try:
             self.transport.connect()
-            status = self.pyseco.get_status()
+            status = self.pyseco.rpc.get_status()
             while status.code != 4:
-                logger.info(f'Server is not ready: {status.name}')
-                time.sleep(5)
-                status = self.pyseco.get_status()
+                time.sleep(0.5)
+                new_status = self.pyseco.rpc.get_status()
+                if new_status != status:
+                    status = new_status
+                    logger.info(f'Server is not ready: {status.name}')
         except BrokenPipeError as ex:
             logger.error(ex)
             raise
