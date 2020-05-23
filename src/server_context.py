@@ -1,9 +1,13 @@
 from dataclasses import dataclass
+from xmlrpc.client import MultiCall
 
 from src.api.tm_requests import XmlRpc
 from src.api.tm_types import Version, ServerOptions, SystemInfo, StateValue, DetailedPlayerInfo, \
     LadderServerLimits, GameInfo, ChallengeInfo
 from src.includes.config import Config
+from src.includes.log import setup_logger
+
+logger = setup_logger(__name__)
 
 
 @dataclass
@@ -38,9 +42,18 @@ class ServerCtx:
         self.config = config
 
     def synchronize(self):
-        self.version = self.rpc.get_version()
-        self.options = self.rpc.get_server_options()
-        self.system_info = self.rpc.get_system_info()
-        self.detailed_player_info = self.rpc.get_detailed_player_info(self.config.tm_login)
-        self.ladder_server_limits = self.rpc.get_ladder_server_limits()
-        self.max_players = self.rpc.get_max_players()
+        multicall = MultiCall(self.rpc)
+        multicall.GetVersion()
+        multicall.GetServerOptions()
+        multicall.GetSystemInfo()
+        multicall.GetDetailedPlayerInfo(self.config.tm_login)
+        multicall.GetLadderServerLimits()
+        multicall.GetMaxPlayers()
+        results = multicall()
+
+        self.version = Version(*results[0].values())
+        self.options = ServerOptions(*results[1].values())
+        self.system_info = SystemInfo(*results[2].values())
+        self.detailed_player_info = DetailedPlayerInfo(*results[3].values())
+        self.ladder_server_limits = LadderServerLimits(*results[4].values())
+        self.max_players = StateValue(*results[5].values())
