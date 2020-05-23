@@ -1,13 +1,16 @@
-from src.APIs.method_types import *
-from src.client import Client
+import time
+from xmlrpc.client import dumps, loads, Fault
+
+from src.api.tm_types import *
 from src.includes.log import setup_logger
+from src.transport import Transport
 
 logger = setup_logger(__name__)
 
 
 class XmlRpc:
-    def __init__(self, client: Client):
-        self.sender = client
+    def __init__(self, transport: Transport):
+        self.sender = transport
 
     def __getattr__(self, name):
         return Method(self.sender, name)
@@ -1203,7 +1206,7 @@ class XmlRpc:
 
 
 class Method:
-    def __init__(self, sender: Client, name: str):
+    def __init__(self, sender: Transport, name: str):
         self.sender = sender
         self._name = name
 
@@ -1211,4 +1214,16 @@ class Method:
         return Method(self.sender, f'{self._name}.{name}')
 
     def __call__(self, *args):
-        return self.sender.request(self._name, args)
+        request = dumps(args, self._name)
+        time_start = time.time()
+        request_num = self.sender.send_request(request)
+        logger.debug(f'-> request sent: {self._name}, num: {request_num}')
+        resp = self.sender.get_response()
+        time_end = time.time()
+        try:
+            response = loads(resp)[0][0]
+        except Fault as ex:
+            logger.error(str(ex))
+            response = False
+        logger.debug('<- received response: {}, took: {:.2f} ms'.format(response, (time_end - time_start) * 1000))
+        return response

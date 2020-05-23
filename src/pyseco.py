@@ -1,10 +1,12 @@
+import time
 import traceback
 from collections import defaultdict
+from queue import Queue
 from xmlrpc.client import loads
+
 from pymysql import OperationalError
 
-from src.APIs.trackmania_api import XmlRpc
-from src.client import Client
+from src.api.tm_requests import XmlRpc
 from src.errors import PlayerNotFound, NotAnEvent, EventDiscarded, PysecoException
 from src.includes.config import Config
 from src.includes.events_types import EventData
@@ -12,6 +14,7 @@ from src.includes.log import setup_logger
 from src.includes.mysql_wrapper import MySqlWrapper
 from src.player import Player
 from src.server_context import ServerCtx
+from src.transport import Transport
 from src.utils import is_bound, strip_size
 
 logger = setup_logger(__name__)
@@ -19,12 +22,13 @@ logger = setup_logger(__name__)
 
 class Pyseco:
     def __init__(self, config_file):
+        self.events_queue = Queue()
         self.config = Config(config_file)
-        self.client = Client(self.config.rcp_ip, self.config.rcp_port, self)
-        self.rpc = XmlRpc(self.client)
+        self.transport = Transport(self.config.rcp_ip, self.config.rcp_port, self.events_queue)
+        self.rpc = XmlRpc(self.transport)
 
-        self.events_map = defaultdict(set)
-        self.server = ServerCtx()
+        self.events_matrix = defaultdict(set)
+        self.server = ServerCtx(self.rpc, self.config)
         try:
             self.mysql = MySqlWrapper(self.config)
         except OperationalError as e:
@@ -35,14 +39,6 @@ class Pyseco:
 
     def __exit__(self, *args):
         self.disconnect()
-
-    def _synchronize_basic_data(self):
-        self.server.version = self.rpc.get_version()
-        self.server.options = self.rpc.get_server_options()
-        self.server.system_info = self.rpc.get_system_info()
-        self.server.detailed_player_info = self.rpc.get_detailed_player_info(self.config.tm_login)
-        self.server.ladder_server_limits = self.rpc.get_ladder_server_limits()
-        self.server.max_players = self.rpc.get_max_players()
 
     def _synchronize_game_infos(self):
         game_infos = self.rpc.get_game_infos()
@@ -62,7 +58,7 @@ class Pyseco:
 
     def _synchronize(self):
         logger.info('Synchronizing data')
-        self._synchronize_basic_data()
+        self.server.synchronize()
         self._synchronize_game_infos()
         self._synchronize_players()
         self._synchronize_challenges()
@@ -72,19 +68,32 @@ class Pyseco:
         if not event.name:
             raise NotAnEvent('Not an event')
 
-        if event.name not in self.events_map:
+        if event.name not in self.events_matrix:
             raise EventDiscarded(f'No method registered for {event.name}')
 
         return event
 
     def start_listening(self):
-        self.client.loop()
+        logger.info('Waiting for events...')
+        while True:
+            if self.events_queue.qsize():
+                logger.debug(f'Handling buffered {self.events_queue.qsize()} event(s)')
+                while self.events_queue.qsize():
+                    self.handle_event(self.events_queue.get())
+            self.handle_event(self.transport.get_any_message())
 
     def connect(self):
-        self.client.connect()
+        self.transport.connect()
+        status = self.rpc.get_status()
+        while status.code != 4:
+            time.sleep(0.5)
+            new_status = self.rpc.get_status()
+            if new_status != status:
+                status = new_status
+                logger.info(f'Server is not ready: {status.name}')
 
     def disconnect(self):
-        self.client.disconnect()
+        self.transport.disconnect()
 
     def add_listener(self, class_name, listener_name):
         class_name(listener_name, self)
@@ -95,7 +104,7 @@ class Pyseco:
             return
 
         logger.debug(f'Registering {listener_method.__name__} for event {event}')
-        self.events_map[event].add(listener_method)
+        self.events_matrix[event].add(listener_method)
 
     def run(self):
         try:
@@ -137,7 +146,7 @@ class Pyseco:
         try:
             event = self._prepare_event(event)
             logger.debug(f'{event.name} Data: {event.data}')
-            for listener_method in self.events_map[event.name]:
+            for listener_method in self.events_matrix[event.name]:
                 if event.data:
                     listener_method(event.data)
                 else:

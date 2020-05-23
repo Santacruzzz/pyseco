@@ -73,19 +73,19 @@ def pyseco(mocker):
 
 @pytest.fixture(autouse=True)
 def client(mocker):
-    return mocker.patch('src.APIs.trackmania_api.Client')
+    return mocker.patch('src.api.trackmania_api.Client')
 
 
 @pytest.fixture(autouse=True)
 def config(mocker):
-    config_mock = mocker.patch('src.APIs.trackmania_api.Config')
+    config_mock = mocker.patch('src.api.trackmania_api.Config')
     config_mock.return_value = DUMMY_CONFIG
     return config_mock
 
 
 @pytest.fixture(autouse=True)
 def mysql(mocker):
-    return mocker.patch('src.APIs.trackmania_api.MySqlWrapper')
+    return mocker.patch('src.api.trackmania_api.MySqlWrapper')
 
 
 def test_should_create_object(client, mysql, config):
@@ -104,7 +104,7 @@ def test_should_disconnect_on_exit(client):
 
 def test_events_map_should_be_empty_when_no_listeners_registered():
     pyseco = Pyseco(DUMMY_PATH_TO_CONFIG)
-    assert len(pyseco.events_map) == 0
+    assert len(pyseco.events_matrix) == 0
 
 
 def test_should_sync_data_on_run(client, pyseco):
@@ -150,7 +150,7 @@ def test_should_add_registered_listener_to_events_map(mocker, pyseco):
     mocker.patch('src.pyseco.is_bound').return_value = True
     listener = DummyListener(mocker)
     pyseco.register(Events.EVENT1.name, listener.on_dummy_event1)
-    assert listener.on_dummy_event1 in pyseco.events_map[Events.EVENT1.name]
+    assert listener.on_dummy_event1 in pyseco.events_matrix[Events.EVENT1.name]
 
 
 def test_only_registered_listener_method_should_be_called_on_event(mocker, pyseco):
