@@ -26,11 +26,14 @@ class ServerCtx:
 
     def synchronize(self):
         multicall = self.rpc.multicall()
-        multicall.GetVersion()
-        multicall.GetServerOptions()
-        multicall.GetSystemInfo()
-        multicall.GetDetailedPlayerInfo(self.config.tm_login)
-        multicall.GetLadderServerLimits()
-        multicall.GetMaxPlayers()
-        multicall(self.version, self.options, self.system_info, self.detailed_player_info, self.ladder_server_limits,
-                  self.max_players)
+        multicall.get_version()
+        multicall.get_server_options()
+        multicall.get_system_info()
+        multicall.get_detailed_player_info(self.config.tm_login)
+        multicall.get_ladder_server_limits()
+        multicall.get_max_players()
+        multicall.exec_multicall(self.version, self.options, self.system_info,
+                                 self.detailed_player_info, self.ladder_server_limits,
+                                 self.max_players)
+
+        logger.info(f'test: {self.system_info}')
