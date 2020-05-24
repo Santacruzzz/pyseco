@@ -7,45 +7,57 @@ from typing import Any
 from typing import List
 
 
+class FromDictionary(type):
+    def __call__(cls, dictionary=None):
+        if dictionary is None:
+            return type.__call__(cls)
+        return type.__call__(cls, *dictionary.values())
+
+
+class FromDict(metaclass=FromDictionary):
+    def set(self, dictionary: dict):
+        self.__init__(*dictionary.values())
+
+
 @dataclass
-class PlayerScore:
+class PlayerScore(FromDict):
     player_id: int = 0
     score: int = 0
 
 
 @dataclass
-class Avatar:
+class Avatar(FromDict):
     file_name: str = ''
     checksum: str = ''
 
 
 @dataclass
-class PackDesc:
+class PackDesc(FromDict):
     file_name: str = ''
     checksum: str = ''
 
 
 @dataclass
-class Skins:
+class Skins(FromDict):
     environment: int = 0
-    pack_desc: PackDesc = PackDesc()
+    pack_desc: PackDesc = None
 
 
 @dataclass
-class Status:
+class Status(FromDict):
     code: int = 0
     name: str = ''
 
 
 @dataclass
-class Version:
+class Version(FromDict):
     name: str = ''
     version: str = ''
     build: str = ''
 
 
 @dataclass
-class CallVoteRatio:
+class CallVoteRatio(FromDict):
     command: str = ''
     ratio: float = 0
 
@@ -57,21 +69,21 @@ class CallVoteRatio:
 
 
 @dataclass
-class ManialinkPageAnswers:
+class ManialinkPageAnswers(FromDict):
     login: str = ''
     player_id: int = 0
     result: bool = True
 
 
 @dataclass
-class BanItem:
+class BanItem(FromDict):
     login: str = ''
     client_name: str = ''
     ip_address: str = ''
 
 
 @dataclass
-class ForcedSkin:
+class ForcedSkin(FromDict):
     orig: str = ''
     name: str = ''
     checksum: str = ''
@@ -79,7 +91,7 @@ class ForcedSkin:
 
 
 @dataclass
-class PlayerInfo:
+class PlayerInfo(FromDict):
     login: str = ''
     nickname: str = ''
     player_id: int = 0
@@ -90,7 +102,7 @@ class PlayerInfo:
 
 
 @dataclass
-class PlayerRanking:
+class PlayerRanking(FromDict):
     login: str = ''
     nickname: str = ''
     player_id: int = 0
@@ -103,27 +115,27 @@ class PlayerRanking:
 
 
 @dataclass
-class CurrentCallVote:
+class CurrentCallVote(FromDict):
     caller_login: str = ''
     cmd_name: str = ''
     cmd_param: str = ''
 
 
 @dataclass
-class StateValue:
+class StateValue(FromDict):
     current_value: Any = 1
     next_value: Any = 1
 
 
 @dataclass
-class BillState:
+class BillState(FromDict):
     state: bool = True
     state_name: str = ''
     transaction_id: int = 0
 
 
 @dataclass
-class SystemInfo:
+class SystemInfo(FromDict):
     published_ip: str = ''
     port: int = 0
     p2p_port: int = 0
@@ -134,14 +146,14 @@ class SystemInfo:
 
 
 @dataclass
-class LadderServerLimits:
+class LadderServerLimits(FromDict):
     ladder_limit_min: int = 0
     ladder_limit_max: int = 0
 
 
 # aligned to FOREVER version
 @dataclass
-class ServerOptions:
+class ServerOptions(FromDict):
     name: str = ''
     comment: str = ''
     password: str = ''
@@ -195,26 +207,26 @@ class ServerOptions:
 
 
 @dataclass
-class Mods:
+class Mods(FromDict):
     env_name: str = ''
     url: str = ''
 
 
 @dataclass
-class ForcedMods:
+class ForcedMods(FromDict):
     is_override: bool = True
     mods_list: list = list
 
 
 @dataclass
-class ForcedMusic:
+class ForcedMusic(FromDict):
     is_override: bool = True
     url: str = ''
     file: str = ''
 
 
 @dataclass
-class GameInfo:
+class GameInfo(FromDict):
     game_mode: int = 0
     chat_time: int = 0
     nb_challenge: str = ''
@@ -249,7 +261,7 @@ class GameInfo:
 
 
 @dataclass
-class ChallengeInfo:
+class ChallengeInfo(FromDict):
     uid: int = 0
     name: str = ''
     filename: str = ''
@@ -267,7 +279,7 @@ class ChallengeInfo:
 
 
 @dataclass
-class LadderRanking:
+class LadderRanking(FromDict):
     path: str = ''
     score: float = 0
     ranking: int = 0
@@ -275,7 +287,7 @@ class LadderRanking:
 
 
 @dataclass
-class LadderStats:
+class LadderStats(FromDict):
     last_match_score: float = 0
     nbr_match_wins: int = 0
     nbr_match_draws: int = 0
@@ -286,7 +298,7 @@ class LadderStats:
 
 
 @dataclass
-class DetailedPlayerInfo:
+class DetailedPlayerInfo(FromDict):
     login: str = ''
     nickname: str = ''
     player_id: int = 0
@@ -300,15 +312,15 @@ class DetailedPlayerInfo:
     is_spectator: bool = True
     is_in_official_mode: bool = True
     is_referee: bool = True
-    avatar: Avatar = Avatar()
-    skins: Skins = Skins()
-    ladder_stats: LadderStats = LadderStats()
+    avatar: Avatar = None
+    skins: Skins = None
+    ladder_stats: LadderStats = None
     hours_since_zone_inscription: int = 0
     online_rights: int = 0
 
 
 @dataclass
-class PlayerNetInfos:
+class PlayerNetInfos(FromDict):
     login: str = ''
     ip_address: str = ''
     last_transfer_time: int = 0
@@ -317,7 +329,7 @@ class PlayerNetInfos:
 
 
 @dataclass
-class NetworkStats:
+class NetworkStats(FromDict):
     uptime: int = 0
     nbr_connection: int = 0
     mean_connection_time: float = 0
@@ -326,11 +338,11 @@ class NetworkStats:
     send_net_rate: float = 0
     total_receiving_size: int = 0
     total_sending_size: int = 0
-    player_net_infos: PlayerNetInfos = PlayerNetInfos()
+    player_net_infos: PlayerNetInfos = None
 
 
 @dataclass
-class TextWithLanguage:
+class TextWithLanguage(FromDict):
     lang: str = ''
     text: str = ''
 
