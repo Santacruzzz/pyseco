@@ -1,5 +1,5 @@
 import time
-from xmlrpc.client import dumps, loads, Fault
+from xmlrpc.client import dumps, loads, Fault, MultiCall
 
 from src.api.tm_types import *
 from src.includes.log import setup_logger
@@ -14,6 +14,9 @@ class XmlRpc:
 
     def __getattr__(self, name):
         return Method(self.sender, name)
+
+    def multicall(self):
+        return RpcMulticall(self)
 
     def authenticate(self, login: str, password: str) -> bool:
         """Allow user authentication by specifying a login and a password, to gain access to the set of
@@ -30,7 +33,7 @@ class XmlRpc:
 
     def get_version(self) -> Version:
         """Returns a struct with the Name, Version and Build of the application remotely controled."""
-        return Version(*self.GetVersion().values())
+        return Version(self.GetVersion())
 
     def call_vote(self, vote: str) -> bool:
         """Call a vote for a cmd. The command is a XML string corresponding to an XmlRpc request.
@@ -54,7 +57,7 @@ class XmlRpc:
 
     def get_current_call_vote(self) -> CurrentCallVote:
         """Returns the vote currently in progress. The returned structure is { CallerLogin, CmdName, CmdParam }."""
-        return CurrentCallVote(*self.GetCurrentCallVote().values())
+        return CurrentCallVote(self.GetCurrentCallVote())
 
     def set_call_vote_time_out(self, timeout: int) -> bool:
         """Set a new timeout for waiting for votes. A zero value disables callvote. Only available to Admin.
@@ -64,7 +67,7 @@ class XmlRpc:
     def get_call_vote_timeout(self) -> StateValue:
         """Get the current and next timeout for waiting for votes. The struct returned contains two
         fields CurrentValue and NextValue."""
-        return StateValue(*self.GetCallVoteTimeOut().values())
+        return StateValue(self.GetCallVoteTimeOut())
 
     def set_call_vote_ratio(self, ratio: float) -> bool:
         """Set a new default ratio for passing a vote. Must lie between 0 and 1. Only available to Admin."""
@@ -81,7 +84,7 @@ class XmlRpc:
 
     def get_call_vote_ratios(self) -> List[CallVoteRatio]:
         """Get the current ratios for passing votes."""
-        return [CallVoteRatio(*result.values()) for result in self.GetCallVoteRatios()]
+        return [CallVoteRatio(result) for result in self.GetCallVoteRatios()]
 
     def chat_send_server_message(self, message: str) -> bool:
         """Send a text message to all clients without the server login. Only available to Admin."""
@@ -193,7 +196,7 @@ class XmlRpc:
     def get_manialink_page_answers(self) -> List[ManialinkPageAnswers]:
         """Returns the latest results from the current manialink page, as an array of structs {string Login,
         int PlayerId, int Result} Result==0 -> no answer, Result>0.... -> answer from the player."""
-        return [ManialinkPageAnswers(*result.values()) for result in self.GetManialinkPageAnswers()]
+        return [ManialinkPageAnswers(result) for result in self.GetManialinkPageAnswers()]
 
     def kick(self, login: str, message='') -> bool:
         """Kick the player with the specified login, with an optional message. Only available to Admin."""
@@ -229,7 +232,7 @@ class XmlRpc:
         specifies the maximum number of infos to be returned, and the second one the starting index in the list.
         The list is an array of structures. Each structure contains the following fields :
         Login, ClientName and IPAddress."""
-        return [BanItem(*result.values()) for result in
+        return [BanItem(result) for result in
                 self.GetBanList(max_number_of_infos, starting_index)]
 
     def black_list(self, login: str) -> bool:
@@ -381,7 +384,7 @@ class XmlRpc:
 
     def get_system_info(self) -> SystemInfo:
         """Get some system infos, including connection rates (in kbps)."""
-        return SystemInfo(*self.GetSystemInfo().values())
+        return SystemInfo(self.GetSystemInfo())
 
     def set_connection_rates(self, connection_rate: int) -> bool:
         """Set the download and upload rates (in kbps)."""
@@ -441,7 +444,7 @@ class XmlRpc:
     def get_max_players(self) -> StateValue:
         """Get the current and next maximum number of players allowed on server. The struct returned contains
         two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetMaxPlayers().values())
+        return StateValue(self.GetMaxPlayers())
 
     def set_max_spectators(self, number_of_spectators: int) -> bool:
         """Set a new maximum number of Spectators. Only available to Admin. Requires a challenge restart to be
@@ -451,7 +454,7 @@ class XmlRpc:
     def get_max_spectators(self) -> StateValue:
         """Get the current and next maximum number of Spectators allowed on server. The struct returned contains
         two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetMaxSpectators().values())
+        return StateValue(self.GetMaxSpectators())
 
     def enable_p2p_upload(self, p2p: bool) -> bool:
         """Enable or disable peer-to-peer upload from server. Only available to Admin."""
@@ -519,12 +522,12 @@ class XmlRpc:
     def get_ladder_mode(self) -> StateValue:
         """Get the current and next ladder mode on server. The struct returned contains two fields CurrentValue
         and NextValue."""
-        return StateValue(*self.GetLadderMode().values())
+        return StateValue(self.GetLadderMode())
 
     def get_ladder_server_limits(self) -> LadderServerLimits:
         """Get the ladder points limit for the players allowed on this server. The struct returned contains
         two fields LadderServerLimitMin and LadderServerLimitMax."""
-        return LadderServerLimits(*self.GetLadderServerLimits().values())
+        return LadderServerLimits(self.GetLadderServerLimits())
 
     def set_vehicle_net_quality(self, quality: int) -> bool:
         """Set the network vehicle quality to Fast (0) or High (1). Only available to Admin.
@@ -534,7 +537,7 @@ class XmlRpc:
     def get_vehicle_net_quality(self) -> StateValue:
         """Get the current and next network vehicle quality on server. The struct returned contains two fields
         CurrentValue and NextValue."""
-        return StateValue(*self.GetVehicleNetQuality().values())
+        return StateValue(self.GetVehicleNetQuality())
 
     def set_server_options(self, server_options: ServerOptions) -> bool:
         """Set new server options using the struct passed as parameters. This struct must contain the following fields:
@@ -575,7 +578,7 @@ class XmlRpc:
 
     def get_forced_mods(self) -> ForcedMods:
         """Get the mods settings."""
-        return ForcedMods(*self.GetForcedMods().values())
+        return ForcedMods(self.GetForcedMods())
 
     def set_forced_music(self, override: bool, url: str) -> bool:
         """Set the music to play on the clients. Parameters: Override, if true even the challenges with a
@@ -585,7 +588,7 @@ class XmlRpc:
 
     def get_forced_music(self) -> ForcedMusic:
         """Get the music setting."""
-        return ForcedMusic(*self.GetForcedMusic().values())
+        return ForcedMusic(self.GetForcedMusic())
 
     def set_forced_skins(self, forced_skin: ForcedSkin) -> bool:
         """Defines a list of remappings for player skins. It expects a list of structs Orig, Name, Checksum, Url.
@@ -596,7 +599,7 @@ class XmlRpc:
 
     def get_forced_skins(self) -> List[ForcedSkin]:
         """Get the current forced skins."""
-        return [ForcedSkin(*result.values()) for result in self.GetForcedSkins()]
+        return [ForcedSkin(result) for result in self.GetForcedSkins()]
 
     def get_last_connection_error_message(self) -> str:
         """Returns the last error message for an internet connection. Only available to Admin."""
@@ -628,7 +631,7 @@ class XmlRpc:
     def get_use_changing_validation_seed(self) -> StateValue:
         """Get the current and next value of UseChangingValidationSeed. The struct returned contains two fields
         CurrentValue and NextValue."""
-        return StateValue(*self.GetUseChangingValidationSeed().values())
+        return StateValue(self.GetUseChangingValidationSeed())
 
     def set_warm_up(self, warm_up: bool) -> bool:
         """Sets whether the server is in warm-up phase or not. Only available to Admin."""
@@ -679,7 +682,7 @@ class XmlRpc:
         LapsNbLaps, LapsTimeLimit, FinishTimeout, and additionally for version 1: AllWarmUpDuration, DisableRespawn,
         ForceShowAllOpponents, RoundsPointsLimitNewRules, TeamPointsLimitNewRules, CupPointsLimit,
         CupRoundsPerChallenge, CupNbWinners, CupWarmUpDuration."""
-        return GameInfo(*self.GetCurrentGameInfo(tm_version).values())
+        return GameInfo(self.GetCurrentGameInfo(tm_version))
 
     # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
     def get_next_game_info(self, tm_version: int = 1) -> GameInfo:
@@ -690,7 +693,7 @@ class XmlRpc:
         and additionally for version 1: AllWarmUpDuration, DisableRespawn, ForceShowAllOpponents,
         RoundsPointsLimitNewRules, TeamPointsLimitNewRules, CupPointsLimit, CupRoundsPerChallenge, CupNbWinners,
         CupWarmUpDuration."""
-        return GameInfo(*self.GetNextGameInfo(tm_version).values())
+        return GameInfo(self.GetNextGameInfo(tm_version))
 
     # TODO fix: raise an exception wen given tm_version is set to 1. We should use 1 as default (TM FOREVER)
     def get_game_infos(self, tm_version: int = 1) -> StateValue:
@@ -698,7 +701,7 @@ class XmlRpc:
         Returns a struct containing two other structures, the first containing the current game settings and
         the second the game settings for next challenge. The first structure is named CurrentGameInfos and the
         second NextGameInfos."""
-        return StateValue(*self.GetGameInfos(tm_version).values())
+        return StateValue(self.GetGameInfos(tm_version))
 
     def set_game_mode(self, game_mode: int) -> bool:
         """Set a new game mode between Rounds (0), TimeAttack (1), Team (2), Laps (3), Stunts (4) and Cup (5).
@@ -716,7 +719,7 @@ class XmlRpc:
 
     def get_chat_time(self) -> StateValue:
         """Get the current and next chat time. The struct returned contains two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetChatTime().values())
+        return StateValue(self.GetChatTime())
 
     def set_finish_timeout(self, timeout: int) -> bool:
         """Set a new finish timeout (for rounds/laps mode) value in milliseconds. 0 means default.
@@ -727,7 +730,7 @@ class XmlRpc:
     def get_finish_timeout(self) -> StateValue:
         """Get the current and next FinishTimeout. The struct returned contains two fields CurrentValue and
         NextValue."""
-        return StateValue(*self.GetFinishTimeout().values())
+        return StateValue(self.GetFinishTimeout())
 
     def set_all_warm_up_duration(self, warm_up: int) -> bool:
         """Set whether to enable the automatic warm-up phase in all modes. 0 = no, otherwise its the duration
@@ -738,7 +741,7 @@ class XmlRpc:
     def get_all_warm_up_duration(self) -> StateValue:
         """Get whether the automatic warm-up phase is enabled in all modes. The struct returned contains two
         fields CurrentValue and NextValue."""
-        return StateValue(*self.GetAllWarmUpDuration().values())
+        return StateValue(self.GetAllWarmUpDuration())
 
     def set_disable_respawn(self, respawn: bool) -> bool:
         """Set whether to disallow players to respawn. Only available to Admin. Requires a challenge restart to
@@ -748,7 +751,7 @@ class XmlRpc:
     def get_disable_respawn(self) -> StateValue:
         """Get whether players are disallowed to respawn. The struct returned contains two fields CurrentValue
         and NextValue."""
-        return StateValue(*self.GetDisableRespawn().values())
+        return StateValue(self.GetDisableRespawn())
 
     def set_force_show_all_opponents(self, opponents_display: int) -> bool:
         """Set whether to override the players preferences and always display all opponents (0=no override,
@@ -759,7 +762,7 @@ class XmlRpc:
     def get_force_show_all_opponents(self) -> StateValue:
         """Get whether players are forced to show all opponents. The struct returned contains two fields CurrentValue
         and NextValue."""
-        return StateValue(*self.GetForceShowAllOpponents().values())
+        return StateValue(self.GetForceShowAllOpponents())
 
     def set_time_attack_limit(self, time_limit: int) -> bool:
         """Set a new time limit for time attack mode. Only available to Admin. Requires a challenge restart to be
@@ -769,7 +772,7 @@ class XmlRpc:
     def get_time_attack_limit(self) -> StateValue:
         """Get the current and next time limit for time attack mode. The struct returned contains two fields
         CurrentValue and NextValue."""
-        return StateValue(*self.GetTimeAttackLimit().values())
+        return StateValue(self.GetTimeAttackLimit())
 
     def set_time_attack_synch_start_period(self, start_period: int) -> bool:
         """Set a new synchronized start period for time attack mode. Only available to Admin. Requires a challenge
@@ -779,7 +782,7 @@ class XmlRpc:
     def get_time_attack_synch_start_period(self) -> StateValue:
         """Get the current and synchronized start period for time attack mode. The struct returned contains two
         fields CurrentValue and NextValue."""
-        return StateValue(*self.GetTimeAttackSynchStartPeriod().values())
+        return StateValue(self.GetTimeAttackSynchStartPeriod())
 
     def set_laps_time_limit(self, time_limit: int) -> bool:
         """Set a new time limit for laps mode. Only available to Admin. Requires a challenge restart to be taken
@@ -789,7 +792,7 @@ class XmlRpc:
     def get_laps_time_limit(self) -> StateValue:
         """Get the current and next time limit for laps mode. The struct returned contains two fields CurrentValue
         and NextValue."""
-        return StateValue(*self.GetLapsTimeLimit().values())
+        return StateValue(self.GetLapsTimeLimit())
 
     def set_nb_laps(self, number_of_laps: int) -> bool:
         """Set a new number of laps for laps mode. Only available to Admin. Requires a challenge restart to be
@@ -799,7 +802,7 @@ class XmlRpc:
     def get_nb_laps(self) -> StateValue:
         """Get the current and next number of laps for laps mode. The struct returned contains two fields
         CurrentValue and NextValue."""
-        return StateValue(*self.GetNbLaps().values())
+        return StateValue(self.GetNbLaps())
 
     def set_round_forced_laps(self, number_of_laps: int) -> bool:
         """Set a new number of laps for rounds mode (0 = default, use the number of laps from the challenges,
@@ -810,7 +813,7 @@ class XmlRpc:
     def get_round_forced_laps(self) -> StateValue:
         """Get the current and next number of laps for rounds mode. The struct returned contains two fields
         CurrentValue and NextValue."""
-        return StateValue(*self.GetRoundForcedLaps().values())
+        return StateValue(self.GetRoundForcedLaps())
 
     def set_round_points_limit(self, points_limit: int) -> bool:
         """Set a new points limit for rounds mode (value set depends on UseNewRulesRound). Only available to Admin.
@@ -820,7 +823,7 @@ class XmlRpc:
     def get_round_points_limit(self) -> StateValue:
         """Get the current and next points limit for rounds mode (values returned depend on UseNewRulesRound).
         The struct returned contains two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetRoundPointsLimit().values())
+        return StateValue(self.GetRoundPointsLimit())
 
     def set_round_custom_points(self, custom_points: List[int]) -> bool:
         """Set the points used for the scores in rounds mode. Points is an array of decreasing integers for the
@@ -840,7 +843,7 @@ class XmlRpc:
     def get_use_new_rules_round(self) -> StateValue:
         """Get if the new rules are used for rounds mode (Current and next values). The struct returned contains
         two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetUseNewRulesRound().values())
+        return StateValue(self.GetUseNewRulesRound())
 
     def set_team_points_limit(self, points_limit: int) -> bool:
         """Set a new points limit for team mode (value set depends on UseNewRulesTeam). Only available to Admin.
@@ -850,7 +853,7 @@ class XmlRpc:
     def get_team_points_limit(self) -> StateValue:
         """Get the current and next points limit for team mode (values returned depend on UseNewRulesTeam).
         The struct returned contains two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetTeamPointsLimit().values())
+        return StateValue(self.GetTeamPointsLimit())
 
     def set_max_points_team(self, max_points: int) -> bool:
         """Set a new number of maximum points per round for team mode. Only available to Admin. Requires a
@@ -860,7 +863,7 @@ class XmlRpc:
     def get_max_points_team(self) -> StateValue:
         """Get the current and next number of maximum points per round for team mode. The struct returned contains
         two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetMaxPointsTeam().values())
+        return StateValue(self.GetMaxPointsTeam())
 
     def set_use_new_rules_team(self, team_mode: bool) -> bool:
         """Set if new rules are used for team mode. Only available to Admin. Requires a challenge restart to be
@@ -870,7 +873,7 @@ class XmlRpc:
     def get_use_new_rules_team(self) -> StateValue:
         """Get if the new rules are used for team mode (Current and next values). The struct returned contains
         two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetUseNewRulesTeam().values())
+        return StateValue(self.GetUseNewRulesTeam())
 
     def set_cup_points_limit(self, points: int) -> bool:
         """Set the points needed for victory in Cup mode. Only available to Admin. Requires a challenge restart
@@ -880,7 +883,7 @@ class XmlRpc:
     def get_cup_points_limit(self) -> StateValue:
         """Get the points needed for victory in Cup mode. The struct returned contains two fields CurrentValue
         and NextValue."""
-        return StateValue(*self.GetCupPointsLimit().values())
+        return StateValue(self.GetCupPointsLimit())
 
     def set_cup_rounds_per_challenge(self, number_of_rounds: int) -> bool:
         """Sets the number of rounds before going to next challenge in Cup mode. Only available to Admin.
@@ -890,7 +893,7 @@ class XmlRpc:
     def get_cup_rounds_per_challenge(self) -> StateValue:
         """Get the number of rounds before going to next challenge in Cup mode. The struct returned contains
         two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetCupRoundsPerChallenge().values())
+        return StateValue(self.GetCupRoundsPerChallenge())
 
     def set_cup_warm_up_duration(self, number_of_rounds: int) -> bool:
         """Set whether to enable the automatic warm-up phase in Cup mode. 0 = no, otherwise its the duration of
@@ -901,7 +904,7 @@ class XmlRpc:
     def get_cup_warm_up_duration(self) -> StateValue:
         """Get whether the automatic warm-up phase is enabled in Cup mode. The struct returned contains two fields
         CurrentValue and NextValue."""
-        return StateValue(*self.GetCupWarmUpDuration().values())
+        return StateValue(self.GetCupWarmUpDuration())
 
     def set_cup_nb_winners(self, number_of_winners: int) -> bool:
         """Set the number of winners to determine before the match is considered over. Only available to Admin.
@@ -911,7 +914,7 @@ class XmlRpc:
     def get_cup_nb_winners(self) -> StateValue:
         """Get the number of winners to determine before the match is considered over. The struct returned contains
         two fields CurrentValue and NextValue."""
-        return StateValue(*self.GetCupNbWinners().values())
+        return StateValue(self.GetCupNbWinners())
 
     def get_current_challenge_index(self) -> int:
         """Returns the current challenge index in the selection, or -1 if the challenge is no longer in the
@@ -932,13 +935,13 @@ class XmlRpc:
         """Returns a struct containing the infos for the current challenge. The struct contains the following
         fields : Name, UId, FileName, Author, Environnement, Mood, BronzeTime, SilverTime, GoldTime, AuthorTime,
         CopperPrice, LapRace, NbLaps and NbCheckpoints."""
-        return ChallengeInfo(*self.GetCurrentChallengeInfo().values())
+        return ChallengeInfo(self.GetCurrentChallengeInfo())
 
     def get_next_challenge_info(self) -> ChallengeInfo:
         """Returns a struct containing the infos for the next challenge. The struct contains the following fields:
         Name, UId, FileName, Author, Environnement, Mood, BronzeTime, SilverTime, GoldTime, AuthorTime, CopperPrice
         and LapRace. (NbLaps and NbCheckpoints are also present but always set to -1)"""
-        return ChallengeInfo(*self.GetNextChallengeInfo().values())
+        return ChallengeInfo(self.GetNextChallengeInfo())
 
     def get_challenge_info(self, filename: str) -> ChallengeInfo:
         """Returns a struct containing the infos for the challenge with the specified filename. The struct contains
@@ -955,7 +958,7 @@ class XmlRpc:
         The first parameter specifies the maximum number of infos to be returned, and the second one the starting
         index in the selection. The list is an array of structures. Each structure contains the following fields :
         Name, UId, FileName, Environnement, Author, GoldTime and CopperPrice."""
-        return [ChallengeInfo(*result.values()) for result in
+        return [ChallengeInfo(result) for result in
                 self.GetChallengeList(max_number_of_infos, starting_index)]
 
     def add_challenge(self, filename: str) -> bool:
@@ -1058,7 +1061,7 @@ class XmlRpc:
         SpectatorStatus = Spectator + TemporarySpectator * 10 + PureSpectator * 100 + AutoTarget * 1000 +
         CurrentTargetId * 10000
         """
-        return [PlayerInfo(*result.values()) for result in
+        return [PlayerInfo(result) for result in
                 self.GetPlayerList(max_number_of_infos, starting_index, compatibility)]
 
     def get_main_server_player_info(self, compatibility: int = 1) -> PlayerInfo:
@@ -1083,7 +1086,7 @@ class XmlRpc:
         index in the ranking. The ranking returned is a list of structures. Each structure contains the following
         fields : Login, NickName, PlayerId, Rank, BestTime, Score, NbrLapsFinished and LadderScore.
         It also contains an array BestCheckpoints that contains the checkpoint times for the best race."""
-        return [PlayerRanking(*result.values()) for result in
+        return [PlayerRanking(result) for result in
                 self.GetCurrentRanking(max_number_of_infos, starting_index)]
 
     def get_current_ranking_for_login(self, logins) -> List[PlayerRanking]:
@@ -1091,7 +1094,7 @@ class XmlRpc:
         (or list of comma-separated logins). The ranking returned is a list of structures, that contains the
         following fields : Login, NickName, PlayerId, Rank, BestTime, Score, NbrLapsFinished and LadderScore.
         It also contains an array BestCheckpoints that contains the checkpoint times for the best race."""
-        return [PlayerRanking(*result.values()) for result in self.GetCurrentRankingForLogin(logins)]
+        return [PlayerRanking(result) for result in self.GetCurrentRankingForLogin(logins)]
 
     def force_scores(self, player_score: PlayerScore, silent_mode: bool) -> bool:
         """Force the scores of the current game. Only available in rounds and team mode. You have to pass an
@@ -1173,7 +1176,7 @@ class XmlRpc:
         TotalSendingSize and an array of structures named PlayerNetInfos. Each structure of the array PlayerNetInfos
         contains the following fields : Login, IPAddress, LastTransferTime, DeltaBetweenTwoLastNetState,
         PacketLossRate. Only available to SuperAdmin."""
-        return NetworkStats(*self.GetNetworkStats().values())
+        return NetworkStats(self.GetNetworkStats())
 
     def start_server_lan(self) -> bool:
         """Start a server on lan, using the current configuration. Only available to SuperAdmin."""
@@ -1186,7 +1189,7 @@ class XmlRpc:
 
     def get_status(self) -> Status:
         """Returns the current status of the server."""
-        return Status(*self.GetStatus().values())
+        return Status(self.GetStatus())
 
     def quit_game(self) -> bool:
         """Quit the application. Only available to SuperAdmin."""
@@ -1227,3 +1230,15 @@ class Method:
             response = False
         logger.debug('<- received response: {}, took: {:.2f} ms'.format(response, (time_end - time_start) * 1000))
         return response
+
+
+class RpcMulticall:
+    def __init__(self, rpc: XmlRpc):
+        self.multicall = MultiCall(rpc)
+
+    def __getattr__(self, attr):
+        return getattr(self.multicall, attr)
+
+    def execute(self, *params):
+        for result, param in zip(self.multicall(), params):
+            param.set(result)
