@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-from xmlrpc.client import MultiCall
-import sys
 from src.api.tm_requests import XmlRpc
 from src.api.tm_types import Version, ServerOptions, SystemInfo, StateValue, DetailedPlayerInfo, \
     LadderServerLimits, GameInfo, ChallengeInfo
@@ -10,21 +7,7 @@ from src.includes.log import setup_logger
 logger = setup_logger(__name__)
 
 
-@dataclass
 class ServerCtx:
-    version: Version
-    options: ServerOptions
-    system_info: SystemInfo
-    max_players: StateValue
-    detailed_player_info: DetailedPlayerInfo
-    ladder_server_limits: LadderServerLimits
-    players_infos: dict
-    players_rankings: dict
-    current_game_info: GameInfo
-    next_game_info: GameInfo
-    current_challenge: ChallengeInfo
-    next_challenge: ChallengeInfo
-
     def __init__(self, rpc: XmlRpc, config: Config):
         self.version = Version()
         self.options = ServerOptions()
