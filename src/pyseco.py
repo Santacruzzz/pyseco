@@ -51,7 +51,6 @@ class Pyseco:
 
     def _synchronize_challenges(self):
         self.server.current_challenge = self.rpc.get_current_challenge_info()
-        logger.info(self.server.current_challenge)
         self.server_message(f'Current map is {strip_size(self.server.current_challenge.name)}$z$s$888,'
                             f' author: {self.server.current_challenge.author}')
         self.server.next_challenge = self.rpc.get_next_challenge_info()
@@ -119,6 +118,8 @@ class Pyseco:
         except Exception as ex:
             logger.error(traceback.format_exc())
             raise
+        finally:
+            self.transport.disconnect()
 
     def add_player(self, login: str, is_spectator: bool = False):
         if login not in self.server.players_infos:
