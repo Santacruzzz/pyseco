@@ -1239,6 +1239,9 @@ class RpcMulticall:
     def __getattr__(self, attr):
         return getattr(self.multicall, attr)
 
-    def execute(self, *params):
-        for result, param in zip(self.multicall(), params):
-            param.set(result)
+    def __call__(self, *params):
+        results = self.multicall()
+        if len(params) > 0:
+            for result, param in zip(results, params):
+                param.set(result)
+
