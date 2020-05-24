@@ -35,5 +35,3 @@ class ServerCtx:
         multicall.exec_multicall(self.version, self.options, self.system_info,
                                  self.detailed_player_info, self.ladder_server_limits,
                                  self.max_players)
-
-        logger.info(f'test: {self.system_info}')
