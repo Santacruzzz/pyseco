@@ -40,7 +40,7 @@ class PackDesc(FromDict):
 @dataclass
 class Skins(FromDict):
     environment: int = 0
-    pack_desc: PackDesc = None
+    pack_desc: PackDesc = PackDesc()
 
 
 @dataclass
@@ -312,9 +312,9 @@ class DetailedPlayerInfo(FromDict):
     is_spectator: bool = True
     is_in_official_mode: bool = True
     is_referee: bool = True
-    avatar: Avatar = None
-    skins: Skins = None
-    ladder_stats: LadderStats = None
+    avatar: Avatar = Avatar()
+    skins: Skins = Skins()
+    ladder_stats: LadderStats = LadderStats()
     hours_since_zone_inscription: int = 0
     online_rights: int = 0
 
@@ -338,7 +338,7 @@ class NetworkStats(FromDict):
     send_net_rate: float = 0
     total_receiving_size: int = 0
     total_sending_size: int = 0
-    player_net_infos: PlayerNetInfos = None
+    player_net_infos: PlayerNetInfos = PlayerNetInfos()
 
 
 @dataclass
