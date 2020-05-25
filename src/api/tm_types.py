@@ -8,10 +8,12 @@ from typing import List
 
 
 class FromDictionary(type):
-    def __call__(cls, dictionary=None):
-        if dictionary is None:
+    def __call__(cls, param=None):
+        if param is None:
             return type.__call__(cls)
-        return type.__call__(cls, *dictionary.values())
+        if isinstance(param, dict):
+            return type.__call__(cls, *param.values())
+        return type.__call__(cls, param)
 
 
 class FromDict(metaclass=FromDictionary):

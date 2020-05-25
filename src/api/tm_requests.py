@@ -1249,3 +1249,4 @@ class RpcMulticall:
         if len(params) > 0:
             for result, param in zip(results, params):
                 param.set(result)
+        return results
