@@ -66,20 +66,35 @@ def test_should_exec_multicall_when_multicall_requested_only(transport, multical
     multicall.return_value.assert_called_once()
 
 
-@pytest.mark.parametrize('types, methods, return_values', [
-    ([Status, Status, Status], ['get_status', 'get_status', 'get_status'], [{'Code': 1, 'Name': 'name1'},
-                                                                            {'Code': 2, 'Name': 'name2'},
-                                                                            {'Code': 3, 'Name': 'name3'}]),
-    ([Status, bool, int], ['get_status', 'start_server_lan', 'get_referee_mode'], [{'Code': 1, 'Name': 'name1'},
-                                                                                   True, 1337])])
-def test_exec_multicall_returns_only_dicts(types, methods, return_values, transport, multicall):
+@pytest.mark.parametrize('types, methods, return_values, expected', [
+    (
+            (Status, Status, Status),                       # types
+            ['get_status', 'get_status', 'get_status'],     # methods
+            [                                               # return_values
+                {'Code': 1, 'Name': 'name1'},
+                {'Code': 2, 'Name': 'name2'},
+                {'Code': 3, 'Name': 'name3'}
+            ],
+            [                                               # expected
+                Status({'Code': 1, 'Name': 'name1'}),
+                Status({'Code': 2, 'Name': 'name2'}),
+                Status({'Code': 3, 'Name': 'name3'})
+            ]
+    ),
+    (
+            (Status, bool, int),                                        # types
+            ['get_status', 'start_server_lan', 'get_referee_mode'],     # methods
+            [{'Code': 1, 'Name': 'name1'}, True, 1337],                 # return_values
+            [Status({'Code': 1, 'Name': 'name1'}), True, 1337]          # expected
+    )
+])
+def test_exec_multicall_should_return_expected_types(types, methods, return_values, expected, transport, multicall):
     rpc = XmlRpc(transport.return_value, True)
     [getattr(rpc, method)() for method in methods]
     multicall.return_value.return_value = return_values
 
     results = rpc.exec_multicall(*types)
-    multicall.return_value.assert_called_once()
 
-    for type_name, return_value, result in zip(types, return_values, results):
-        assert type_name(return_value) == result
+    for expectation, result in zip(expected, results):
+        assert expectation == result
 
