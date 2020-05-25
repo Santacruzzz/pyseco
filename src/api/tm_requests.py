@@ -19,9 +19,9 @@ class XmlRpc:
     def multicall(self):
         return XmlRpc(self.sender, multicall=True)
 
-    def exec_multicall(self, *params):
+    def exec_multicall(self, *types):
         if isinstance(self.call_proxy, RpcMulticall):
-            self.call_proxy(*params)
+            return self.call_proxy(*types)
 
     def authenticate(self, login: str, password: str) -> bool:
         """Allow user authentication by specifying a login and a password, to gain access to the set of
@@ -1244,9 +1244,8 @@ class RpcMulticall:
     def __getattr__(self, attr):
         return getattr(self.multicall, attr)
 
-    def __call__(self, *params):
+    def __call__(self, *types):
         results = self.multicall()
-        if len(params) > 0:
-            for result, param in zip(results, params):
-                param.set(result)
+        if len(types) > 0:
+            return [type_name(result) for result, type_name in zip(results, types)]
         return results

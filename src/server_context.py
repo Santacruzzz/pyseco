@@ -32,6 +32,6 @@ class ServerCtx:
         multicall.get_detailed_player_info(self.config.tm_login)
         multicall.get_ladder_server_limits()
         multicall.get_max_players()
-        multicall.exec_multicall(self.version, self.options, self.system_info,
-                                 self.detailed_player_info, self.ladder_server_limits,
-                                 self.max_players)
+        self.version, self.options, self.system_info, self.detailed_player_info, self.ladder_server_limits, \
+            self.max_players = multicall.exec_multicall(Version, ServerOptions, SystemInfo, DetailedPlayerInfo,
+                                                        LadderServerLimits, StateValue)
