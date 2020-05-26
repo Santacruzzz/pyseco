@@ -93,8 +93,8 @@ def test_should_exec_multicall_when_multicall_requested_only(transport, multical
     (
             (List[int], List[str]),
             ['get_status', 'get_referee_mode'],
-            [[1, 2, 3], ['1', '2', '3']],
-            [[1, 2, 3], ['1', '2', '3']]
+            [[1, 2, 3], []],
+            [[1, 2, 3], []]
     )
 ])
 def test_exec_multicall_should_return_expected_types(types, methods, return_values, expected, transport, multicall):
