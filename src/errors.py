@@ -20,3 +20,7 @@ class WrongCommand(PysecoException):
 
 class WrongNumberOfParams(PysecoException):
     pass
+
+
+class InconsistentTypesError(PysecoException):
+    pass

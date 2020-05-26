@@ -1,8 +1,13 @@
 import time
+from abc import abstractmethod
 from xmlrpc.client import dumps, loads, Fault, MultiCall
 
+import typing
+
 from src.api.tm_types import *
+from src.errors import InconsistentTypesError
 from src.includes.log import setup_logger
+from src.includes.type_factory import ObjectFactory
 from src.transport import Transport
 
 logger = setup_logger(__name__)
@@ -1247,5 +1252,10 @@ class RpcMulticall:
     def __call__(self, *types):
         results = self.multicall()
         if len(types) > 0:
-            return [type_name(result) for result, type_name in zip(results, types)]
+            return_values = []
+            for result, type_name in zip(results, types):
+                return_values.append(ObjectFactory(type_name, result).create())
+            return return_values
         return results
+
+
