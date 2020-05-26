@@ -8,58 +8,56 @@ from typing import List
 
 
 class FromDictionary(type):
-    def __call__(cls, param=None):
-        if param is None:
-            return type.__call__(cls)
-        if isinstance(param, dict):
-            return type.__call__(cls, *param.values())
-        return type.__call__(cls, param)
+    def __call__(cls, *args, **kwargs):
+        if len(args) == 1:
+            if isinstance(args[0], dict):
+                return type.__call__(cls, *(args[0]).values())
+        return type.__call__(cls, *args, **kwargs)
 
 
-class FromDict(metaclass=FromDictionary):
-    def set(self, dictionary: dict):
-        self.__init__(*dictionary.values())
+class TmType(metaclass=FromDictionary):
+    pass
 
 
 @dataclass
-class PlayerScore(FromDict):
+class PlayerScore(TmType):
     player_id: int = 0
     score: int = 0
 
 
 @dataclass
-class Avatar(FromDict):
+class Avatar(TmType):
     file_name: str = ''
     checksum: str = ''
 
 
 @dataclass
-class PackDesc(FromDict):
+class PackDesc(TmType):
     file_name: str = ''
     checksum: str = ''
 
 
 @dataclass
-class Skins(FromDict):
+class Skins(TmType):
     environment: int = 0
     pack_desc: PackDesc = PackDesc()
 
 
 @dataclass
-class Status(FromDict):
+class Status(TmType):
     code: int = 0
     name: str = ''
 
 
 @dataclass
-class Version(FromDict):
+class Version(TmType):
     name: str = ''
     version: str = ''
     build: str = ''
 
 
 @dataclass
-class CallVoteRatio(FromDict):
+class CallVoteRatio(TmType):
     command: str = ''
     ratio: float = 0
 
@@ -71,21 +69,21 @@ class CallVoteRatio(FromDict):
 
 
 @dataclass
-class ManialinkPageAnswers(FromDict):
+class ManialinkPageAnswers(TmType):
     login: str = ''
     player_id: int = 0
     result: bool = True
 
 
 @dataclass
-class BanItem(FromDict):
+class BanItem(TmType):
     login: str = ''
     client_name: str = ''
     ip_address: str = ''
 
 
 @dataclass
-class ForcedSkin(FromDict):
+class ForcedSkin(TmType):
     orig: str = ''
     name: str = ''
     checksum: str = ''
@@ -93,7 +91,7 @@ class ForcedSkin(FromDict):
 
 
 @dataclass
-class PlayerInfo(FromDict):
+class PlayerInfo(TmType):
     login: str = ''
     nickname: str = ''
     player_id: int = 0
@@ -104,7 +102,7 @@ class PlayerInfo(FromDict):
 
 
 @dataclass
-class PlayerRanking(FromDict):
+class PlayerRanking(TmType):
     login: str = ''
     nickname: str = ''
     player_id: int = 0
@@ -117,27 +115,27 @@ class PlayerRanking(FromDict):
 
 
 @dataclass
-class CurrentCallVote(FromDict):
+class CurrentCallVote(TmType):
     caller_login: str = ''
     cmd_name: str = ''
     cmd_param: str = ''
 
 
 @dataclass
-class StateValue(FromDict):
+class StateValue(TmType):
     current_value: Any = 1
     next_value: Any = 1
 
 
 @dataclass
-class BillState(FromDict):
+class BillState(TmType):
     state: bool = True
     state_name: str = ''
     transaction_id: int = 0
 
 
 @dataclass
-class SystemInfo(FromDict):
+class SystemInfo(TmType):
     published_ip: str = ''
     port: int = 0
     p2p_port: int = 0
@@ -148,14 +146,14 @@ class SystemInfo(FromDict):
 
 
 @dataclass
-class LadderServerLimits(FromDict):
+class LadderServerLimits(TmType):
     ladder_limit_min: int = 0
     ladder_limit_max: int = 0
 
 
 # aligned to FOREVER version
 @dataclass
-class ServerOptions(FromDict):
+class ServerOptions(TmType):
     name: str = ''
     comment: str = ''
     password: str = ''
@@ -209,26 +207,26 @@ class ServerOptions(FromDict):
 
 
 @dataclass
-class Mods(FromDict):
+class Mods(TmType):
     env_name: str = ''
     url: str = ''
 
 
 @dataclass
-class ForcedMods(FromDict):
+class ForcedMods(TmType):
     is_override: bool = True
     mods_list: list = list
 
 
 @dataclass
-class ForcedMusic(FromDict):
+class ForcedMusic(TmType):
     is_override: bool = True
     url: str = ''
     file: str = ''
 
 
 @dataclass
-class GameInfo(FromDict):
+class GameInfo(TmType):
     game_mode: int = 0
     chat_time: int = 0
     nb_challenge: str = ''
@@ -263,7 +261,7 @@ class GameInfo(FromDict):
 
 
 @dataclass
-class ChallengeInfo(FromDict):
+class ChallengeInfo(TmType):
     uid: int = 0
     name: str = ''
     filename: str = ''
@@ -281,7 +279,7 @@ class ChallengeInfo(FromDict):
 
 
 @dataclass
-class LadderRanking(FromDict):
+class LadderRanking(TmType):
     path: str = ''
     score: float = 0
     ranking: int = 0
@@ -289,7 +287,7 @@ class LadderRanking(FromDict):
 
 
 @dataclass
-class LadderStats(FromDict):
+class LadderStats(TmType):
     last_match_score: float = 0
     nbr_match_wins: int = 0
     nbr_match_draws: int = 0
@@ -300,7 +298,7 @@ class LadderStats(FromDict):
 
 
 @dataclass
-class DetailedPlayerInfo(FromDict):
+class DetailedPlayerInfo(TmType):
     login: str = ''
     nickname: str = ''
     player_id: int = 0
@@ -322,7 +320,7 @@ class DetailedPlayerInfo(FromDict):
 
 
 @dataclass
-class PlayerNetInfos(FromDict):
+class PlayerNetInfos(TmType):
     login: str = ''
     ip_address: str = ''
     last_transfer_time: int = 0
@@ -331,7 +329,7 @@ class PlayerNetInfos(FromDict):
 
 
 @dataclass
-class NetworkStats(FromDict):
+class NetworkStats(TmType):
     uptime: int = 0
     nbr_connection: int = 0
     mean_connection_time: float = 0
@@ -344,7 +342,7 @@ class NetworkStats(FromDict):
 
 
 @dataclass
-class TextWithLanguage(FromDict):
+class TextWithLanguage(TmType):
     lang: str = ''
     text: str = ''
 
