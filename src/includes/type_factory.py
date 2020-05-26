@@ -35,7 +35,13 @@ class PrimitiveTypeBuilder(TypeBuilder):
         return self.type_to_build(value)
 
 
-class AnyTypeObjectFactory:
+class Factory:
+    @abstractmethod
+    def create(self):
+        pass
+
+
+class WithBuilder:
     def __init__(self, type_to_build, value):
         self.type_to_build = type_to_build
         self.value = value
@@ -46,12 +52,8 @@ class AnyTypeObjectFactory:
             return TmTypeBuilder(self.type_to_build)
         return PrimitiveTypeBuilder(self.type_to_build)
 
-    @abstractmethod
-    def create(self):
-        pass
 
-
-class ListTypeObjectFactory(AnyTypeObjectFactory):
+class ListTypeObjectFactory(Factory, WithBuilder):
     def __init__(self, type_to_build, value):
         super().__init__(type_to_build, value)
 
@@ -61,7 +63,7 @@ class ListTypeObjectFactory(AnyTypeObjectFactory):
         return [self.builder.build(item) for item in self.value]
 
 
-class TypeObjectFactory(AnyTypeObjectFactory):
+class TypeObjectFactory(Factory, WithBuilder):
     def __init__(self, type_to_build, value):
         super().__init__(type_to_build, value)
 
@@ -69,7 +71,7 @@ class TypeObjectFactory(AnyTypeObjectFactory):
         return self.builder.build(self.value)
 
 
-class ObjectFactory:
+class ObjectFactory(Factory):
     def __init__(self, type_name, value):
         self._type_name = type_name
         self._value = value
