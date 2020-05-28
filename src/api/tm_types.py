@@ -7,45 +7,57 @@ from typing import Any
 from typing import List
 
 
+class FromDictionary(type):
+    def __call__(cls, *args, **kwargs):
+        if len(args) == 1:
+            if isinstance(args[0], dict):
+                return type.__call__(cls, *(args[0]).values())
+        return type.__call__(cls, *args, **kwargs)
+
+
+class TmType(metaclass=FromDictionary):
+    pass
+
+
 @dataclass
-class PlayerScore:
+class PlayerScore(TmType):
     player_id: int = 0
     score: int = 0
 
 
 @dataclass
-class Avatar:
+class Avatar(TmType):
     file_name: str = ''
     checksum: str = ''
 
 
 @dataclass
-class PackDesc:
+class PackDesc(TmType):
     file_name: str = ''
     checksum: str = ''
 
 
 @dataclass
-class Skins:
+class Skins(TmType):
     environment: int = 0
     pack_desc: PackDesc = PackDesc()
 
 
 @dataclass
-class Status:
+class Status(TmType):
     code: int = 0
     name: str = ''
 
 
 @dataclass
-class Version:
+class Version(TmType):
     name: str = ''
     version: str = ''
     build: str = ''
 
 
 @dataclass
-class CallVoteRatio:
+class CallVoteRatio(TmType):
     command: str = ''
     ratio: float = 0
 
@@ -57,21 +69,21 @@ class CallVoteRatio:
 
 
 @dataclass
-class ManialinkPageAnswers:
+class ManialinkPageAnswers(TmType):
     login: str = ''
     player_id: int = 0
     result: bool = True
 
 
 @dataclass
-class BanItem:
+class BanItem(TmType):
     login: str = ''
     client_name: str = ''
     ip_address: str = ''
 
 
 @dataclass
-class ForcedSkin:
+class ForcedSkin(TmType):
     orig: str = ''
     name: str = ''
     checksum: str = ''
@@ -79,7 +91,7 @@ class ForcedSkin:
 
 
 @dataclass
-class PlayerInfo:
+class PlayerInfo(TmType):
     login: str = ''
     nickname: str = ''
     player_id: int = 0
@@ -90,7 +102,7 @@ class PlayerInfo:
 
 
 @dataclass
-class PlayerRanking:
+class PlayerRanking(TmType):
     login: str = ''
     nickname: str = ''
     player_id: int = 0
@@ -103,27 +115,27 @@ class PlayerRanking:
 
 
 @dataclass
-class CurrentCallVote:
+class CurrentCallVote(TmType):
     caller_login: str = ''
     cmd_name: str = ''
     cmd_param: str = ''
 
 
 @dataclass
-class StateValue:
+class StateValue(TmType):
     current_value: Any = 1
     next_value: Any = 1
 
 
 @dataclass
-class BillState:
+class BillState(TmType):
     state: bool = True
     state_name: str = ''
     transaction_id: int = 0
 
 
 @dataclass
-class SystemInfo:
+class SystemInfo(TmType):
     published_ip: str = ''
     port: int = 0
     p2p_port: int = 0
@@ -134,14 +146,14 @@ class SystemInfo:
 
 
 @dataclass
-class LadderServerLimits:
+class LadderServerLimits(TmType):
     ladder_limit_min: int = 0
     ladder_limit_max: int = 0
 
 
 # aligned to FOREVER version
 @dataclass
-class ServerOptions:
+class ServerOptions(TmType):
     name: str = ''
     comment: str = ''
     password: str = ''
@@ -195,26 +207,26 @@ class ServerOptions:
 
 
 @dataclass
-class Mods:
+class Mods(TmType):
     env_name: str = ''
     url: str = ''
 
 
 @dataclass
-class ForcedMods:
+class ForcedMods(TmType):
     is_override: bool = True
     mods_list: list = list
 
 
 @dataclass
-class ForcedMusic:
+class ForcedMusic(TmType):
     is_override: bool = True
     url: str = ''
     file: str = ''
 
 
 @dataclass
-class GameInfo:
+class GameInfo(TmType):
     game_mode: int = 0
     chat_time: int = 0
     nb_challenge: str = ''
@@ -249,7 +261,7 @@ class GameInfo:
 
 
 @dataclass
-class ChallengeInfo:
+class ChallengeInfo(TmType):
     uid: int = 0
     name: str = ''
     filename: str = ''
@@ -267,7 +279,7 @@ class ChallengeInfo:
 
 
 @dataclass
-class LadderRanking:
+class LadderRanking(TmType):
     path: str = ''
     score: float = 0
     ranking: int = 0
@@ -275,7 +287,7 @@ class LadderRanking:
 
 
 @dataclass
-class LadderStats:
+class LadderStats(TmType):
     last_match_score: float = 0
     nbr_match_wins: int = 0
     nbr_match_draws: int = 0
@@ -286,7 +298,7 @@ class LadderStats:
 
 
 @dataclass
-class DetailedPlayerInfo:
+class DetailedPlayerInfo(TmType):
     login: str = ''
     nickname: str = ''
     player_id: int = 0
@@ -308,7 +320,7 @@ class DetailedPlayerInfo:
 
 
 @dataclass
-class PlayerNetInfos:
+class PlayerNetInfos(TmType):
     login: str = ''
     ip_address: str = ''
     last_transfer_time: int = 0
@@ -317,7 +329,7 @@ class PlayerNetInfos:
 
 
 @dataclass
-class NetworkStats:
+class NetworkStats(TmType):
     uptime: int = 0
     nbr_connection: int = 0
     mean_connection_time: float = 0
@@ -330,7 +342,7 @@ class NetworkStats:
 
 
 @dataclass
-class TextWithLanguage:
+class TextWithLanguage(TmType):
     lang: str = ''
     text: str = ''
 

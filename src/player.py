@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from src.APIs.method_types import PlayerInfo, PlayerRanking
+from src.api.tm_types import PlayerInfo, PlayerRanking
 
 
 class Player(object):

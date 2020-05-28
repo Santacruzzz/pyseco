@@ -11,7 +11,7 @@ class PlayerListener(Listener):
         super(PlayerListener, self).__init__(name, pyseco_instance)
         self.pyseco.register(EventPlayerConnect.name, self.on_player_connect)
         self.pyseco.register(EventPlayerDisconnect.name, self.on_player_disconnect)
-        self.pyseco.register(EventPlayerCheckpoint.name, self.on_player_cp)
+        self.pyseco.register(EventPlayerFinish.name, self.on_player_finish)
 
     def on_player_connect(self, data: EventPlayerConnect):
         login, is_spectator = data.login, data.is_spectator
@@ -25,5 +25,6 @@ class PlayerListener(Listener):
         self.pyseco.server_message(f'{strip_size(player.info.nickname)}$z$s$888 has left')
         self.pyseco.remove_player(login)
 
-    def on_player_cp(self, data: EventPlayerCheckpoint):
+    def on_player_finish(self, data: EventPlayerFinish):
+        logger.info(data)
         pass
