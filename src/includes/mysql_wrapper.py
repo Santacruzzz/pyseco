@@ -1,5 +1,10 @@
 import pymysql
+
+from src.api.tm_types import ChallengeInfo
 from src.includes.config import Config
+from src.includes.log import setup_logger
+
+logger = setup_logger(__name__)
 
 
 class MySqlWrapper:
@@ -29,3 +34,18 @@ class MySqlWrapper:
 
     def get_challenges(self):
         return self._get_all_from(self.CHALLENGES)
+
+    def get_records(self, challenge: ChallengeInfo):
+        with self._connection.cursor() as cursor:
+            sql = 'SELECT c.Id AS ChallengeId, r.Score, p.NickName, p.Login, r.Date, r.Checkpoints '\
+                'FROM challenges c '\
+                'LEFT JOIN records r ON (r.ChallengeId=c.Id) '\
+                'LEFT JOIN players p ON (r.PlayerId=p.Id) '\
+                f'WHERE c.Uid="{challenge.uid}" '\
+                'GROUP BY r.Id '\
+                'ORDER BY r.Score ASC, r.Date ASC '\
+                'LIMIT 20'
+            logger.info(sql)
+
+            cursor.execute(sql)
+            return cursor.fetchall()

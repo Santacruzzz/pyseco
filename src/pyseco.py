@@ -112,6 +112,7 @@ class Pyseco:
             self.server_message('pyseco connected')
             self.rpc.enable_callbacks(True)
             self._synchronize()
+            logger.info(self.mysql.get_records(self.server.current_challenge))
             self.start_listening()
         except KeyboardInterrupt:
             logger.info('Exiting')
