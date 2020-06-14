@@ -1,7 +1,5 @@
-from abc import abstractmethod
-
 import typing
-
+from abc import abstractmethod
 from src.api.tm_types import TmType
 from src.errors import InconsistentTypesError
 
@@ -16,9 +14,6 @@ class TypeBuilder:
 
 
 class TmTypeBuilder(TypeBuilder):
-    def __init__(self, type_to_build):
-        super().__init__(type_to_build)
-
     def build(self, value):
         if not isinstance(value, dict):
             raise InconsistentTypesError(f'dict expected, given: {type(value).__name__}')
@@ -26,9 +21,6 @@ class TmTypeBuilder(TypeBuilder):
 
 
 class PrimitiveTypeBuilder(TypeBuilder):
-    def __init__(self, type_to_build):
-        super().__init__(type_to_build)
-
     def build(self, value):
         if not isinstance(value, self.type_to_build):
             raise InconsistentTypesError(f'expected: {self.type_to_build.__name__}, given: {type(value).__name__}')
@@ -54,9 +46,6 @@ class WithBuilder:
 
 
 class ListTypeObjectFactory(Factory, WithBuilder):
-    def __init__(self, type_to_build, value):
-        super().__init__(type_to_build, value)
-
     def create(self):
         if not isinstance(self.value, list):
             raise InconsistentTypesError(f'expected list, given: {type(self.value).__name__}')
@@ -64,9 +53,6 @@ class ListTypeObjectFactory(Factory, WithBuilder):
 
 
 class TypeObjectFactory(Factory, WithBuilder):
-    def __init__(self, type_to_build, value):
-        super().__init__(type_to_build, value)
-
     def create(self):
         return self.builder.build(self.value)
 
