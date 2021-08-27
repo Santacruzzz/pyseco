@@ -130,7 +130,6 @@ def test_should_sync_data_on_run(transport, pyseco, rpc, server):
     rpc.return_value.authenticate.assert_called_once_with(DUMMY_CONFIG.rcp_login, DUMMY_CONFIG.rcp_password)
     rpc.return_value.enable_callbacks.assert_called_once_with(True)
     server.return_value.synchronize.assert_called_once()
-    rpc.return_value.get_game_infos.assert_called_once()
     rpc.return_value.get_player_list.assert_called_once()
 
 
