@@ -24,11 +24,13 @@ class Pyseco:
     def __init__(self, config_file):
         self.events_queue = Queue()
         self.config = Config(config_file)
-        self.transport = Transport(self.config.rcp_ip, self.config.rcp_port, self.events_queue)
+        self.transport = Transport(
+            self.config.rcp_ip, self.config.rcp_port, self.events_queue)
         self.rpc = XmlRpc(self.transport)
 
         self.events_matrix = defaultdict(set)
         self.server = ServerCtx(self.rpc, self.config)
+        self.players = dict()
         try:
             self.mysql = MySqlWrapper(self.config)
         except OperationalError as e:
@@ -40,28 +42,6 @@ class Pyseco:
     def __exit__(self, *args):
         self.disconnect()
 
-    def _synchronize_game_infos(self):
-        game_infos = self.rpc.get_game_infos()
-        self.server.current_game_info = game_infos.current_value
-        self.server.next_game_info = game_infos.next_value
-
-    def _synchronize_players(self):
-        for player in self.rpc.get_player_list(self.server.max_players.current_value):
-            self.add_player(login=player.login)
-
-    def _synchronize_challenges(self):
-        self.server.current_challenge = self.rpc.get_current_challenge_info()
-        self.server_message(f'Current map is {strip_size(self.server.current_challenge.name)}$z$s$888,'
-                            f' author: {self.server.current_challenge.author}')
-        self.server.next_challenge = self.rpc.get_next_challenge_info()
-
-    def _synchronize(self):
-        logger.info('Synchronizing data')
-        self.server.synchronize()
-        self._synchronize_game_infos()
-        self._synchronize_players()
-        self._synchronize_challenges()
-
     def _prepare_event(self, msg):
         event = EventData(*loads(msg))
         if not event.name:
@@ -72,11 +52,16 @@ class Pyseco:
 
         return event
 
+    def synchronize_players(self):
+        for player in self.rpc.get_player_list(self.server.max_players.current_value):
+            self.add_player(login=player.login)
+
     def start_listening(self):
         logger.info('Waiting for events...')
         while True:
             if self.events_queue.qsize():
-                logger.debug(f'Handling buffered {self.events_queue.qsize()} event(s)')
+                logger.debug(
+                    f'Handling buffered {self.events_queue.qsize()} event(s)')
                 while self.events_queue.qsize():
                     self.handle_event(self.events_queue.get())
             self.handle_event(self.transport.get_any_message())
@@ -94,24 +79,28 @@ class Pyseco:
     def disconnect(self):
         self.transport.disconnect()
 
-    def add_listener(self, class_name, listener_name):
+    def register_listener(self, class_name, listener_name):
         class_name(listener_name, self)
 
     def register(self, event, listener_method):
         if not is_bound(listener_method):
-            logger.error(f'This is not a bound method "{listener_method.__name__}"')
+            logger.error(
+                f'This is not a bound method "{listener_method.__name__}"')
             return
 
-        logger.debug(f'Registering {listener_method.__name__} for event {event}')
+        logger.debug(
+            f'Registering {listener_method.__name__} for event {event}')
         self.events_matrix[event].add(listener_method)
 
     def run(self):
         try:
             self.connect()
-            self.rpc.authenticate(self.config.rcp_login, self.config.rcp_password)
+            self.rpc.authenticate(self.config.rcp_login,
+                                  self.config.rcp_password)
             self.server_message('pyseco connected')
             self.rpc.enable_callbacks(True)
-            self._synchronize()
+            self.server.synchronize()
+            self.synchronize_players()
             self.start_listening()
         except KeyboardInterrupt:
             logger.info('Exiting')
@@ -122,26 +111,30 @@ class Pyseco:
             self.transport.disconnect()
 
     def add_player(self, login: str, is_spectator: bool = False):
-        if login not in self.server.players_infos:
-            self.server.players_infos[login] = self.rpc.get_detailed_player_info(login)
-        if login not in self.server.players_rankings:
-            self.server.players_rankings[login] = self.rpc.get_current_ranking_for_login(login)[0]
+        self.players[login] = Player(self.rpc.get_detailed_player_info(login),
+                                     self.rpc.get_current_ranking_for_login(login)[0])
 
     def remove_player(self, login: str):
-        if login in self.server.players_infos:
-            del self.server.players_infos[login]
-        if login in self.server.players_rankings:
-            del self.server.players_rankings[login]
+        if login in self.players:
+            del self.players[login]
 
     def get_player(self, login: str) -> Player:
         try:
-            return Player(self.server.players_infos[login], self.server.players_rankings[login])
+            return self.players[login]
         except KeyError:
-            logger.error(f'Login "{login}" not found')
+            logger.warn(f'Login "{login}" not found')
             raise PlayerNotFound(f'Login "{login}" not found')
 
+    def is_player_on_server(self, login):
+        return login in self.players
+
     def server_message(self, msg):
-        self.rpc.chat_send_server_message(f'{self.config.color}{self.config.prefix}~ $888{msg}')
+        self.rpc.chat_send_server_message(
+            f'{self.config.color}{self.config.prefix}~ $888{msg}')
+
+    def server_message_to_login(self, login, msg):
+        self.rpc.chat_send_server_message_to_login(
+            f'{self.config.color}{self.config.prefix}~ $888{msg}', login)
 
     def handle_event(self, event):
         try:
@@ -154,7 +147,7 @@ class Pyseco:
                     listener_method()
 
         except PysecoException as ex:
-            logger.debug(f'Event discarded: {ex}')
+            logger.debug(f'Event dropped. {ex}')
         except UnicodeDecodeError as ex:
             logger.error(f'Parsing xml failed. ({ex})')
 

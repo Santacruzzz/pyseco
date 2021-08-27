@@ -18,6 +18,7 @@ class PlayerListener(Listener):
         self.pyseco.add_player(login, is_spectator)
         player = self.pyseco.get_player(login)
         self.pyseco.server_message(f'{strip_size(player.info.nickname)}$z$s$888 has joined')
+        self.pyseco.server_message_to_login(login, f'$z$s$888Witaj na serwerze {self.pyseco.server.get_name()}')
 
     def on_player_disconnect(self, data: EventPlayerDisconnect):
         login = data.login
@@ -26,5 +27,4 @@ class PlayerListener(Listener):
         self.pyseco.remove_player(login)
 
     def on_player_finish(self, data: EventPlayerFinish):
-        logger.info(data)
         pass
