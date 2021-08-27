@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from src.utils import strip_size
 from typing import Any
 
 
@@ -351,3 +352,10 @@ class TextWithLanguage(TmType):
             'Lang': self.lang,
             'Text': self.text
         }
+
+class TmStr():
+    def __init__(self, string):
+        self.string = string
+
+    def __str__(self) -> str:
+        return strip_size(self.string) + "$g$z"

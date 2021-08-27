@@ -21,7 +21,7 @@ class XmlRpc:
     def __getattr__(self, name):
         return Method(self.sender, name)
 
-    def multicall(self):
+    def getMulticallRpc(self):
         return XmlRpc(self.sender, multicall=True)
 
     def exec_multicall(self, *types):
@@ -1229,8 +1229,8 @@ class Method:
     def __call__(self, *args):
         request = dumps(args, self._name)
         time_start = time.time()
-        request_num = self.sender.send_request(request)
-        logger.debug(f'-> request sent: {self._name}, num: {request_num}')
+        self.sender.send_request(request)
+        logger.debug(f'-> request sent: {self._name}, num: {self.sender.request_num}')
         resp = self.sender.get_response()
         time_end = time.time()
         try:

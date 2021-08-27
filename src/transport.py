@@ -14,15 +14,15 @@ class Transport:
         self.request_num = 0x80000000
         self.events_queue = events_queue
 
-    def _read_response(self, wait_for_number):
+    def _read_response(self, expected_request_number):
         while True:
             size, request_number = self._read_message_info()
             msg = self._receive(size)
 
-            if not wait_for_number or request_number == wait_for_number:
+            if not expected_request_number or request_number == expected_request_number:
                 return msg
             else:
-                logger.debug(f'Putting event to queue, size before={self.events_queue.qsize()}')
+                logger.debug(f'Queue event, current size = {self.events_queue.qsize()}')
                 self.events_queue.put(msg)
 
     def _read_init_resp_size(self):
@@ -45,12 +45,10 @@ class Transport:
                 logger.debug(f'waiting for next {bytes_left} byte(s)')
         return bytes_received.decode('utf-8')
 
-    def send_request(self, request) -> int:
-        """Returns request number"""
+    def send_request(self, request):
         try:
             self.request_num += 1
             self.sock.sendall(self._pack_message(request))
-            return self.request_num
         except BrokenPipeError:
             self.request_num -= 1
             raise

@@ -30,7 +30,7 @@ from src.listeners.player_listener import PlayerListener
 if __name__ == '__main__':
     settings = os.path.join(os.path.dirname(os.path.realpath(__file__)), args.settings)
     with Pyseco(settings) as pyseco:
-        pyseco.add_listener(ServerStateListener, 'ServerStateListener')
-        pyseco.add_listener(PlayerListener, 'PlayerListener')
-        pyseco.add_listener(ChatListener, 'ChatListener')
+        pyseco.register_listener(ServerStateListener, 'ServerStateListener')
+        pyseco.register_listener(PlayerListener, 'PlayerListener')
+        pyseco.register_listener(ChatListener, 'ChatListener')
         pyseco.run()

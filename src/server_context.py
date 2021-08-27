@@ -1,5 +1,5 @@
 from src.api.tm_requests import XmlRpc
-from src.api.tm_types import Version, ServerOptions, SystemInfo, StateValue, DetailedPlayerInfo, \
+from src.api.tm_types import TmStr, Version, ServerOptions, SystemInfo, StateValue, DetailedPlayerInfo, \
     LadderServerLimits, GameInfo, ChallengeInfo
 from src.includes.config import Config
 from src.includes.log import setup_logger
@@ -15,8 +15,6 @@ class ServerCtx:
         self.max_players = StateValue()
         self.detailed_player_info = DetailedPlayerInfo()
         self.ladder_server_limits = LadderServerLimits()
-        self.players_infos = dict()
-        self.players_rankings = dict()
         self.current_game_info = GameInfo()
         self.next_game_info = GameInfo()
         self.current_challenge = ChallengeInfo()
@@ -24,8 +22,20 @@ class ServerCtx:
         self.rpc = rpc
         self.config = config
 
+    def _synchronize_game_infos(self):
+        game_infos = self.rpc.get_game_infos()
+        self.current_game_info = game_infos.current_value
+        self.next_game_info = game_infos.next_value
+
+    def _synchronize_challenges(self):
+        self.current_challenge = self.rpc.get_current_challenge_info()
+        self.next_challenge = self.rpc.get_next_challenge_info()
+
     def synchronize(self):
-        multicall = self.rpc.multicall()
+        self._synchronize_game_infos()
+        self._synchronize_challenges()
+
+        multicall = self.rpc.getMulticallRpc()
         multicall.get_version()
         multicall.get_server_options()
         multicall.get_system_info()
@@ -35,3 +45,6 @@ class ServerCtx:
         self.version, self.options, self.system_info, self.detailed_player_info, self.ladder_server_limits, \
             self.max_players = multicall.exec_multicall(Version, ServerOptions, SystemInfo, DetailedPlayerInfo,
                                                         LadderServerLimits, StateValue)
+
+    def get_name(self) -> TmStr:
+        return TmStr(self.options.name)
