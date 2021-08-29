@@ -1,3 +1,4 @@
+from src.transport import Transport
 import time
 import traceback
 from collections import defaultdict
@@ -14,7 +15,6 @@ from src.includes.log import setup_logger
 from src.includes.mysql_wrapper import MySqlWrapper
 from src.player import Player
 from src.server_context import ServerCtx
-from src.transport import Transport
 from src.utils import is_bound, strip_size
 
 logger = setup_logger(__name__)
@@ -24,12 +24,10 @@ class Pyseco:
     def __init__(self, config_file):
         self.events_queue = Queue()
         self.config = Config(config_file)
-        self.transport = Transport(
-            self.config.rcp_ip, self.config.rcp_port, self.events_queue)
+        self.transport = Transport(self.config, self.events_queue)
         self.rpc = XmlRpc(self.transport)
-
         self.events_matrix = defaultdict(set)
-        self.server = ServerCtx(self.rpc, self.config)
+        self.server = ServerCtx(self.transport, self.config)
         self.players = dict()
         try:
             self.mysql = MySqlWrapper(self.config)
@@ -64,10 +62,10 @@ class Pyseco:
                     f'Handling buffered {self.events_queue.qsize()} event(s)')
                 while self.events_queue.qsize():
                     self.handle_event(self.events_queue.get())
-            self.handle_event(self.transport.get_any_message())
+            self.handle_event(self.rpc.get_any_message())
 
     def connect(self):
-        self.transport.connect()
+        self.rpc.connect()
         status = self.rpc.get_status()
         while status.code != 4:
             time.sleep(0.5)
@@ -77,7 +75,7 @@ class Pyseco:
                 logger.info(f'Server is not ready: {status.name}')
 
     def disconnect(self):
-        self.transport.disconnect()
+        self.rpc.disconnect()
 
     def register_listener(self, class_name, listener_name):
         class_name(listener_name, self)
@@ -108,7 +106,7 @@ class Pyseco:
             logger.error(traceback.format_exc())
             raise
         finally:
-            self.transport.disconnect()
+            self.rpc.disconnect()
 
     def add_player(self, login: str, is_spectator: bool = False):
         self.players[login] = Player(self.rpc.get_detailed_player_info(login),

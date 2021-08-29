@@ -5,28 +5,30 @@ from xmlrpc.client import dumps, loads, Fault, MultiCall
 import typing
 
 from src.api.tm_types import *
-from src.errors import InconsistentTypesError
 from src.includes.log import setup_logger
 from src.includes.type_factory import ObjectFactory
 from src.transport import Transport
+from src.includes.config import Config
 
 logger = setup_logger(__name__)
 
 
 class XmlRpc:
-    def __init__(self, transport: Transport, multicall=False):
+    def __init__(self, transport: Transport):
         self.sender = transport
-        self.call_proxy = self if not multicall else RpcMulticall(self)
+        self.call_proxy = self
 
     def __getattr__(self, name):
-        return Method(self.sender, name)
+        return XmlRpcMethod(self.sender, name)
 
-    def getMulticallRpc(self):
-        return XmlRpc(self.sender, multicall=True)
+    def get_any_message(self):
+        return self.sender.get_any_message()
 
-    def exec_multicall(self, *types):
-        if isinstance(self.call_proxy, RpcMulticall):
-            return self.call_proxy(*types)
+    def connect(self):
+        self.sender.connect()
+
+    def disconnect(self):
+        self.sender.disconnect()
 
     def authenticate(self, login: str, password: str) -> bool:
         """Allow user authentication by specifying a login and a password, to gain access to the set of
@@ -1217,14 +1219,21 @@ class XmlRpc:
         """Returns the path of the skins directory. Only available to Admin."""
         return self.call_proxy.GetSkinsDirectory()
 
+class XmlRpcMulticall(XmlRpc):
+    def __init__(self, transport: Transport):
+        super().__init__(transport)
+        self.call_proxy = MulticallProxy(self)
 
-class Method:
+    def exec(self, *types):
+        return self.call_proxy(*types)
+
+class XmlRpcMethod:
     def __init__(self, sender: Transport, name: str):
         self.sender = sender
         self._name = name
 
     def __getattr__(self, name):
-        return Method(self.sender, f'{self._name}.{name}')
+        return XmlRpcMethod(self.sender, f'{self._name}.{name}')
 
     def __call__(self, *args):
         request = dumps(args, self._name)
@@ -1242,7 +1251,7 @@ class Method:
         return response
 
 
-class RpcMulticall:
+class MulticallProxy:
     def __init__(self, rpc: XmlRpc):
         self.multicall = MultiCall(rpc)
 

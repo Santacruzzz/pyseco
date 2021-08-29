@@ -2,15 +2,15 @@ import socket
 from multiprocessing.queues import Queue
 from struct import unpack, pack
 from src.includes.log import setup_logger
+from src.includes.config import Config
 
 logger = setup_logger(__name__)
 
 
-class Transport:
-    def __init__(self, ip, port, events_queue: Queue):
+class Transport():
+    def __init__(self, config: Config, events_queue: Queue):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.ip = ip
-        self.port = port
+        self.config = config
         self.request_num = 0x80000000
         self.events_queue = events_queue
 
@@ -64,7 +64,7 @@ class Transport:
 
     def connect(self):
         logger.debug('connecting')
-        self.sock.connect((self.ip, self.port))
+        self.sock.connect((self.config.rcp_ip, self.config.rcp_port))
         data_length = self._read_init_resp_size()
         protocol_version = self._receive(data_length)
         logger.info(f'Connected, protocol used: {protocol_version}')

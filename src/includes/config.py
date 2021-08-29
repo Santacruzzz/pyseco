@@ -1,23 +1,6 @@
-from dataclasses import dataclass
-
 import yaml
 
-
-@dataclass
-class Config(object):
-    prefix: str
-    color: str
-    tm_login: str
-    rcp_login: str
-    rcp_password: str
-    rcp_ip: str
-    rcp_port: int
-    db_user: str
-    db_password: str
-    db_name: str
-    db_charset: str
-    db_hostname: str
-
+class Config():
     def __init__(self, config_file):
         self._config = yaml.safe_load(open(config_file))
         self.prefix = self._config['prefix']

@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from src.api.tm_requests import XmlRpc
+from src.api.tm_requests import XmlRpc, XmlRpcMulticall
 from src.api.tm_types import Status
 from src.errors import InconsistentTypesError
 
@@ -13,28 +13,21 @@ def transport(mocker):
 
 
 @pytest.fixture
-def rpc_multicall(mocker):
-    return mocker.patch('src.api.tm_requests.RpcMulticall')
-
-
-@pytest.fixture
 def multicall(mocker):
     return mocker.patch('src.api.tm_requests.MultiCall')
 
 
 @pytest.fixture
 def method(mocker):
-    return mocker.patch('src.api.tm_requests.Method')
+    return mocker.patch('src.api.tm_requests.XmlRpcMethod')
 
 
-def test_should_create_rpc_object(transport, rpc_multicall):
+def test_should_create_rpc_object(transport):
     XmlRpc(transport.return_value)
-    rpc_multicall.assert_not_called()
 
 
-def test_should_create_rpc_as_multicall(transport, rpc_multicall):
-    rpc = XmlRpc(transport.return_value, True)
-    rpc_multicall.assert_called_once_with(rpc)
+def test_should_create_rpc_as_multicall(transport):
+    XmlRpcMulticall(transport.return_value)
 
 
 def test_should_getattr_from_method_on_default_rpc_call(method, transport):
@@ -45,22 +38,22 @@ def test_should_getattr_from_method_on_default_rpc_call(method, transport):
     method.return_value.assert_called_once()
 
 
-def test_should_getattr_from_multicall_when_multicall_requested(method, transport, rpc_multicall):
-    rpc = XmlRpc(transport.return_value, True)
+def test_should_getattr_from_multicall_when_multicall_requested(method, transport, multicall):
+    rpc = XmlRpcMulticall(transport.return_value)
     rpc.get_status()
 
     method.assert_not_called()
-    rpc_multicall.assert_called_once_with(rpc)
-    rpc_multicall.return_value.GetStatus.assert_called_once()
+    multicall.assert_called_once_with(rpc)
+    multicall.return_value.GetStatus.assert_called_once()
 
 
 def test_should_exec_multicall_when_multicall_requested_only(transport, multicall):
-    rpc = XmlRpc(transport.return_value, True)
+    rpc = XmlRpcMulticall(transport.return_value)
     rpc.get_status()
 
     multicall.return_value.return_value = []
     dummy_param = None
-    rpc.exec_multicall(dummy_param)
+    rpc.exec(dummy_param)
 
     multicall.assert_called_once_with(rpc)
     multicall.return_value.GetStatus.assert_called_once()
@@ -98,11 +91,11 @@ def test_should_exec_multicall_when_multicall_requested_only(transport, multical
     )
 ])
 def test_exec_multicall_should_return_expected_types(types, methods, return_values, expected, transport, multicall):
-    rpc = XmlRpc(transport.return_value, True)
+    rpc = XmlRpcMulticall(transport.return_value)
     [getattr(rpc, method)() for method in methods]
     multicall.return_value.return_value = return_values
 
-    results = rpc.exec_multicall(*types)
+    results = rpc.exec(*types)
 
     for expectation, result in zip(expected, results):
         assert expectation == result
@@ -131,9 +124,9 @@ def test_exec_multicall_should_return_expected_types(types, methods, return_valu
     )
 ])
 def test_exec_multicall_throws_exception_on_inconsistent_data(types, methods, return_values, transport, multicall):
-    rpc = XmlRpc(transport.return_value, True)
+    rpc = XmlRpcMulticall(transport.return_value)
     [getattr(rpc, method)() for method in methods]
     multicall.return_value.return_value = return_values
 
     with pytest.raises(InconsistentTypesError):
-        rpc.exec_multicall(*types)
+        rpc.exec(*types)
