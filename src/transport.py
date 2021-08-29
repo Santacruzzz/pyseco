@@ -64,7 +64,7 @@ class Transport():
 
     def connect(self):
         logger.debug('connecting')
-        self.sock.connect((self.config.rcp_ip, self.config.rcp_port))
+        self.sock.connect((self.config.rpc_ip, self.config.rpc_port))
         data_length = self._read_init_resp_size()
         protocol_version = self._receive(data_length)
         logger.info(f'Connected, protocol used: {protocol_version}')

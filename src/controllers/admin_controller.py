@@ -9,7 +9,6 @@ class AdminController(Controller):
         else:
             self.pyseco.server_message(f'{login} not found')
 
-
     def restart_challenge(self):
         self.pyseco.rpc.restart_challenge()
         self.pyseco.server_message(f'Challenge was restarted')

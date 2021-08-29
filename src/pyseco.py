@@ -93,8 +93,8 @@ class Pyseco:
     def run(self):
         try:
             self.connect()
-            self.rpc.authenticate(self.config.rcp_login,
-                                  self.config.rcp_password)
+            self.rpc.authenticate(self.config.rpc_login,
+                                  self.config.rpc_password)
             self.server_message('pyseco connected')
             self.rpc.enable_callbacks(True)
             self.server.synchronize()

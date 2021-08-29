@@ -14,8 +14,8 @@ DummyEvent = namedtuple('DummyEvent', ['name'])
 CallAssert = namedtuple('CallAssert', ['call', 'params'])
 TM_FOREVER = 1
 
-DummyConfig = namedtuple('Dummyconfig', ['prefix', 'color', 'tm_login', 'rcp_login', 'rcp_password', 'rcp_ip',
-                                         'rcp_port', 'db_hostname', 'db_user', 'db_password', 'db_name', 'db_charset'])
+DummyConfig = namedtuple('Dummyconfig', ['prefix', 'color', 'tm_login', 'rpc_login', 'rpc_password', 'rpc_ip',
+                                         'rpc_port', 'db_hostname', 'db_user', 'db_password', 'db_name', 'db_charset'])
 DUMMY_CONFIG = DummyConfig("T", "$00f", "server_login", "login", "password", "11.22.33.44", 5002, "localhost", "root",
                            "passwd", "aseco", "utf8")
 DUMMY_PATH_TO_CONFIG = '/path/to/config.yaml'
@@ -77,7 +77,6 @@ def transport(mocker):
 @pytest.fixture(autouse=True)
 def config(mocker):
     config_mock = mocker.patch('src.pyseco.Config')
-    config_mock.return_value = DUMMY_CONFIG
     return config_mock
 
 
@@ -103,17 +102,17 @@ def rpc(mocker):
 def test_should_create_object(transport, mysql, config, rpc, server):
     pyseco = Pyseco(DUMMY_PATH_TO_CONFIG)
 
-    transport.assert_called_once_with(DUMMY_CONFIG.rcp_ip, DUMMY_CONFIG.rcp_port, pyseco.events_queue)
     config.assert_called_once_with(DUMMY_PATH_TO_CONFIG)
-    mysql.assert_called_once_with(DUMMY_CONFIG)
-    rpc.assert_called_once_with(pyseco.transport)
-    server.assert_called_once_with(pyseco.rpc, pyseco.config)
+    transport.assert_called_once_with(config.return_value, pyseco.events_queue)
+    mysql.assert_called_once_with(config.return_value)
+    rpc.assert_called_once_with(transport.return_value)
+    server.assert_called_once_with(transport.return_value, config.return_value)
 
 
-def test_should_disconnect_on_exit(transport):
+def test_should_disconnect_on_exit(rpc):
     with Pyseco(DUMMY_PATH_TO_CONFIG):
-        transport.return_value.disconnect.assert_not_called()
-    transport.return_value.disconnect.assert_called_once()
+        rpc.return_value.disconnect.assert_not_called()
+    rpc.return_value.disconnect.assert_called_once()
 
 
 def test_events_map_should_be_empty_when_no_listeners_registered():
@@ -121,13 +120,15 @@ def test_events_map_should_be_empty_when_no_listeners_registered():
     assert len(pyseco.events_matrix) == 0
 
 
-def test_should_sync_data_on_run(transport, pyseco, rpc, server):
+def test_should_sync_data_on_run(pyseco, rpc, server, config):
     rpc.return_value.get_player_list.return_value = []
+    config.return_value.rpc_login = DUMMY_CONFIG.rpc_login
+    config.return_value.rpc_password = DUMMY_CONFIG.rpc_password
 
     pyseco.run()
-    transport.return_value.connect.assert_called_once()
+    rpc.return_value.connect.assert_called_once()
 
-    rpc.return_value.authenticate.assert_called_once_with(DUMMY_CONFIG.rcp_login, DUMMY_CONFIG.rcp_password)
+    rpc.return_value.authenticate.assert_called_once_with(DUMMY_CONFIG.rpc_login, DUMMY_CONFIG.rpc_password)
     rpc.return_value.enable_callbacks.assert_called_once_with(True)
     server.return_value.synchronize.assert_called_once()
     rpc.return_value.get_player_list.assert_called_once()
@@ -140,11 +141,11 @@ def test_an_exception_other_than_keyboardinterrupt_should_be_passed_further(rpc,
         pyseco.run()
 
 
-def test_should_disconnect_on_keyboardinterrupt(rpc, pyseco, transport):
+def test_should_disconnect_on_keyboardinterrupt(rpc, pyseco):
     rpc.return_value.authenticate.return_value = True
     rpc.return_value.chat_send_server_message.side_effect = KeyboardInterrupt
     pyseco.run()
-    transport.return_value.disconnect.assert_called_once()
+    rpc.return_value.disconnect.assert_called_once()
 
 
 def test_should_add_registered_listener_to_events_map(mocker, pyseco):
