@@ -90,6 +90,10 @@ def server(mocker):
 def mysql(mocker):
     return mocker.patch('src.pyseco.MySqlWrapper')
 
+@pytest.fixture(autouse=True)
+def msg_mock(mocker):
+    return mocker.patch('src.pyseco.MessageManager')
+
 
 @pytest.fixture(autouse=True)
 def rpc(mocker):
@@ -135,8 +139,7 @@ def test_should_sync_data_on_run(pyseco, rpc, server, config):
 
 
 def test_an_exception_other_than_keyboardinterrupt_should_be_passed_further(rpc, pyseco):
-    rpc.return_value.authenticate.return_value = True
-    rpc.return_value.chat_send_server_message.side_effect = Exception
+    rpc.return_value.authenticate.side_effect = Exception
     with pytest.raises(Exception):
         pyseco.run()
 

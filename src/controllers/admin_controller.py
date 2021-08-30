@@ -2,18 +2,17 @@ from src.controllers.controller import Controller
 
 
 class AdminController(Controller):
-    def kick(self, login, message):
-        if self.pyseco.is_player_on_server(login):
-            self.pyseco.rpc.kick(login, message)
-            self.pyseco.server_message(f'{login} was kicked')
-        else:
-            self.pyseco.server_message(f'{login} not found')
+    def kick(self, who, whom, message):
+        if self.pyseco.is_player_on_server(whom):
+            self.pyseco.msg.show_player_kicked(
+                self.pyseco.get_player(who), self.pyseco.get_player(whom))
+            self.pyseco.rpc.kick(whom, message)
 
-    def restart_challenge(self):
+    def restart(self, who):
+        self.pyseco.msg.show_map_restarted(self.pyseco.get_player(who))
         self.pyseco.rpc.restart_challenge()
-        self.pyseco.server_message(f'Challenge was restarted')
 
-    def skip(self):
+    def skip(self, who):
+        self.pyseco.msg.show_map_skipped(self.pyseco.get_player(who))
         self.pyseco.rpc.next_challenge()
-        self.pyseco.server_message(f'Challenge was skipped')
 

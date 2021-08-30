@@ -1,4 +1,3 @@
-from src.transport import Transport
 import time
 import traceback
 from collections import defaultdict
@@ -15,7 +14,9 @@ from src.includes.log import setup_logger
 from src.includes.mysql_wrapper import MySqlWrapper
 from src.player import Player
 from src.server_context import ServerCtx
-from src.utils import is_bound, strip_size
+from src.utils import is_bound
+from src.includes.message_manager import MessageManager
+from src.transport import Transport
 
 logger = setup_logger(__name__)
 
@@ -29,6 +30,7 @@ class Pyseco:
         self.events_matrix = defaultdict(set)
         self.server = ServerCtx(self.transport, self.config)
         self.players = dict()
+        self.msg = MessageManager(self.rpc, self.config)
         try:
             self.mysql = MySqlWrapper(self.config)
         except OperationalError as e:
@@ -95,10 +97,10 @@ class Pyseco:
             self.connect()
             self.rpc.authenticate(self.config.rpc_login,
                                   self.config.rpc_password)
-            self.server_message('pyseco connected')
             self.rpc.enable_callbacks(True)
             self.server.synchronize()
             self.synchronize_players()
+            self.msg.show_current_map_info(self.server.current_challenge)
             self.start_listening()
         except KeyboardInterrupt:
             logger.info('Exiting')
@@ -125,14 +127,6 @@ class Pyseco:
 
     def is_player_on_server(self, login):
         return login in self.players
-
-    def server_message(self, msg):
-        self.rpc.chat_send_server_message(
-            f'{self.config.color}{self.config.prefix}~ $888{msg}')
-
-    def server_message_to_login(self, login, msg):
-        self.rpc.chat_send_server_message_to_login(
-            f'{self.config.color}{self.config.prefix}~ $888{msg}', login)
 
     def handle_event(self, event):
         try:

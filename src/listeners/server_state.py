@@ -39,6 +39,9 @@ class ServerStateListener(Listener):
         pass
 
     def on_begin_challenge(self, data: EventBeginChallenge):
+        self.pyseco.server.current_challenge = data.challenge
+        self.pyseco.server.update_next_challenge()
+        self.pyseco.msg.show_current_map_info(self.pyseco.server.current_challenge)
         logger.debug("Event: begin challenge")
         pass
 

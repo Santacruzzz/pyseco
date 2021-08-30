@@ -1,6 +1,6 @@
 from src.transport import Transport
 from src.api.tm_requests import XmlRpc, XmlRpcMulticall
-from src.api.tm_types import TmStr, Version, ServerOptions, SystemInfo, StateValue, DetailedPlayerInfo, \
+from src.api.tm_types import Version, ServerOptions, SystemInfo, StateValue, DetailedPlayerInfo, \
     LadderServerLimits, GameInfo, ChallengeInfo
 from src.includes.config import Config
 from src.includes.log import setup_logger
@@ -31,6 +31,9 @@ class ServerCtx:
 
     def _synchronize_challenges(self):
         self.current_challenge = self.rpc.get_current_challenge_info()
+        self.update_next_challenge()
+
+    def update_next_challenge(self):
         self.next_challenge = self.rpc.get_next_challenge_info()
 
     def synchronize(self):
@@ -47,5 +50,5 @@ class ServerCtx:
             self.max_players = self.rpc_multicall.exec(Version, ServerOptions, SystemInfo, DetailedPlayerInfo,
                                                        LadderServerLimits, StateValue)
 
-    def get_name(self) -> TmStr:
-        return TmStr(self.options.name)
+    def get_name(self):
+        return self.options.name

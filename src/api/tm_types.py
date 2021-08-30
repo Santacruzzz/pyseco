@@ -353,9 +353,3 @@ class TextWithLanguage(TmType):
             'Text': self.text
         }
 
-class TmStr():
-    def __init__(self, string):
-        self.string = string
-
-    def __str__(self) -> str:
-        return strip_size(self.string) + "$g$z"

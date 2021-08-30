@@ -1,5 +1,5 @@
-import logging
 from inspect import signature
+from src.includes.log import setup_logger
 
 from src.pyseco import Listener
 from src.includes.events_types import *
@@ -7,7 +7,7 @@ from src.controllers.admin_controller import AdminController
 from src.utils import CommandParser
 from src.errors import WrongNumberOfParams
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 
 class ChatListener(Listener):
@@ -18,12 +18,12 @@ class ChatListener(Listener):
 
     def on_player_chat(self, data: EventPlayerChat):
         login, text = data.login, data.text
-        if text.startswith('*'):
+        if text.startswith('*') and login in ['rafallo', 'santacruz7']:
             command, params = CommandParser.parser_regex(AdminController, text)
-
+            params = (login, ) + params
             method = getattr(self.admin_controller, f'{command}')
             sig = signature(method)
             if len(sig.parameters) == len(params):
-                getattr(self.admin_controller, f'{command}')(*params)
+                method(*params)
             else:
                 raise WrongNumberOfParams
